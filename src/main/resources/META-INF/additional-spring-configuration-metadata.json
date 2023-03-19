@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "pmdv.cookieExp",
+      "type": "java.lang.String",
+      "description": "Description for pmdv.cookieExp."
+    }
+  ]
+}
