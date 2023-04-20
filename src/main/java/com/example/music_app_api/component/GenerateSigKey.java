@@ -1,6 +1,5 @@
 package com.example.music_app_api.component;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +38,6 @@ public class GenerateSigKey {
         return String.format("%064x", new BigInteger(1, hash));
     }
 
-    @Contract(value = "_, null, _ -> null; _, !null, _ -> !null")
     public static String getHmac512(
             @NotNull String key,
             String pathApi,

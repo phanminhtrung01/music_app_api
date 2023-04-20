@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 @Slf4j
 @RestController
@@ -57,7 +57,7 @@ public class SongController {
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
                             "Failure",
-                            ""
+                            e.getMessage()
                     ));
         }
     }
@@ -82,7 +82,7 @@ public class SongController {
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
                             "Failure",
-                            ""
+                            e.getMessage()
                     ));
         }
     }
@@ -98,9 +98,7 @@ public class SongController {
                 CompletableFuture.supplyAsync(() -> {
                     try {
                         return songRequestSer
-                                .getStreamSongN(new BasicNameValuePair(
-                                        "id",
-                                        id));
+                                .getStreamSongN(new BasicNameValuePair("id", id));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -113,11 +111,18 @@ public class SongController {
                         throw new RuntimeException(e);
                     }
                 }, executorService);
+        final CompletableFuture<StreamSourceSong> resultFuture = streamSourceSongCompletableFuture
+                .handle(((streamSourceSong1, throwable) -> throwable == null ?
+                        CompletableFuture.completedFuture(streamSourceSong1) :
+                        streamSourceSongCompletableFutureN))
+                .thenCompose(Function.identity());
 
         try {
-            streamSourceSong =
-                    streamSourceSongCompletableFuture.get();
+            streamSourceSong = resultFuture.get();
+            streamSourceSongCompletableFuture.cancel(true);
             streamSourceSongCompletableFutureN.cancel(true);
+            executorService.shutdownNow();
+
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
@@ -125,27 +130,17 @@ public class SongController {
                             "Success",
                             streamSourceSong
                     ));
+
         } catch (Exception e) {
             log.error(e.getMessage());
 
-            try {
-                streamSourceSong =
-                        streamSourceSongCompletableFutureN.get();
-                return ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(new ResponseObject(
-                                HttpStatus.OK.value(),
-                                "Success",
-                                streamSourceSong
-                        ));
-            } catch (InterruptedException | ExecutionException ex) {
-                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                        .body(new ResponseObject(
-                                HttpStatus.BAD_REQUEST.value(),
-                                "Failure",
-                                ""
-                        ));
-            }
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Failure",
+                            e.getMessage()
+                    ));
 
         }
     }
@@ -181,6 +176,29 @@ public class SongController {
         try {
             List<InfoSong> songs = songRequestSer
                     .getRecommendSongs(idSong);
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Success",
+                            songs
+                    ));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Failure",
+                            e.getMessage()
+                    ));
+        }
+    }
+
+    @GetMapping("get/song/new-release")
+    public ResponseEntity<ResponseObject> getSongNewRelease() {
+        try {
+            List<InfoSong> songs = songRequestSer.getSongNewRelease();
 
             return ResponseEntity
                     .status(HttpStatus.OK)

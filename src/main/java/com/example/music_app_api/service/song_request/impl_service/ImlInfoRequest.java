@@ -1,6 +1,6 @@
 package com.example.music_app_api.service.song_request.impl_service;
 
-import com.example.music_app_api.component.BusinessService;
+import com.example.music_app_api.component.AppManager;
 import com.example.music_app_api.component.enums.TypeParameter;
 import com.example.music_app_api.config.ConfigJsoup;
 import com.example.music_app_api.main_api.GetInfo;
@@ -33,18 +33,24 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class ImlInfoRequest implements InfoRequestService {
+public class ImlInfoRequest
+        extends ImlSongRequestService
+        implements InfoRequestService {
 
-    final ConfigJsoup configJsoup;
+    private final ConfigJsoup configJsoup;
+    private final AppManager appManager;
 
     @Autowired
-    ImlInfoRequest(ConfigJsoup configJsoup) {
+    ImlInfoRequest(
+            ConfigJsoup configJsoup,
+            AppManager appManager) {
         this.configJsoup = configJsoup;
+        this.appManager = appManager;
     }
 
     @Override
     public InfoSong getInfoSong(String idSong) throws Exception {
-        final JSONObject jsonData = BusinessService
+        final JSONObject jsonData = appManager
                 .getDataRequest(
                         HostApi.uriHostApiV2,
                         GetInfo.infoSong,
@@ -55,21 +61,7 @@ public class ImlInfoRequest implements InfoRequestService {
         final InfoSong infoSong = mapper
                 .readValue(jsonData.toString(), InfoSong.class);
 
-        try {
-            final JSONObject jsonAlbum = jsonData.getJSONObject("album");
-            infoSong.setIdAlbum(jsonAlbum.getString("encodeId"));
-        } catch (Exception ignore) {
-        }
-
-        try {
-            final List<String> artists = new ArrayList<>();
-            final JSONArray jsonArtists = jsonData.getJSONArray("artists");
-            jsonArtists
-                    .forEach(artist -> artists
-                            .add(((JSONObject) artist).getString("id")));
-            infoSong.setIdArtists(artists);
-        } catch (Exception ignore) {
-        }
+        getIdAlbumIdArtist(jsonData, infoSong);
 
         log.info(infoSong.toString());
         return infoSong;
@@ -86,7 +78,7 @@ public class ImlInfoRequest implements InfoRequestService {
 
         if (basicNameValuePair.getName()
                 .equals(TypeParameter.id.name())) {
-            keySong = BusinessService
+            keySong = appManager
                     .getKeySong(basicNameValuePair.getValue());
         }
         final BasicNameValuePair nameValuePair =
@@ -124,7 +116,7 @@ public class ImlInfoRequest implements InfoRequestService {
     public InfoAlbum getInfoAlbum(String idAlbum)
             throws Exception {
 
-        JSONObject jsonData = BusinessService
+        JSONObject jsonData = appManager
                 .getDataRequest(
                         HostApi.uriHostApiV2,
                         GetInfo.infoPlaylist,
@@ -153,8 +145,7 @@ public class ImlInfoRequest implements InfoRequestService {
     public InfoArtist getInfoArtist(String idArtist) throws Exception {
 
         JSONObject jsonData;
-
-        jsonData = BusinessService
+        jsonData = appManager
                 .getDataRequest(
                         HostApi.uriHostApiV2,
                         GetInfo.artist,
@@ -163,7 +154,7 @@ public class ImlInfoRequest implements InfoRequestService {
 
         String aliasName = jsonData.getString("alias");
 
-        jsonData = BusinessService
+        jsonData = appManager
                 .getDataRequest(
                         HostApi.uriHostApiV2,
                         GetInfo.infoArtist,
@@ -182,7 +173,7 @@ public class ImlInfoRequest implements InfoRequestService {
 
     @Override
     public InfoGenre getInfoGenre(String idGenre) throws Exception {
-        final JSONObject jsonData = BusinessService
+        final JSONObject jsonData = appManager
                 .getDataRequest(
                         HostApi.uriHostApiV2,
                         GetInfo.infoGenre,
@@ -215,7 +206,7 @@ public class ImlInfoRequest implements InfoRequestService {
 
     @Override
     public SourceLyric getSourceLyric(String idSong) throws Exception {
-        final JSONObject jsonData = BusinessService
+        final JSONObject jsonData = appManager
                 .getDataRequest(
                         HostApi.uriHostApiV2,
                         GetInfo.infoLyric,
