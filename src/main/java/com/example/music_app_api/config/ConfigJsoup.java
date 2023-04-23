@@ -39,7 +39,7 @@ public class ConfigJsoup {
     Proxy proxy() {
         return new Proxy(
                 Proxy.Type.HTTP,
-                new InetSocketAddress("192.168.43.1", 10809)
+                new InetSocketAddress("103.101.90.19", 6284)
         );
     }
 
