@@ -5,10 +5,13 @@ import com.example.music_app_api.component.BusinessService;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.cookie.Cookie;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 import java.util.Map;
@@ -16,6 +19,18 @@ import java.util.Map;
 @Slf4j
 @Configuration
 public class ConfigCache {
+
+    private final AppManager appManager;
+    private final BusinessService businessService;
+
+    @Autowired
+    @Lazy
+    public ConfigCache(
+            AppManager appManager,
+            BusinessService businessService) {
+        this.appManager = appManager;
+        this.businessService = businessService;
+    }
 
     @Bean
     public CacheLoader<Object, Object> cacheLoaderVersion() {
@@ -66,7 +81,7 @@ public class ConfigCache {
         return Caffeine.newBuilder()
                 .initialCapacity(1)
                 .maximumWeight(3)
-                .weigher((key, value) -> ((Map<?, ?>) value).size());
+                .weigher((key, value) -> ((Object[]) value).length);
 
     }
 
@@ -112,16 +127,16 @@ public class ConfigCache {
 
     private String getVersionToLoadNewValue() {
         log.info("Version: Loader");
-        return BusinessService.loadDataVersion();
+        return businessService.loadDataVersion();
     }
 
     public Map<String, String> getParameterToLoadNewValue() {
         log.info("Parameter: Loader");
-        return BusinessService.loadDataParameter();
+        return businessService.loadDataParameter();
     }
 
-    public Map<String, String> getCookiesToLoadNewValue() {
+    public Cookie[] getCookiesToLoadNewValue() {
         log.info("Cookies: Loader");
-        return AppManager.loadDataCookies();
+        return appManager.loadDataCookies();
     }
 }

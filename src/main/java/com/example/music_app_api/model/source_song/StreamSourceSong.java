@@ -20,4 +20,6 @@ public class StreamSourceSong {
     @XmlElement(name = "locationHQ")
     @JsonProperty(value = "320")
     private String uri320;
+    @JsonProperty(value = "lossless")
+    private String uriLossless;
 }

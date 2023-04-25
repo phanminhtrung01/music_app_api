@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 
 @Slf4j
 @RestController
@@ -105,20 +104,16 @@ public class SongController {
                 }, executorService);
         final CompletableFuture<StreamSourceSong> streamSourceSongCompletableFuture =
                 CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return songRequestSer.getStreamSong(id);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }, executorService);
-        final CompletableFuture<StreamSourceSong> resultFuture = streamSourceSongCompletableFuture
-                .handle(((streamSourceSong1, throwable) -> throwable == null ?
-                        CompletableFuture.completedFuture(streamSourceSong1) :
-                        streamSourceSongCompletableFutureN))
-                .thenCompose(Function.identity());
+                            try {
+                                return songRequestSer.getStreamSong(id);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }, executorService)
+                        .exceptionally(throwable -> streamSourceSongCompletableFutureN.join());
 
         try {
-            streamSourceSong = resultFuture.get();
+            streamSourceSong = streamSourceSongCompletableFuture.join();
             streamSourceSongCompletableFuture.cancel(true);
             streamSourceSongCompletableFutureN.cancel(true);
             executorService.shutdownNow();

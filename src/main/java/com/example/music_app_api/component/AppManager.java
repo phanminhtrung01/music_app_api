@@ -1,87 +1,82 @@
 package com.example.music_app_api.component;
 
 import com.example.music_app_api.component.enums.KeyCookie;
-import com.example.music_app_api.config.ConfigJsoup;
+import com.example.music_app_api.config.ConfigHttpClient;
 import com.example.music_app_api.config.ConfigProperties;
 import com.example.music_app_api.main_api.GetInfo;
 import com.example.music_app_api.main_api.HostApi;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.cookie.Cookie;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.io.IOException;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
 @Slf4j
-public class AppManager implements CommandLineRunner {
+public class AppManager {
 
     private final BusinessService businessService;
-    private static ConfigJsoup configJsoup;
-    private static ConfigProperties configProperties;
+    private final ConfigProperties configProperties;
+    private final ConfigHttpClient configHttpClient;
     private final CacheManager cacheManagerVer;
     private final CacheManager cacheManagerPar;
 
+    @Autowired
     public AppManager(
             BusinessService businessService,
-            ConfigJsoup configJsoup,
             ConfigProperties configProperties,
+            ConfigHttpClient configHttpClient,
             @Qualifier("cacheMngVer") CacheManager cacheManagerVer,
             @Qualifier("cacheMngPar") CacheManager cacheManagerPar) {
         this.businessService = businessService;
-        AppManager.configJsoup = configJsoup;
-        AppManager.configProperties = configProperties;
+        this.configProperties = configProperties;
+        this.configHttpClient = configHttpClient;
         this.cacheManagerVer = cacheManagerVer;
         this.cacheManagerPar = cacheManagerPar;
     }
 
     public @NotNull List<BasicNameValuePair> generatePar(
             @NotNull URI uriMultiSearch,
-            Map<String, String> mapKey)
-            throws ExecutionException, InterruptedException {
-
-        final int nThread = Runtime.getRuntime().availableProcessors();
-        final ExecutorService executorService = Executors.newFixedThreadPool(nThread);
-        final CompletableFuture<Map<String, String>> completableFuturePar;
-        final CompletableFuture<String> completableFutureVer;
-
-        completableFuturePar = CompletableFuture
-                .supplyAsync(businessService::getParameterAsync, executorService);
-        completableFutureVer = CompletableFuture
-                .supplyAsync(businessService::getVerAsync, executorService);
+            Map<String, String> mapKey) {
 
         final LocalDateTime now = LocalDateTime.now();
         final ZonedDateTime zonedDateTime = ZonedDateTime.of(now, ZoneId.systemDefault());
         final String dataTime = Long.toString(zonedDateTime.toInstant().toEpochMilli());
         final String ctime = dataTime.substring(0, dataTime.length() - 3);
         final String pathApi = uriMultiSearch.getPath();
-        final String version = completableFutureVer.get();
+        final String version = businessService.getVerAsync();
         final Map<String, String> mapKeyBase =
                 new TreeMap<>(Map.of("ctime", ctime, "version", version));
         mapKeyBase.putAll(mapKey);
-        mapKey = completableFuturePar.get();
+        mapKey = businessService.getParameterAsync();
         final String hmacKey = mapKey.get("hmacKey");
         final String apiKey = mapKey.get("apiKey");
         final String sigKey;
@@ -104,7 +99,8 @@ public class AppManager implements CommandLineRunner {
             URI uriHost,
             @NotNull String path,
             Map<String, String> mapKey,
-            @NotNull Map<String, String> mapPar)
+            @NotNull Map<String, String> mapPar,
+            boolean hasProxy)
             throws Exception {
 
         final URIBuilder uriBuild =
@@ -117,9 +113,14 @@ public class AppManager implements CommandLineRunner {
                 .map((par -> new BasicNameValuePair(par, mapPar.get(par))))
                 .toList());
         final URI uriData = uriBuild.addParameters(valuePairs).build();
-        final Document document = configJsoup
-                .jsoupConnectionCookies(uriData.toString());
-        final JSONObject jsonDoc = new JSONObject(document.body().text());
+        final String response = configHttpClient
+                .setHasCookies(true)
+                .sendRequest(RequestMethod.GET, uriData, hasProxy)
+                .getResponse();
+
+        System.out.println(hasProxy);
+
+        final JSONObject jsonDoc = new JSONObject(response);
 
         JSONObject jsonData;
         try {
@@ -131,6 +132,12 @@ public class AppManager implements CommandLineRunner {
         }
 
         return jsonData;
+    }
+
+    public String getResponseRequest(URI uriData) throws IOException {
+        return configHttpClient
+                .sendRequest(RequestMethod.GET, uriData, false)
+                .getResponse();
     }
 
     public @NotNull String getKeySong(String idSong) {
@@ -150,22 +157,24 @@ public class AppManager implements CommandLineRunner {
                     .addParameters(nameValuePairs)
                     .build();
 
-            final Document document = configJsoup
-                    .jsoupConnectionCookies(uriHome.toString());
+            final String response = configHttpClient
+                    .setHasCookies(true)
+                    .sendRequest(RequestMethod.GET, uriHome, false)
+                    .getResponse();
 
-            final JSONObject jsonResponse = new JSONObject(document.body().text());
+            final JSONObject jsonResponse = new JSONObject(response);
             final JSONObject jsonData = jsonResponse.getJSONObject("data");
             final String linkData = jsonData.getString("link");
             final URI linkSong = new URIBuilder(HostApi.uriHostApiOld)
                     .appendPath(linkData)
                     .build();
 
-            final String responsePageSong = Jsoup
-                    .connect(linkSong.toString())
-                    .get()
-                    .toString();
+            final String responsePageSong = configHttpClient
+                    .sendRequest(RequestMethod.GET, linkSong, false)
+                    .getResponse();
 
-            //data-xml="/media/get-source?type=audio&key=kHcmyZkdLNBdBDlTGTbHkHtkCshnkBbFc" data-id="ZZCEOICC"
+            //data-xml="/media/get-source?type=audio&
+            // key=kHcmyZkdLNBdBDlTGTbHkHtkCshnkBbFc" data-id="ZZCEOICC"
             final String regex = "data-xml=.*key=(.*?)\" data-id=\"(.*?)\"";
             final Pattern pattern = Pattern.compile(regex);
             final Matcher matcher = pattern.matcher(responsePageSong);
@@ -185,24 +194,47 @@ public class AppManager implements CommandLineRunner {
     }
 
 
-    public static Map<String, String> loadDataCookies() {
-        Map<String, String> cookiesDefault = new HashMap<>();
+    public Cookie[] loadDataCookies() {
+        List<Cookie> cookies = new ArrayList<>();
         try {
-            Connection.Response response = configJsoup.
-                    jsoupResponseNoCookies(HostApi.uriHostApiNew.toString());
+            HttpClientContext clientContext = configHttpClient
+                    .sendRequest(
+                            RequestMethod.GET,
+                            HostApi.uriHostApiNew,
+                            false)
+                    .getClientContext();
 
-            cookiesDefault = response.cookies();
-            cookiesDefault
-                    .put(KeyCookie.zmp3_sid.name(), configProperties.getCookieExp());
+            cookies.addAll(clientContext.getCookieStore().getCookies());
+            BasicClientCookie cookie = new BasicClientCookie(
+                    KeyCookie.zmp3_sid.name(), configProperties.getCookieExp()
+            );
+            cookies.removeIf(cookie1 -> cookie1.getValue().isEmpty());
+            Cookie cookieTemp = cookies
+                    .stream()
+                    .filter(cookie1 -> cookie1
+                            .getName()
+                            .equals("zmp3_app_version.1"))
+                    .toList()
+                    .stream()
+                    .findFirst()
+                    .orElse(new BasicClientCookie("", ""));
+
+            cookie.setDomain(cookieTemp.getDomain());
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setExpiryDate(cookieTemp.getExpiryInstant());
+
+            cookies.add(cookie);
+
         } catch (Exception e) {
             log.error(e.getMessage());
         }
 
-        return cookiesDefault;
+        return cookies.toArray(new Cookie[3]);
     }
 
     @Cacheable(cacheNames = "cookies", cacheManager = "cacheMngCookie")
-    public Map<String, String> getCookiesCacheableMethod() {
+    public Cookie[] getCookiesCacheableMethod() {
         log.info("Cookies: GetMain");
         return loadDataCookies();
     }
@@ -225,7 +257,4 @@ public class AppManager implements CommandLineRunner {
         }
     }
 
-    @Override
-    public void run(String... args) {
-    }
 }

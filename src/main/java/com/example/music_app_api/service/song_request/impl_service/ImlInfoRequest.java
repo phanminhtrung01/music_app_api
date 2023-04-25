@@ -2,7 +2,6 @@ package com.example.music_app_api.service.song_request.impl_service;
 
 import com.example.music_app_api.component.AppManager;
 import com.example.music_app_api.component.enums.TypeParameter;
-import com.example.music_app_api.config.ConfigJsoup;
 import com.example.music_app_api.main_api.GetInfo;
 import com.example.music_app_api.main_api.HostApi;
 import com.example.music_app_api.main_api.SearchSong;
@@ -20,7 +19,6 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,14 +35,11 @@ public class ImlInfoRequest
         extends ImlSongRequestService
         implements InfoRequestService {
 
-    private final ConfigJsoup configJsoup;
     private final AppManager appManager;
 
     @Autowired
     ImlInfoRequest(
-            ConfigJsoup configJsoup,
             AppManager appManager) {
-        this.configJsoup = configJsoup;
         this.appManager = appManager;
     }
 
@@ -55,7 +50,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoSong,
                         Map.of("id", idSong),
-                        Map.of());
+                        Map.of(), false);
 
         ObjectMapper mapper = new ObjectMapper();
         final InfoSong infoSong = mapper
@@ -87,11 +82,10 @@ public class ImlInfoRequest
                 .setParameters(nameValuePair)
                 .build();
 
-        final Document document = configJsoup
-                .jsoupConnectionNoCookies(uriGetSource.toString());
+        final String response = appManager.getResponseRequest(uriGetSource);
 
         final ObjectMapper mapper = new ObjectMapper();
-        final JSONObject jsonResponse = new JSONObject(document.body().text());
+        final JSONObject jsonResponse = new JSONObject(response);
         final JSONObject jsonData = jsonResponse.getJSONObject("data");
         final JSONObject jsonSource = jsonData.getJSONObject("source");
         final SourceSong song = mapper
@@ -121,7 +115,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoPlaylist,
                         Map.of("id", idAlbum),
-                        Map.of());
+                        Map.of(), false);
 
         ObjectMapper mapper = new ObjectMapper();
         final InfoAlbum infoAlbum = mapper
@@ -150,7 +144,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.artist,
                         Map.of("id", idArtist),
-                        Map.of());
+                        Map.of(), false);
 
         String aliasName = jsonData.getString("alias");
 
@@ -159,7 +153,8 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoArtist,
                         Map.of(),
-                        Map.of("alias", aliasName));
+                        Map.of("alias", aliasName),
+                        false);
 
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -178,7 +173,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoGenre,
                         Map.of("id", idGenre),
-                        Map.of());
+                        Map.of(), false);
 
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -211,7 +206,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoLyric,
                         Map.of("id", idSong),
-                        Map.of());
+                        Map.of(), false);
 
         final ObjectMapper mapper = new ObjectMapper();
 
