@@ -88,7 +88,7 @@ public class SongController {
 
     @GetMapping("get/streaming/song")
     public ResponseEntity<ResponseObject> getStreamingSong(
-            @RequestParam(required = false, name = "id") String id) {
+            @RequestParam(name = "id") String id) {
 
         StreamSourceSong streamSourceSong;
         final int thread = Runtime.getRuntime().availableProcessors();

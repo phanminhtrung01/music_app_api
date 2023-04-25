@@ -168,7 +168,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                 HostApi.uriHostApiV2,
                 SearchSong.streamSource,
                 Map.of("id", idSong),
-                Map.of(), true);
+                Map.of(), false);
 
         final ObjectMapper mapper = new ObjectMapper();
         final StreamSourceSong sourceSong = mapper
