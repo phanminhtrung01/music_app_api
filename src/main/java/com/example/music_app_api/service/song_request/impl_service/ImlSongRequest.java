@@ -68,7 +68,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                 SearchSong.hotSearch,
                 Map.of(), Map.of("query", data,
                         "language", "vi"),
-                false);
+                false, false);
         final JSONArray jsonItems = jsonData.getJSONArray("items");
         final JSONObject jsonObjectKeywords = jsonItems.getJSONObject(0);
 
@@ -98,9 +98,9 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                 }
         );
 
+        final List<HotSearchSong> hotSearchSongs = new ArrayList<>();
         final int limitedSearchSong = 2;
         final int sizeLoopSongs = Math.min(limitedSearchSong, songs.size());
-        final List<HotSearchSong> hotSearchSongs = new ArrayList<>();
         for (int i = 0; i < sizeLoopSongs; i++) {
             final StringBuilder artistBuilder = new StringBuilder();
             final JSONObject jsonArtist = jsonArraySuggestions.getJSONObject(i);
@@ -136,7 +136,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                 SearchSong.multiSearch,
                 Map.of(),
                 Map.of("q", data),
-                false);
+                false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -168,7 +168,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                 HostApi.uriHostApiV2,
                 SearchSong.streamSource,
                 Map.of("id", idSong),
-                Map.of(), false);
+                Map.of(), false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
         final StreamSourceSong sourceSong = mapper
@@ -191,7 +191,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoSong,
                         Map.of(TypeParameter.id.name(), valuePair.getValue()),
-                        Map.of(), false);
+                        Map.of(), false, true);
                 data = jsonData.getString("alias");
             } else {
                 SourceSong song = infoRequest.getInfoSourceSong(valuePair);
@@ -296,7 +296,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                         Map.of("historyIds", idSong,
                                 "start", String.valueOf(0),
                                 "count", String.valueOf(10)),
-                        false);
+                        false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
         final JSONArray jsonItems = jsonData.getJSONArray("items");
@@ -327,7 +327,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                                 TypeParameter.page.name(), String.valueOf(1),
                                 TypeParameter.count.name(), String.valueOf(10)),
                         Map.of("sort", "listen"),
-                        false);
+                        false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
         final JSONArray jsonItems = jsonData.getJSONArray("items");
@@ -377,7 +377,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                         Map.of(TypeParameter.page.name(), String.valueOf(1),
                                 TypeParameter.count.name(), String.valueOf(30)),
                         Map.of(),
-                        false);
+                        false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
         final JSONArray jsonItems = jsonData.getJSONArray("items");

@@ -11,6 +11,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.TreeMap;
 
 @Component
 public class GenerateSigKey {
@@ -45,7 +46,8 @@ public class GenerateSigKey {
             throws NoSuchAlgorithmException,
             InvalidKeyException {
 
-        final String concatString = concatParaRequest(mapKey);
+        final Map<String, String> mapKeyA_Z = new TreeMap<>(mapKey);
+        final String concatString = concatParaRequest(mapKeyA_Z);
         final String data = pathApi + getHash256(concatString);
         final Mac sha512Hmac = Mac.getInstance("HmacSHA512");
         final byte[] byteKey = key.getBytes(StandardCharsets.UTF_8);

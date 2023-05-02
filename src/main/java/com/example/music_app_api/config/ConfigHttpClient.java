@@ -1,6 +1,6 @@
 package com.example.music_app_api.config;
 
-import com.example.music_app_api.component.AppManager;
+import com.example.music_app_api.component.BusinessService;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -19,36 +19,24 @@ import org.apache.hc.core5.util.Timeout;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class ConfigHttpClient {
     public String response;
     public Boolean hasCookies = false;
     public HttpClientContext clientContext;
-    private final CacheManager cacheManager;
-    private final AppManager appManager;
 
     @Autowired
     @Lazy
-    public ConfigHttpClient(
-            AppManager appManager,
-            @Qualifier("cacheMngCookie")
-            CacheManager cacheManager) {
-        this.appManager = appManager;
-        this.cacheManager = cacheManager;
+    public ConfigHttpClient() {
     }
 
     @Bean
@@ -72,10 +60,9 @@ public class ConfigHttpClient {
         return credentialsProvider;
     }
 
-    @Bean
-    BasicCookieStore cookieStore() {
+    private @NotNull BasicCookieStore cookieStore() {
         BasicCookieStore cookieStore = new BasicCookieStore();
-        cookieStore.addCookies(appManager.getCookiesCacheableMethod());
+        cookieStore.addCookies(BusinessService.cookiesBase.get("base"));
 
         return cookieStore;
     }
@@ -172,15 +159,6 @@ public class ConfigHttpClient {
     public HttpClientContext getClientContext() {
 
         return clientContext;
-    }
-
-    @Scheduled(fixedRate = 45, timeUnit = TimeUnit.MINUTES)
-    protected void reloadCookies() {
-        Cache cache = cacheManager.getCache("cookies");
-        if (cache != null) {
-            cache.clear();
-            appManager.getCookiesCacheableMethod();
-        }
     }
 
 }

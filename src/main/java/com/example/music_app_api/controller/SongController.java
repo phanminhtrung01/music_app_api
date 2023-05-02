@@ -40,15 +40,16 @@ public class SongController {
     public ResponseEntity<ResponseObject> searchHotSong(
             @RequestParam(required = false, name = "query") String query) {
 
+        HotSearch hotSearch;
         try {
-            HotSearch data = songRequestSer.searchHotSongs(query);
+            hotSearch = songRequestSer.searchHotSongs(query);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Success",
-                            data
+                            hotSearch
                     ));
         } catch (Exception e) {
             log.error(e.getMessage());

@@ -1,11 +1,8 @@
 package com.example.music_app_api.config;
 
-import com.example.music_app_api.component.AppManager;
-import com.example.music_app_api.component.BusinessService;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.cookie.Cookie;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -20,16 +17,9 @@ import java.util.Map;
 @Configuration
 public class ConfigCache {
 
-    private final AppManager appManager;
-    private final BusinessService businessService;
-
     @Autowired
     @Lazy
-    public ConfigCache(
-            AppManager appManager,
-            BusinessService businessService) {
-        this.appManager = appManager;
-        this.businessService = businessService;
+    public ConfigCache() {
     }
 
     @Bean
@@ -37,7 +27,7 @@ public class ConfigCache {
         return new CacheLoader<>() {
             @Override
             public @Nullable Object load(Object o) {
-                return getVersionToLoadNewValue();
+                return null;
             }
         };
     }
@@ -47,7 +37,7 @@ public class ConfigCache {
         return new CacheLoader<>() {
             @Override
             public @Nullable Object load(Object o) {
-                return getCookiesToLoadNewValue();
+                return null;
             }
 
             @Override
@@ -62,7 +52,7 @@ public class ConfigCache {
         return new CacheLoader<>() {
             @Override
             public @Nullable Object load(Object o) {
-                return getParameterToLoadNewValue();
+                return null;
             }
         };
     }
@@ -123,20 +113,5 @@ public class ConfigCache {
         cacheManager.setCaffeine(caffeineParameter());
 
         return cacheManager;
-    }
-
-    private String getVersionToLoadNewValue() {
-        log.info("Version: Loader");
-        return businessService.loadDataVersion();
-    }
-
-    public Map<String, String> getParameterToLoadNewValue() {
-        log.info("Parameter: Loader");
-        return businessService.loadDataParameter();
-    }
-
-    public Cookie[] getCookiesToLoadNewValue() {
-        log.info("Cookies: Loader");
-        return appManager.loadDataCookies();
     }
 }

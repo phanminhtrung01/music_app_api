@@ -50,7 +50,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoSong,
                         Map.of("id", idSong),
-                        Map.of(), false);
+                        Map.of(), false, true);
 
         ObjectMapper mapper = new ObjectMapper();
         final InfoSong infoSong = mapper
@@ -115,7 +115,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoPlaylist,
                         Map.of("id", idAlbum),
-                        Map.of(), false);
+                        Map.of(), false, true);
 
         ObjectMapper mapper = new ObjectMapper();
         final InfoAlbum infoAlbum = mapper
@@ -144,7 +144,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.artist,
                         Map.of("id", idArtist),
-                        Map.of(), false);
+                        Map.of(), false, true);
 
         String aliasName = jsonData.getString("alias");
 
@@ -154,7 +154,7 @@ public class ImlInfoRequest
                         GetInfo.infoArtist,
                         Map.of(),
                         Map.of("alias", aliasName),
-                        false);
+                        false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -173,7 +173,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoGenre,
                         Map.of("id", idGenre),
-                        Map.of(), false);
+                        Map.of(), false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -206,7 +206,7 @@ public class ImlInfoRequest
                         HostApi.uriHostApiV2,
                         GetInfo.infoLyric,
                         Map.of("id", idSong),
-                        Map.of(), false);
+                        Map.of(), false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
 
