@@ -24,8 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-@RestController
-@RequestMapping("/pmdv/ma/")
+@RestController("RequestSongController")
+@RequestMapping("/pmdv/src/")
 public class SongController {
 
     private final SongRequestService songRequestSer;

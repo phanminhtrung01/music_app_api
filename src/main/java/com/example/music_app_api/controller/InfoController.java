@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/pmdv/ma/get/info/")
+@RequestMapping("/pmdv/src/get/info/")
 public class InfoController {
 
     private final InfoRequestService infoRequestService;
@@ -33,7 +33,7 @@ public class InfoController {
 
     @GetMapping("song")
     public ResponseEntity<ResponseObject> getInfoSong(
-            @RequestParam(required = false, name = "id") String idSong) {
+            @RequestParam(name = "id") String idSong) {
 
         try {
             final InfoSong infoSong = infoRequestService.getInfoSong(idSong);
@@ -57,7 +57,7 @@ public class InfoController {
 
     @GetMapping("album")
     public ResponseEntity<ResponseObject> getInfoAlbum(
-            @RequestParam(required = false, name = "id") String idAlbum) {
+            @RequestParam(name = "id") String idAlbum) {
 
         try {
             final InfoAlbum infoAlbum = infoRequestService
@@ -82,7 +82,7 @@ public class InfoController {
 
     @GetMapping("artist")
     public ResponseEntity<ResponseObject> getInfoArtist(
-            @RequestParam(required = false, name = "id") String idArtist) {
+            @RequestParam(name = "id") String idArtist) {
 
         try {
             final InfoArtist infoArtist = infoRequestService
@@ -107,7 +107,7 @@ public class InfoController {
 
     @GetMapping("genre")
     public ResponseEntity<ResponseObject> getInfoGenre(
-            @RequestParam(required = false, name = "id") String idGenre) {
+            @RequestParam(name = "id") String idGenre) {
 
         try {
             final InfoGenre infoGenre = infoRequestService
@@ -132,7 +132,7 @@ public class InfoController {
 
     @GetMapping("source/song")
     public ResponseEntity<ResponseObject> getSourceSong(
-            @RequestParam(required = false, name = "id") String id) {
+            @RequestParam(name = "id") String id) {
 
         try {
             BasicNameValuePair valuePair = new BasicNameValuePair("id", id);
@@ -157,7 +157,7 @@ public class InfoController {
 
     @GetMapping("source/lyric")
     public ResponseEntity<ResponseObject> getSourceLyric(
-            @RequestParam(required = false, name = "id") String idSong) {
+            @RequestParam(name = "id") String idSong) {
 
         try {
             SourceLyric sourceLyric = infoRequestService

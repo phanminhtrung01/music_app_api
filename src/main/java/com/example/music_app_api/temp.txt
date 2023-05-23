@@ -1,1 +1,22 @@
-ID_Artists: IWZ9Z87W
+6BACZ0DW,2023-05-17 00:00:00,Anh Không Quan Trọng Nữa (Single)
+
+U1,avatar1,29-07-2001,test1@gmail.com,Test1,1111,0343421234,test1
+U2,avatar2,20-01-2000,test2@gmail.com,Test2,2222,0344321654,test2
+
+Z6ACUB98,"Tăng Phúc, Nguyễn Đình Vũ",263,1684324800,https://photo-resize-zmp3.zmdcdn.me/w94_r1x1_jpeg/cover/c/4/0/0/c400085748eb1fc513aa4492a5d56810.jpg,https://photo-resize-zmp3.zmdcdn.me/w240_r1x1_jpeg/cover/c/4/0/0/c400085748eb1fc513aa4492a5d56810.jpg,Anh Không Quan Trọng Nữa,
+ZZDI9B7U,"Miu Lê, Karik, Châu Đăng Khoa",262,1655120700,https://photo-resize-zmp3.zmdcdn.me/w94_r1x1_jpeg/cover/1/b/8/9/1b8958017b04a663eb8c093905dd4d85.jpg,https://photo-resize-zmp3.zmdcdn.me/w240_r1x1_jpeg/cover/1/b/8/9/1b8958017b04a663eb8c093905dd4d85.jpg,Vì Mẹ Anh Bắt Chia Tay,
+
+1,Bài này hay quá!,Z6ACUB98,U2
+
+User user = new User();
+user.setAvatar("avatar1");
+user.setBirthday("29-07-2001");
+user.setEmail("test1@gmail.com");
+user.setGender("Male");
+user.setName("Test1");
+user.setUsername("test1");
+user.setPassword("1111");
+user.setPhoneNumber("0343421234");
+
+
+SQL Dialect

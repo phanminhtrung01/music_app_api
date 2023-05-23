@@ -1,0 +1,203 @@
+package com.example.music_app_api.controller.database;
+
+import com.example.music_app_api.entity.User;
+import com.example.music_app_api.exception.NotFoundException;
+import com.example.music_app_api.model.ResponseObject;
+import com.example.music_app_api.service.database_server.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@CrossOrigin(value = "*", maxAge = 3600)
+@RequestMapping("/pmdv/db/user/")
+public class UserController {
+
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+
+        this.userService = userService;
+    }
+
+    @PostMapping("add")
+    public ResponseEntity<ResponseObject> addUser(
+            @RequestBody User user) {
+
+        try {
+            String avatar = user.getAvatar();
+            String gender = user.getGender();
+            if (avatar == null || avatar.isEmpty()) {
+                if (gender.equals("Male") || gender.equals("male")) {
+                    user.setAvatar("https://cdn1.iconfinder.com/" +
+                            "data/icons/avatars-55/100/" +
+                            "avatar_profile_user_music_headphones_shirt_cool-512.png");
+                } else if (gender.equals("Female") || gender.equals("female")) {
+                    user.setAvatar("https://cdn1.iconfinder.com/" +
+                            "data/icons/ordinary-people/512/music-512.png");
+                } else {
+                    user.setAvatar("https://cdn1.iconfinder.com/" +
+                            "data/icons/ordinary-people/512/music-512.png");
+                }
+            }
+            User userPar = userService.save(user);
+
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new ResponseObject(
+                            HttpStatus.CREATED.value(),
+                            "Query add user successful!",
+                            userPar));
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
+    @DeleteMapping("delete")
+    public ResponseEntity<ResponseObject> delUser(
+            @RequestParam("idUser") String idUser) {
+
+        try {
+            User user = userService.delete(idUser);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Query remove user successful!",
+                            user));
+
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+
+    }
+
+    @PutMapping("update")
+    public ResponseEntity<ResponseObject> updateUser(
+            @RequestBody User user) {
+
+        try {
+            User userPar = userService.save(user);
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Query update user successful!",
+                            userPar));
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
+    @GetMapping("get")
+    public ResponseEntity<ResponseObject> getUser(
+            @RequestParam("idUser") String idUser) {
+
+        try {
+            User user = userService.getUserById(idUser);
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Query get user successful!",
+                            user));
+
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+
+    }
+
+    @PostMapping("verify")
+    public ResponseEntity<ResponseObject> verifyUser(
+            @RequestParam("email") String email,
+            @RequestParam("password") String password) {
+
+        try {
+            Map<String, Object> mapVerify = userService.verifyUser(email, password);
+            boolean check = (boolean) mapVerify.get("check");
+            User user = (User) mapVerify.get("user");
+
+            return check ?
+                    ResponseEntity.status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "User authentication successful!",
+                                    user)) :
+                    ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "User authentication failed!",
+                                    user));
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+}
