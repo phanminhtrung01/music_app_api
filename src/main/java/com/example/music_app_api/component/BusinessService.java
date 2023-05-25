@@ -10,20 +10,22 @@ import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
 @Slf4j
-public class BusinessService implements CommandLineRunner {
+public class BusinessService {
     private final ConfigHttpClient configHttpClient;
     private final ConfigProperties configProperties;
     public static Map<String, String> keyParameter;
@@ -38,10 +40,13 @@ public class BusinessService implements CommandLineRunner {
         this.configProperties = configProperties;
     }
 
-    public void loadDataParameter() {
+    public void loadDataParameter(int get) {
         String apiKey = "";
         String hmacKey = "";
         String version = "";
+        if (keyParameter == null) {
+            keyParameter = new HashMap<>();
+        }
         try {
 
             URI uriBase = new URIBuilder(HostApi.uriHostApiNew)
@@ -57,6 +62,12 @@ public class BusinessService implements CommandLineRunner {
             Matcher matcher = pattern.matcher(response);
             if (matcher.find(4500)) {
                 version = matcher.group(2);
+            }
+
+            if (get == 0) {
+                keyParameter.put("version", version);
+                log.info("Refresh Version!");
+                return;
             }
 
             //https://zjs.zmdcdn.me/zmp3-desktop/releases/v1.8.27/static/js/main.min.js
@@ -86,6 +97,12 @@ public class BusinessService implements CommandLineRunner {
                 start = matcher.end();
             }
 
+            if (get == 1) {
+                keyParameter.put("apiKey", apiKey);
+                log.info("Refresh ApiKey!");
+                return;
+            }
+
             //return h()(e+r,"acOrvUS15XRW2o9JksiK1KgQ6Vbds8ZW")}
             regex = "(return [a-z]\\(\\))\\(([a-z]\\+[a-z])+.*([A-Za-z\\d]{32})\"\\)}";
             pattern = Pattern.compile(regex);
@@ -93,16 +110,15 @@ public class BusinessService implements CommandLineRunner {
             if (matcher.find(start)) {
                 hmacKey = matcher.group(3);
             }
+
+            if (get == 2) {
+                keyParameter.put("hmacKey", hmacKey);
+                log.info("Refresh HmacKey!");
+            }
+
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
-        keyParameter = Map.of(
-                "version", version,
-                "apiKey", apiKey,
-                "hmacKey", hmacKey);
-
-        log.info("Success!");
     }
 
     public void loadDataCookies() {
@@ -146,9 +162,24 @@ public class BusinessService implements CommandLineRunner {
         log.info("Success!");
     }
 
-    @Override
-    public void run(String... args) {
-        loadDataParameter();
+    @Scheduled(fixedRate = 1, timeUnit = TimeUnit.DAYS)
+    protected void reloadVersion() {
+        loadDataParameter(0);
+    }
+
+    @Scheduled(fixedRate = 30, timeUnit = TimeUnit.DAYS)
+    protected void reloadApiKey() {
+        loadDataParameter(1);
+    }
+
+    @Scheduled(fixedRate = 30, timeUnit = TimeUnit.DAYS)
+    protected void reloadHmacKey() {
+        loadDataParameter(2);
+    }
+
+    @Scheduled(fixedRate = 45, timeUnit = TimeUnit.MINUTES)
+    protected void reloadCookie() {
         loadDataCookies();
     }
+
 }

@@ -31,9 +31,13 @@ public class User {
     private String phoneNumber;
     private String avatar;
     private String birthday;
-    @JsonAlias({"check_login", "checkLogin"})
-    private boolean checkLogin;
+    @Column(name = "is_vip")
+    private boolean isVip;
 
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_credential", referencedColumnName = "id_credential")
+    private UserCredential userCredential;
     @ManyToMany(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)

@@ -3,8 +3,6 @@ package com.example.music_app_api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -17,8 +15,8 @@ public class TStatusFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_status_file", nullable = false)
     private Long idStatusFile;
-    @Column(nullable = false)
+    @Column(name = "name_status_file", nullable = false)
     private String nameStatusFile;
-    @Column(nullable = false, columnDefinition = "datetime default now()")
-    private Date dateCompleted;
+    @Column(name = "date_completed", nullable = false)
+    private String dateCompleted;
 }

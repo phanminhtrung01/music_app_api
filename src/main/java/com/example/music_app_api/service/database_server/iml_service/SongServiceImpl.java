@@ -1,25 +1,20 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
-
 import com.example.music_app_api.component.enums.TypeSong;
-import com.example.music_app_api.controller.InfoController;
 import com.example.music_app_api.entity.Charts;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
 import com.example.music_app_api.exception.NotFoundException;
-import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.repo.SongRepository;
 import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.ChartsService;
 import com.example.music_app_api.service.database_server.GenreService;
 import com.example.music_app_api.service.database_server.PlaylistService;
 import com.example.music_app_api.service.database_server.SongService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -29,7 +24,6 @@ public class SongServiceImpl implements SongService {
     private final GenreService genreService;
     private final PlaylistService playlistService;
     private final ChartsService chartsService;
-    private final InfoController infoController;
 
     @Autowired
     public SongServiceImpl(
@@ -37,14 +31,12 @@ public class SongServiceImpl implements SongService {
             UserRepository userRepository,
             GenreService genreService,
             PlaylistService playlistService,
-            ChartsService chartsService,
-            InfoController infoController) {
+            ChartsService chartsService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.genreService = genreService;
         this.playlistService = playlistService;
         this.chartsService = chartsService;
-        this.infoController = infoController;
     }
 
     @Override
@@ -189,18 +181,7 @@ public class SongServiceImpl implements SongService {
             Optional<User> userOptional = userRepository.findById(idUser);
 
             if (songOptional.isEmpty()) {
-                try {
-                    InfoSong infoSong = (InfoSong) Objects.requireNonNull(infoController
-                                    .getInfoSong(idSong)
-                                    .getBody())
-                            .getData();
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    Song song = objectMapper.convertValue(infoSong, Song.class);
-
-                    songOptional = Optional.of(song);
-                } catch (Exception e) {
-                    throw new NotFoundException("Not fount song with ID: " + idSong);
-                }
+                throw new NotFoundException("Not fount song with ID: " + idSong);
             }
 
             if (userOptional.isEmpty()) {

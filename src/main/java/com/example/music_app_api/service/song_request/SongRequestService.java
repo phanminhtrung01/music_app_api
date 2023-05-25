@@ -25,7 +25,7 @@ public interface SongRequestService {
 
     List<InfoAlbum> getAlbumsOfGenre(String idGenre) throws Exception;
 
-    List<InfoSong> getSongsOfArtist(String idArtist) throws Exception;
+    List<InfoSong> getSongsOfArtist(String idArtist, int count) throws Exception;
 
     List<InfoSong> getSongsOfAlbum(String idAlbum) throws Exception;
 

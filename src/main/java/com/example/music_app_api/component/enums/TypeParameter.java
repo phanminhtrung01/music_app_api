@@ -6,5 +6,7 @@ public enum TypeParameter {
     id,
     type,
     page,
-    count
+    count,
+    sort,
+    sectionId,
 }

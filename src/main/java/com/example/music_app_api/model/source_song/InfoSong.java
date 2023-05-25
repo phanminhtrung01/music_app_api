@@ -1,13 +1,17 @@
 package com.example.music_app_api.model.source_song;
 
+import com.example.music_app_api.model.InfoAlbum;
+import com.example.music_app_api.model.InfoArtist;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class InfoSong {
     @JsonAlias({"encodeId", "id"})
@@ -20,6 +24,6 @@ public class InfoSong {
     private int releaseDate;
     @JsonProperty(value = "genreIds")
     private List<String> idGenres;
-    private List<String> idArtists;
-    private String idAlbum;
+    private List<InfoArtist> artists;
+    private InfoAlbum album;
 }

@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +21,7 @@ public class Playlist {
     private String idPlaylist;
     private String name;
     @Column(name = "date_create")
-    private Date dateCreate;
+    private String dateCreate;
 
     @ManyToMany(
             fetch = FetchType.EAGER,

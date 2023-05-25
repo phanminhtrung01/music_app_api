@@ -3,7 +3,6 @@ package com.example.music_app_api.service.song_request.impl_service;
 import com.example.music_app_api.component.AppManager;
 import com.example.music_app_api.component.enums.SearchField;
 import com.example.music_app_api.component.enums.TypeParameter;
-import com.example.music_app_api.component.enums.TypeSuggestion;
 import com.example.music_app_api.main_api.GetInfo;
 import com.example.music_app_api.main_api.HostApi;
 import com.example.music_app_api.main_api.SearchSong;
@@ -18,6 +17,7 @@ import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.SourceSong;
 import com.example.music_app_api.model.source_song.StreamSourceSong;
 import com.example.music_app_api.service.song_request.SongRequestService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.xml.bind.JAXBContext;
@@ -41,13 +41,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 @Slf4j
-public class ImlSongRequest extends ImlSongRequestService implements SongRequestService {
+public class ImlSongRequest implements SongRequestService {
 
     private final ImlInfoRequest infoRequest;
     private final AppManager appManager;
@@ -92,35 +91,20 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
         final JSONArray jsonArraySuggestions = jsonObjectSuggestions
                 .getJSONArray("suggestions");
 
-        final List<HotSearchSong> songs = mapper.readValue(
+        List<HotSearchSong> songs = mapper.readValue(
                 jsonArraySuggestions.toString(),
                 new TypeReference<>() {
                 }
         );
 
-        final List<HotSearchSong> hotSearchSongs = new ArrayList<>();
         final int limitedSearchSong = 2;
         final int sizeLoopSongs = Math.min(limitedSearchSong, songs.size());
-        for (int i = 0; i < sizeLoopSongs; i++) {
-            final StringBuilder artistBuilder = new StringBuilder();
-            final JSONObject jsonArtist = jsonArraySuggestions.getJSONObject(i);
-            final int typeSuggestion = jsonArtist.getInt("type");
-            if (typeSuggestion == TypeSuggestion.map.get("song")) {
-                final JSONArray jsonArtists = jsonArtist.getJSONArray("artists");
-                for (int j = 0; j < jsonArtists.length(); j++) {
-                    final String artist = jsonArtists.getJSONObject(j).get("name").toString();
-                    artistBuilder.append(artist);
-                    if (j != jsonArtists.length() - 1) {
-                        artistBuilder.append(", ");
-                    }
-                }
-                final HotSearchSong hotSearchSong = songs.get(i);
-                hotSearchSong.setArtist(artistBuilder.toString());
-                hotSearchSongs.add(hotSearchSong);
-            }
-        }
+        songs = songs.stream()
+                .filter(song -> song.getType() == 1)
+                .toList()
+                .subList(0, sizeLoopSongs);
 
-        hotSearch.setSongs(hotSearchSongs);
+        hotSearch.setSongs(songs);
 
         log.info(hotSearch.toString());
 
@@ -304,13 +288,6 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
                 .readValue(jsonItems.toString(), new TypeReference<>() {
                 });
 
-        int i = 0;
-        for (Object jsonSong : jsonItems) {
-            JSONObject jsonObject = (JSONObject) jsonSong;
-            getIdAlbumIdArtist(jsonObject, infoSongs.get(i));
-            i++;
-        }
-
         log.info(infoSongs.toString());
         return infoSongs;
     }
@@ -321,7 +298,7 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
         JSONObject jsonData = appManager
                 .getDataRequest(
                         HostApi.uriHostApiV2,
-                        SearchSong.getAlbumsOfGenre,
+                        GetInfo.getAlbumsOfGenre,
                         Map.of(TypeParameter.id.name(), String.valueOf(idGenre),
                                 TypeParameter.type.name(), "genre",
                                 TypeParameter.page.name(), String.valueOf(1),
@@ -331,40 +308,74 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
 
         final ObjectMapper mapper = new ObjectMapper();
         final JSONArray jsonItems = jsonData.getJSONArray("items");
-        final List<InfoAlbum> infoAlbums = mapper
+
+        return mapper
                 .readValue(jsonItems.toString(), new TypeReference<>() {
                 });
-
-        AtomicInteger i = new AtomicInteger();
-        jsonItems.forEach(item -> {
-            try {
-                final JSONArray jsonArtists = ((JSONObject) item)
-                        .getJSONArray("artists");
-                final List<String> artists = new ArrayList<>();
-                jsonArtists
-                        .forEach(artist -> artists
-                                .add(((JSONObject) artist)
-                                        .getString("id")));
-
-                infoAlbums.get(i.get()).setIdArtists(artists);
-            } catch (Exception ignore) {
-            }
-            i.incrementAndGet();
-        });
-
-        return infoAlbums;
     }
 
     @Override
-    public List<InfoSong> getSongsOfArtist(String idArtist)
+    public List<InfoSong> getSongsOfArtist(String idArtist, int count)
             throws Exception {
-        return null;
+        //type=artist&page=1&count=0&sort=listen&sectionId=aSongs
+        JSONObject jsonData = appManager
+                .getDataRequest(
+                        HostApi.uriHostApiV2,
+                        SearchSong.getSongsOfArtist,
+                        Map.of(TypeParameter.id.name(), String.valueOf(idArtist),
+                                TypeParameter.type.name(), SearchField.artist.name(),
+                                TypeParameter.page.name(), String.valueOf(1),
+                                TypeParameter.count.name(), String.valueOf(count)),
+                        Map.of(TypeParameter.sort.name(), "listen",
+                                TypeParameter.sectionId.name(), "aSongs"),
+                        false, true);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JSONArray itemSong = jsonData.getJSONArray("items");
+
+        return mapper
+                .readValue(itemSong.toString(), new TypeReference<>() {
+                });
     }
 
     @Override
     public List<InfoSong> getSongsOfAlbum(String idAlbum)
             throws Exception {
-        return null;
+        JSONObject jsonData = appManager
+                .getDataRequest(
+                        HostApi.uriHostApiV2,
+                        SearchSong.infoPagePlaylist,
+                        Map.of(TypeParameter.id.name(), String.valueOf(idAlbum)),
+                        Map.of(),
+                        false, true);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JSONArray sections = jsonData.getJSONArray("sections");
+        JSONObject jsonSongs = jsonData.getJSONObject("song");
+        JSONArray songItems = jsonSongs.getJSONArray("items");
+        List<InfoSong> songMain = mapper.readValue(
+                songItems.toString(), new TypeReference<>() {
+                });
+        List<InfoSong> songs = new ArrayList<>(songMain);
+        sections.forEach(section -> {
+            JSONObject jsonSection = (JSONObject) section;
+            String sectionType = jsonSection.getString("sectionType");
+
+            if (sectionType.equals(SearchField.song.name())) {
+                JSONArray jsonArray = jsonSection.getJSONArray("items");
+
+                try {
+                    List<InfoSong> infoSongs = mapper
+                            .readValue(jsonArray.toString(), new TypeReference<>() {
+                            });
+                    songs.addAll(infoSongs);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        return songs;
     }
 
     @Override
@@ -395,13 +406,6 @@ public class ImlSongRequest extends ImlSongRequestService implements SongRequest
         List<InfoSong> infoSongs = mapper
                 .readValue(jsonAllSong.toString(), new TypeReference<>() {
                 });
-
-        int i = 0;
-        for (Object jsonSong : jsonAllSong) {
-            JSONObject jsonObject = (JSONObject) jsonSong;
-            getIdAlbumIdArtist(jsonObject, infoSongs.get(i));
-            i++;
-        }
 
         log.info(infoSongs.toString());
         return infoSongs;

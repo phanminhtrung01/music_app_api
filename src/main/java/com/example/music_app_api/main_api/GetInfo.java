@@ -7,6 +7,7 @@ public class GetInfo {
     //?alias<-idArtist
     public static final String infoArtist = "page/get/artist";
     public static final String infoPlaylist = "playlist/get/info";
+    public static final String getAlbumsOfGenre = "album/get/list";
     public static final String infoGenre = "genre/get/info";
     //?idSong
     public static final String infoLyric = "lyric/get/lyric";

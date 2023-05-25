@@ -242,11 +242,15 @@ public class SongController {
 
     @GetMapping("get/songs/artist")
     public ResponseEntity<ResponseObject> getSongsOfArtist(
-            @RequestParam(name = "id") String idArtist) {
+            @RequestParam(name = "id") String idArtist,
+            @RequestParam(name = "count", required = false) Integer count) {
 
         try {
+            if (count == null) {
+                count = 10;
+            }
             List<InfoSong> songs = songRequestSer
-                    .getSongsOfArtist(idArtist);
+                    .getSongsOfArtist(idArtist, count);
 
             return ResponseEntity
                     .status(HttpStatus.OK)

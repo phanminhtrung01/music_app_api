@@ -20,6 +20,7 @@ public class Artist {
     @Column(name = "id_artist")
     private String idArtist;
     private String name;
+    @Column(name = "real_name")
     private String realName;
     private Date birthday;
     private String thumbnail;
@@ -29,6 +30,8 @@ public class Artist {
     private String sortBiography;
     private String biography;
     private String national;
+    @Column(name = "total_follow")
+    private String totalFollow;
 
     @ManyToMany(
             mappedBy = "artistsSing",

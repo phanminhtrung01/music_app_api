@@ -1,6 +1,7 @@
 package com.example.music_app_api.service.song_request.impl_service;
 
 import com.example.music_app_api.component.AppManager;
+import com.example.music_app_api.component.enums.SearchField;
 import com.example.music_app_api.component.enums.TypeParameter;
 import com.example.music_app_api.main_api.GetInfo;
 import com.example.music_app_api.main_api.HostApi;
@@ -12,6 +13,8 @@ import com.example.music_app_api.model.source_lyric.SourceLyric;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.SourceSong;
 import com.example.music_app_api.service.song_request.InfoRequestService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
@@ -31,9 +34,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class ImlInfoRequest
-        extends ImlSongRequestService
-        implements InfoRequestService {
+public class ImlInfoRequest implements InfoRequestService {
 
     private final AppManager appManager;
 
@@ -55,8 +56,6 @@ public class ImlInfoRequest
         ObjectMapper mapper = new ObjectMapper();
         final InfoSong infoSong = mapper
                 .readValue(jsonData.toString(), InfoSong.class);
-
-        getIdAlbumIdArtist(jsonData, infoSong);
 
         log.info(infoSong.toString());
         return infoSong;
@@ -123,10 +122,11 @@ public class ImlInfoRequest
 
         try {
             final JSONArray jsonArtists = jsonData.getJSONArray("artists");
-            final List<String> artists = new ArrayList<>();
-            jsonArtists.forEach(artist -> artists
-                    .add(((JSONObject) artist).getString("id")));
-            infoAlbum.setIdArtists(artists);
+            final List<InfoArtist> artists = mapper
+                    .readValue(jsonArtists.toString(), new TypeReference<>() {
+                    });
+
+            infoAlbum.setArtists(artists);
         } catch (Exception ignore) {
         }
 
@@ -157,9 +157,51 @@ public class ImlInfoRequest
                         false, true);
 
         final ObjectMapper mapper = new ObjectMapper();
-
         final InfoArtist infoArtist = mapper
                 .readValue(jsonData.toString(), InfoArtist.class);
+        final JSONArray itemSections = jsonData.getJSONArray("sections");
+
+        itemSections.forEach(itemSection -> {
+            JSONObject jsonObject = (JSONObject) itemSection;
+            if (jsonObject.getString("sectionType")
+                    .equals(SearchField.song.name())) {
+                final JSONArray itemSong = jsonObject.getJSONArray("items");
+                try {
+                    List<InfoSong> infoSongs = mapper.readValue(itemSong.toString(),
+                            new TypeReference<>() {
+                            });
+
+                    infoArtist.setSongs(infoSongs);
+
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            List<InfoAlbum> infoAlbums = new ArrayList<>();
+            if (jsonObject.getString("sectionType")
+                    .equals(SearchField.playlist.name())) {
+                final String sectionType = jsonObject.getString("sectionType");
+                final JSONArray itemAlbum = jsonObject.getJSONArray("items");
+                if (sectionType.equals(SearchField.playlist.name())) {
+                    try {
+                        List<InfoAlbum> infoAlbumsT = mapper.readValue(itemAlbum.toString(),
+                                new TypeReference<>() {
+                                });
+
+                        infoAlbums.addAll(infoAlbumsT);
+
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            if (infoArtist.getAlbums() == null) {
+                infoArtist.setAlbums(infoAlbums);
+            }
+            infoArtist.getAlbums().addAll(infoAlbums);
+        });
+
         log.info(infoArtist.toString());
 
         return infoArtist;
@@ -183,14 +225,13 @@ public class ImlInfoRequest
         try {
             JSONObject jsonParent = jsonData.getJSONObject("parent");
             JSONArray jsonChildren = jsonData.getJSONArray("childs");
+            InfoGenre parent = mapper.readValue(jsonParent.toString(), InfoGenre.class);
+            List<InfoGenre> children = mapper
+                    .readValue(jsonChildren.toString(), new TypeReference<>() {
+                    });
 
-            infoGenre.setIdParent(jsonParent.getString("id"));
-
-            List<String> idChildren = new ArrayList<>();
-            jsonChildren
-                    .forEach(child -> idChildren.add(((JSONObject) child)
-                            .getString("id")));
-            infoGenre.setIdChildren(idChildren);
+            infoGenre.setParent(parent);
+            infoGenre.setChildren(children);
         } catch (Exception ignore) {
         }
 
