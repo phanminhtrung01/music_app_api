@@ -15,7 +15,8 @@ public class UserCredential {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id_credential")
     private Long idCredential;
-    private int code;
+    @Column(unique = true)
+    private Integer code;
     @Column(name = "time_verify")
     private String timeVerify;
     @Column(name = "check_login")
