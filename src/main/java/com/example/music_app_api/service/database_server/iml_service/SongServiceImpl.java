@@ -54,7 +54,9 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public List<Song> getSongs(int count) {
-        return getAllSongs().subList(0, count);
+        List<Song> songs = getAllSongs();
+        int min = Math.min(count, songs.size());
+        return songs.subList(0, min);
     }
 
     @Override
