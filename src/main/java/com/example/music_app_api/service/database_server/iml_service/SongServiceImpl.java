@@ -53,6 +53,11 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public List<Song> getSongs(int count) {
+        return getAllSongs().subList(0, count);
+    }
+
+    @Override
     public Song save(Song song) {
         try {
             Optional<Song> optionalSong = songRepository.findSongByTitleAndArtistsNames(

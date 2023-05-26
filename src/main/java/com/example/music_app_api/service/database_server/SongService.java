@@ -8,6 +8,8 @@ import java.util.List;
 public interface SongService {
     List<Song> getAllSongs();
 
+    List<Song> getSongs(int count);
+
     Song save(Song Song);
 
     Song delete(String idSong);
