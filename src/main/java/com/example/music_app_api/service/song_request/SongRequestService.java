@@ -30,4 +30,6 @@ public interface SongRequestService {
     List<InfoSong> getSongsOfAlbum(String idAlbum) throws Exception;
 
     List<InfoSong> getSongNewRelease() throws Exception;
+
+
 }

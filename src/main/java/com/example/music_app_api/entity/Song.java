@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Entity
 @Table(name = "song")
@@ -19,6 +20,9 @@ import java.util.List;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Song {
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int ID_LENGTH = 7;
+
     @Id
     @Column(name = "id_song")
     @JsonAlias({"encodeId", "id"})
@@ -32,6 +36,27 @@ public class Song {
     private int duration;
     @Column(name = "release_date")
     private long releaseDate;
+
+    @PrePersist
+    public void generateId() {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(ID_LENGTH);
+        boolean hasDigit = false;
+        for (int i = 0; i < ID_LENGTH; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            char c = CHARACTERS.charAt(index);
+            sb.append(c);
+            if (Character.isDigit(c)) {
+                hasDigit = true;
+            }
+        }
+        if (!hasDigit) {
+            int index = random.nextInt(ID_LENGTH);
+            int digitIndex = random.nextInt(10) + 26;
+            sb.setCharAt(index, CHARACTERS.charAt(digitIndex));
+        }
+        this.idSong = "S" + sb;
+    }
 
     @ManyToMany(
             fetch = FetchType.EAGER,

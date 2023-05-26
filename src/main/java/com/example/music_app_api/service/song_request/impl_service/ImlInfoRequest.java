@@ -6,6 +6,7 @@ import com.example.music_app_api.component.enums.TypeParameter;
 import com.example.music_app_api.main_api.GetInfo;
 import com.example.music_app_api.main_api.HostApi;
 import com.example.music_app_api.main_api.SearchSong;
+import com.example.music_app_api.model.Banner;
 import com.example.music_app_api.model.InfoAlbum;
 import com.example.music_app_api.model.InfoArtist;
 import com.example.music_app_api.model.InfoGenre;
@@ -259,5 +260,75 @@ public class ImlInfoRequest implements InfoRequestService {
         return sourceLyric;
     }
 
+    @Override
+    public List<Banner> getBanner() throws Exception {
+        List<Banner> banners = new ArrayList<>();
 
+        JSONObject jsonData = appManager
+                .getDataRequest(
+                        HostApi.uriHostApiV2,
+                        SearchSong.getSongNewRelease,
+                        Map.of(TypeParameter.page.name(), String.valueOf(1),
+                                TypeParameter.count.name(), String.valueOf(30)),
+                        Map.of(),
+                        false, true);
+
+        final ObjectMapper mapper = new ObjectMapper();
+        final JSONArray jsonItems = jsonData.getJSONArray("items");
+        for (Object jsonItem : jsonItems) {
+            JSONObject jsonContain = (JSONObject) jsonItem;
+            String type = jsonContain.getString("sectionType");
+            if (type.equals("banner")) {
+                JSONArray jsonAllBanner = jsonContain.getJSONArray("items");
+                banners = mapper
+                        .readValue(
+                                jsonAllBanner.toString(),
+                                new TypeReference<>() {
+                                });
+                break;
+            }
+        }
+
+        return banners.stream()
+                .filter(banner -> banner.getType() == 1)
+                .toList();
+    }
+
+    @Override
+    public List<InfoArtist> getArtistHot() throws Exception {
+        List<InfoArtist> infoArtists = new ArrayList<>();
+        JSONObject jsonData = appManager
+                .getDataRequest(
+                        HostApi.uriHostApiV2,
+                        SearchSong.getSongNewRelease,
+                        Map.of(TypeParameter.page.name(), String.valueOf(1),
+                                TypeParameter.count.name(), String.valueOf(30)),
+                        Map.of(),
+                        false, true);
+
+        final ObjectMapper mapper = new ObjectMapper();
+        final JSONArray jsonItems = jsonData.getJSONArray("items");
+        for (Object jsonItem : jsonItems) {
+            JSONObject jsonContain = (JSONObject) jsonItem;
+
+            String sectionId;
+            try {
+                sectionId = jsonContain.getString("sectionId");
+            } catch (Exception ignore) {
+                sectionId = "";
+            }
+            if (sectionId.equals("hArtistTheme")) {
+                JSONArray jsonArrayArtist = jsonContain.getJSONArray("items");
+
+                infoArtists = mapper.readValue(
+                        jsonArrayArtist.toString(), new TypeReference<>() {
+                        });
+                break;
+            }
+
+
+        }
+
+        return infoArtists;
+    }
 }

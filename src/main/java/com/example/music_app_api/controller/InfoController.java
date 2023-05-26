@@ -1,9 +1,6 @@
 package com.example.music_app_api.controller;
 
-import com.example.music_app_api.model.InfoAlbum;
-import com.example.music_app_api.model.InfoArtist;
-import com.example.music_app_api.model.InfoGenre;
-import com.example.music_app_api.model.ResponseObject;
+import com.example.music_app_api.model.*;
 import com.example.music_app_api.model.source_lyric.SourceLyric;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.SourceSong;
@@ -17,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -168,6 +167,52 @@ public class InfoController {
                             HttpStatus.OK.value(),
                             "Success",
                             sourceLyric
+                    ));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Failure",
+                            ""
+                    ));
+        }
+    }
+
+    @GetMapping("/banner")
+    public ResponseEntity<ResponseObject> getBanner() {
+        try {
+            List<Banner> banners = infoRequestService.getBanner();
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Success",
+                            banners
+                    ));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Failure",
+                            ""
+                    ));
+        }
+    }
+
+    @GetMapping("/artist_hot")
+    public ResponseEntity<ResponseObject> getArtistHot() {
+        try {
+            List<InfoArtist> infoArtists = infoRequestService.getArtistHot();
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Success",
+                            infoArtists
                     ));
         } catch (Exception e) {
             log.error(e.getMessage());

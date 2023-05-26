@@ -1,6 +1,7 @@
 package com.example.music_app_api.model;
 
 import com.example.music_app_api.model.source_song.InfoSong;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,6 +13,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class InfoArtist {
+    @JsonAlias({"encodeId", "id"})
     private String id;
     private String name;
     private String alias;
