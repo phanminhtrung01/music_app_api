@@ -53,9 +53,15 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public Song save(Song Song) {
+    public Song save(Song song) {
         try {
-            songRepository.save(Song);
+            Optional<Song> optionalSong = songRepository.findSongByTitleAndArtistsNames(
+                    song.getTitle(), song.getArtistsNames()
+            );
+            if (optionalSong.isPresent()) {
+                throw new NotFoundException("There are already similar songs in the database");
+            }
+            songRepository.save(song);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -63,7 +69,7 @@ public class SongServiceImpl implements SongService {
                 throw new RuntimeException(e.getMessage());
             }
         }
-        return Song;
+        return song;
     }
 
     @Override

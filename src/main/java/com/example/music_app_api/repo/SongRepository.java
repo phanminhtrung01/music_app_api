@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SongRepository extends JpaRepository<Song, String> {
@@ -43,5 +44,14 @@ public interface SongRepository extends JpaRepository<Song, String> {
                     """,
             nativeQuery = true)
     List<Song> getListenSongsByUser(String idUser);
+
+    @Query(
+            value = """
+                    select * from song
+                    where title = ?1 && artists_name =?2
+                    """,
+            nativeQuery = true
+    )
+    Optional<Song> findSongByTitleAndArtistsNames(String title, String artistNames);
 
 }

@@ -58,6 +58,10 @@ public class Song {
         this.idSong = "S" + sb;
     }
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_source", referencedColumnName = "id_source")
+    private SourceSong sourceSong;
+
     @ManyToMany(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)
