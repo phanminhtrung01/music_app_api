@@ -320,9 +320,18 @@ public class ImlInfoRequest implements InfoRequestService {
             if (sectionId.equals("hArtistTheme")) {
                 JSONArray jsonArrayArtist = jsonContain.getJSONArray("items");
 
-                infoArtists = mapper.readValue(
-                        jsonArrayArtist.toString(), new TypeReference<>() {
+                jsonArrayArtist.forEach(jsonArtist -> {
+                    JSONObject jsonObject = (JSONObject) jsonArtist;
+                    JSONArray jsonArtists = jsonObject.getJSONArray("artists");
+                    try {
+                        List<InfoArtist> temp = mapper.readValue(jsonArtists.toString(), new TypeReference<>() {
                         });
+
+                        infoArtists.addAll(temp);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
                 break;
             }
 
