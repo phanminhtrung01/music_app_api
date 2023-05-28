@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @CrossOrigin("http://localhost:8080")
@@ -25,15 +24,13 @@ public class CommentController {
 
     @PostMapping("add")
     public ResponseEntity<ResponseObject> addComment(
-            @RequestBody Map<String, String> map) {
+            @RequestParam("idUser") String idUser,
+            @RequestParam("idSong") String idSong,
+            @RequestParam("value") String value) {
         try {
-            String value = map.get("value");
-            String id_song = map.get("id_song");
-            String id_user = map.get("id_user");
             Comment comment = new Comment();
             comment.setValue(value);
-            Comment commentPar = commentService
-                    .saveComment(comment, id_user, id_song);
+            Comment commentPar = commentService.saveComment(comment, idUser, idSong);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
