@@ -24,15 +24,13 @@ public class Comment {
 
     @ManyToOne(
             cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER
-    )
+            fetch = FetchType.EAGER)
     @JoinColumn(name = "id_song")
     private Song song;
 
     @ManyToOne(
             cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER
-    )
+            fetch = FetchType.EAGER)
     @JoinColumn(name = "id_user")
     private User user;
 
@@ -43,8 +41,7 @@ public class Comment {
             name = "comment_like",
             joinColumns = @JoinColumn(name = "id_comment"),
             inverseJoinColumns = @JoinColumn(name = "id_user"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"id_comment", "id_user"})
-    )
+            uniqueConstraints = @UniqueConstraint(columnNames = {"id_comment", "id_user"}))
     @ToString.Exclude
     @JsonIgnore
     private List<User> usersLike = new ArrayList<>();

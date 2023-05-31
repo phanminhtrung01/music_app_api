@@ -69,9 +69,9 @@ public class SongController {
 
     @PostMapping("add")
     public ResponseEntity<ResponseObject> addSong(
-            @RequestBody Song Song) {
+            @RequestBody Song song) {
         try {
-            Song SongPar = songService.save(Song);
+            Song SongPar = songService.save(song);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
