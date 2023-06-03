@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 public class SourceLyric {
     private String file;
+    private String content;
     private List<WordsLyricSong> sentences;
     private List<String> defaultIBGUrls;
 }

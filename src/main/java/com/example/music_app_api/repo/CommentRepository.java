@@ -3,10 +3,12 @@ package com.example.music_app_api.repo;
 import com.example.music_app_api.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+@Repository
+public interface CommentRepository extends JpaRepository<Comment, String> {
     @Query(
             value = "select * from comment " +
                     "where id_user=?1 and id_song=?2",

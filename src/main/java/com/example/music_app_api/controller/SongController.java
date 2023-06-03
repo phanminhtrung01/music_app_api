@@ -4,7 +4,6 @@ import com.example.music_app_api.model.InfoAlbum;
 import com.example.music_app_api.model.ResponseObject;
 import com.example.music_app_api.model.hot_search.HotSearch;
 import com.example.music_app_api.model.multi_search.MultiSearch;
-import com.example.music_app_api.model.multi_search.MultiSearchSong;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.StreamSourceSong;
 import com.example.music_app_api.service.song_request.SongRequestService;
@@ -38,7 +37,7 @@ public class SongController {
 
     @GetMapping("search/hot/song")
     public ResponseEntity<ResponseObject> searchHotSong(
-            @RequestParam(required = false, name = "query") String query) {
+            @RequestParam(name = "query") String query) {
 
         HotSearch hotSearch;
         try {
@@ -62,13 +61,75 @@ public class SongController {
         }
     }
 
-    @GetMapping("search/multi/song")
-    public ResponseEntity<ResponseObject> searchMultiSong(
-            @RequestParam(required = false, name = "query") String query) {
+    @GetMapping("search/multi")
+    public ResponseEntity<ResponseObject> searchMulti(
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "count", required = false) Integer count) {
+
+        if (count == null) {
+            count = 10;
+        }
 
         try {
-            //TODO: -----------Use CompletableFuture-----------
-            MultiSearch multiSearch = songRequestSer.searchHMultiSongsZ(query);
+            MultiSearch multiSearch = songRequestSer
+                    .searchMulti(query, count);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Success",
+                            multiSearch
+                    ));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Failure",
+                            e.getMessage()
+                    ));
+        }
+    }
+
+    @GetMapping("search/multi/song")
+    public ResponseEntity<ResponseObject> searchMultiSong(
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "count", required = false) Integer count) {
+
+        if (count == null) {
+            count = 10;
+        }
+        try {
+            MultiSearch multiSearch = songRequestSer.searchMultiSongs(query, count);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Success",
+                            multiSearch
+                    ));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Failure",
+                            e.getMessage()
+                    ));
+        }
+    }
+
+    @GetMapping("search/multi/artist")
+    public ResponseEntity<ResponseObject> searchMultiArtist(
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "count", required = false) Integer count) {
+
+        if (count == null) {
+            count = 10;
+        }
+
+        try {
+            MultiSearch multiSearch = songRequestSer.searchMultiArtists(query, count);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
@@ -146,7 +207,7 @@ public class SongController {
             @RequestParam(name = "count") int n) {
 
         try {
-            List<MultiSearchSong> songs = songRequestSer.getChartsSong(n);
+            List<InfoSong> songs = songRequestSer.getChartsSong(n);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(

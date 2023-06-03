@@ -8,7 +8,6 @@ import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -102,10 +101,8 @@ public class AppManager {
         JSONObject jsonData;
         try {
             jsonData = jsonDoc.getJSONObject("data");
-        } catch (Exception e) {
-
-            jsonData = new JSONObject(Map.of("data", jsonDoc));
-            throw new JSONException(jsonData.toString());
+        } catch (Exception ignore) {
+            jsonData = new JSONObject(jsonDoc, "data");
         }
 
         return jsonData;

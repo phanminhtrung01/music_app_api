@@ -4,6 +4,7 @@ import com.example.music_app_api.entity.Comment;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.ResponseObject;
 import com.example.music_app_api.service.database_server.CommentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
 public class CommentController {
     private final CommentService commentService;
 
+    @Autowired
     public CommentController(CommentService commentService) {
 
         this.commentService = commentService;
@@ -57,7 +59,7 @@ public class CommentController {
 
     @DeleteMapping("delete")
     public ResponseEntity<ResponseObject> deleteComment(
-            @RequestParam("idComment") Long idComment) {
+            @RequestParam("idComment") String idComment) {
         try {
             Comment comment = commentService.deleteComment(idComment);
 
@@ -210,7 +212,7 @@ public class CommentController {
     @PostMapping("add/like_comment")
     public ResponseEntity<ResponseObject> addLikeComment(
             @RequestParam("idUser") String idUser,
-            @RequestParam("idComment") Long idComment) {
+            @RequestParam("idComment") String idComment) {
         try {
             Comment comment = commentService
                     .addLikeComment(idComment, idUser);
@@ -242,7 +244,7 @@ public class CommentController {
     @DeleteMapping("delete/like_comment")
     public ResponseEntity<ResponseObject> removeLikeComment(
             @RequestParam("idUser") String idUser,
-            @RequestParam("idComment") Long idComment) {
+            @RequestParam("idComment") String idComment) {
         try {
             Comment comment = commentService
                     .removeLikeComment(idComment, idUser);

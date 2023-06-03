@@ -1,13 +1,18 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
 import com.example.music_app_api.entity.Artist;
+import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.repo.ArtistRepository;
+import com.example.music_app_api.repo.SongRepository;
 import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.ArtistService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.util.List;
@@ -17,13 +22,16 @@ import java.util.Optional;
 public class ArtistServiceImpl implements ArtistService {
     private final ArtistRepository artistRepository;
     private final UserRepository userRepository;
+    private final SongRepository songRepository;
 
     @Autowired
     public ArtistServiceImpl(
             ArtistRepository artistRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            SongRepository songRepository) {
         this.artistRepository = artistRepository;
         this.userRepository = userRepository;
+        this.songRepository = songRepository;
     }
 
     @Override
@@ -40,6 +48,14 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
+    @Transactional
+    public List<Artist> getArtistsByNameOrRealName(
+            String name, String realName, int count) {
+        Pageable topTen = PageRequest.of(0, count);
+        return artistRepository.getArtistByNameOrRealName(name, realName, topTen);
+    }
+
+    @Override
     public Artist getArtist(String idArtist) {
         try {
             Optional<Artist> artistOptional = artistRepository.findById(idArtist);
@@ -48,6 +64,24 @@ public class ArtistServiceImpl implements ArtistService {
             }
 
             return artistOptional.get();
+        } catch (Exception e) {
+            if (e instanceof NotFoundException) {
+                throw new NotFoundException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<Artist> getArtistByIdSong(String idSong) {
+        try {
+            Optional<Song> songOptional = songRepository.findById(idSong);
+            if (songOptional.isEmpty()) {
+                throw new NotFoundException("Not fount song with ID: " + idSong);
+            }
+            return artistRepository.getArtistsBySong(idSong);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());

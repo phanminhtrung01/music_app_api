@@ -3,19 +3,26 @@ package com.example.music_app_api.service.song_request.impl_service;
 import com.example.music_app_api.component.AppManager;
 import com.example.music_app_api.component.enums.SearchField;
 import com.example.music_app_api.component.enums.TypeParameter;
+import com.example.music_app_api.entity.Artist;
+import com.example.music_app_api.entity.Genre;
+import com.example.music_app_api.entity.Song;
+import com.example.music_app_api.entity.SourceSong;
 import com.example.music_app_api.main_api.GetInfo;
 import com.example.music_app_api.main_api.HostApi;
 import com.example.music_app_api.main_api.SearchSong;
 import com.example.music_app_api.model.InfoAlbum;
+import com.example.music_app_api.model.InfoArtist;
+import com.example.music_app_api.model.InfoGenre;
 import com.example.music_app_api.model.hot_search.HotSearch;
 import com.example.music_app_api.model.hot_search.HotSearchKeyword;
 import com.example.music_app_api.model.hot_search.HotSearchSong;
 import com.example.music_app_api.model.multi_search.MultiSearch;
-import com.example.music_app_api.model.multi_search.MultiSearchSong;
 import com.example.music_app_api.model.multi_search.TrackSong;
 import com.example.music_app_api.model.source_song.InfoSong;
-import com.example.music_app_api.model.source_song.SourceSong;
+import com.example.music_app_api.model.source_song.InfoSourceSong;
 import com.example.music_app_api.model.source_song.StreamSourceSong;
+import com.example.music_app_api.service.database_server.ArtistService;
+import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.song_request.SongRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -26,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,7 +48,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,94 +59,160 @@ public class ImlSongRequest implements SongRequestService {
 
     private final ImlInfoRequest infoRequest;
     private final AppManager appManager;
+    private final SongService songService;
+    private final ArtistService artistService;
+
 
     @Autowired
     ImlSongRequest(
             ImlInfoRequest infoRequest,
-            AppManager appManager) {
+            AppManager appManager,
+            SongService songService,
+            ArtistService artistService) {
         this.infoRequest = infoRequest;
         this.appManager = appManager;
+        this.songService = songService;
+        this.artistService = artistService;
     }
 
     @Override
-    public HotSearch searchHotSongs(String data) throws Exception {
+    public HotSearch searchHotSongs(String data) {
         final HotSearch hotSearch = new HotSearch();
-        final JSONObject jsonData = appManager.getDataRequest(
-                HostApi.uriHostApiV1,
-                SearchSong.hotSearch,
-                Map.of(), Map.of("query", data,
-                        "language", "vi"),
-                false, false);
-        final JSONArray jsonItems = jsonData.getJSONArray("items");
-        final JSONObject jsonObjectKeywords = jsonItems.getJSONObject(0);
+        try {
+            final JSONObject jsonData = appManager.getDataRequest(
+                    HostApi.uriHostApiV1,
+                    SearchSong.hotSearch,
+                    Map.of(), Map.of("query", data,
+                            "language", "vi"),
+                    false, false);
+            final JSONArray jsonItems = jsonData.getJSONArray("items");
+            final JSONObject jsonObjectKeywords = jsonItems.getJSONObject(0);
 
-        final ObjectMapper mapper = new ObjectMapper();
+            final ObjectMapper mapper = new ObjectMapper();
 
-        final int limitedSearchWord = 3;
-        List<HotSearchKeyword> keywords = new ArrayList<>(
-                mapper.readValue(
-                        jsonObjectKeywords.get("keywords").toString(),
-                        new TypeReference<>() {
+            final int limitedSearchWord = 3;
+            List<HotSearchKeyword> keywords = new ArrayList<>(
+                    mapper.readValue(
+                            jsonObjectKeywords.get("keywords").toString(),
+                            new TypeReference<>() {
+                            }
+                    )
+            );
+
+            keywords = keywords
+                    .subList(0, Math.min(keywords.size(), limitedSearchWord));
+
+            hotSearch.setKeywords(keywords);
+
+            CompletableFuture<List<HotSearchSong>> completableFutureOn = CompletableFuture
+                    .supplyAsync(() -> {
+                        try {
+                            return getHotSearchSongsOn(jsonItems);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
                         }
-                )
-        );
+                    });
 
-        keywords = keywords
-                .subList(0, Math.min(keywords.size(), limitedSearchWord));
+            CompletableFuture<List<HotSearchSong>> completableFutureOff = CompletableFuture
+                    .supplyAsync(() -> getHotSearchSongsOff(data));
 
-        hotSearch.setKeywords(keywords);
+            List<HotSearchSong> songsOff = completableFutureOff.join();
+            List<HotSearchSong> songsOn = completableFutureOn.join();
+            List<HotSearchSong> songs = new ArrayList<>();
+            songs.addAll(songsOff);
+            songs.addAll(songsOn);
+            hotSearch.setSongs(songs);
 
-        final JSONObject jsonObjectSuggestions = jsonItems.getJSONObject(1);
-        final JSONArray jsonArraySuggestions = jsonObjectSuggestions
-                .getJSONArray("suggestions");
-
-        List<HotSearchSong> songs = mapper.readValue(
-                jsonArraySuggestions.toString(),
-                new TypeReference<>() {
-                }
-        );
-
-        final int limitedSearchSong = 2;
-        final int sizeLoopSongs = Math.min(limitedSearchSong, songs.size());
-        songs = songs.stream()
-                .filter(song -> song.getType() == 1)
-                .toList()
-                .subList(0, sizeLoopSongs);
-
-        hotSearch.setSongs(songs);
-
-        log.info(hotSearch.toString());
+            log.info(hotSearch.toString());
+        } catch (Exception ignore) {
+        }
 
         return hotSearch;
     }
 
-    @Override
-    public MultiSearch searchHMultiSongsZ(String data) throws Exception {
-        final MultiSearch multiSearch = new MultiSearch();
-        final MultiSearchSong songTop;
-        final JSONObject jsonData = appManager.getDataRequest(
-                HostApi.uriHostApiV2,
-                SearchSong.multiSearch,
-                Map.of(),
-                Map.of("q", data),
-                false, true);
-
+    @NotNull
+    private List<HotSearchSong> getHotSearchSongsOn(
+            @NotNull JSONArray jsonItems)
+            throws JsonProcessingException {
+        List<HotSearchSong> songs;
         final ObjectMapper mapper = new ObjectMapper();
+        if (jsonItems.length() > 1) {
+            final JSONObject jsonObjectSuggestions = jsonItems.getJSONObject(1);
+            final JSONArray jsonArraySuggestions = jsonObjectSuggestions
+                    .getJSONArray("suggestions");
 
-        final JSONObject jsonTopSong = jsonData.getJSONObject("top");
-        final String objectType = jsonTopSong.getString("objectType");
-        if (Objects.equals(objectType, "song")) {
-            songTop = mapper
-                    .readValue(jsonTopSong.toString(), MultiSearchSong.class);
+            songs = mapper.readValue(
+                    jsonArraySuggestions.toString(),
+                    new TypeReference<>() {
+                    }
+            );
 
-            multiSearch.setTopSong(songTop);
+            for (int i = 0; i < jsonArraySuggestions.length(); i++) {
+                JSONObject jsonSuggestion = (JSONObject) jsonArraySuggestions.get(i);
+                JSONArray artistsJson = jsonSuggestion.getJSONArray("artists");
+                StringBuilder artistName = new StringBuilder();
+                for (int j = 0; j < artistsJson.length(); j++) {
+                    JSONObject artistJson = (JSONObject) artistsJson.get(j);
+                    artistName.append(artistJson.getString("name"));
+                }
+                songs.get(i).setArtistsNames(artistName.toString());
+            }
+
+            final int limitedSearchSong = 2;
+            final int sizeLoopSongs = Math.min(limitedSearchSong, songs.size());
+            songs = songs.stream()
+                    .filter(song -> song.getType() == 1)
+                    .toList()
+                    .subList(0, sizeLoopSongs);
+        } else {
+            songs = new ArrayList<>();
         }
+        return songs;
+    }
 
-        final JSONArray jsonSongs = jsonData.getJSONArray("songs");
+    @NotNull
+    private List<HotSearchSong> getHotSearchSongsOff(String query) {
+        List<HotSearchSong> hotSearchSongs;
+        final ObjectMapper mapper = new ObjectMapper();
+        List<Song> songs = songService.getSongsByTitle(query, 5);
+        hotSearchSongs = mapper.convertValue(songs, new TypeReference<>() {
+        });
+        int minSelection = Math.min(hotSearchSongs.size(), 3);
+        return hotSearchSongs.subList(0, minSelection);
+    }
 
-        final List<MultiSearchSong> songs = mapper
-                .readValue(jsonSongs.toString(), new TypeReference<>() {
-                });
+    @Override
+    public MultiSearch searchMulti(String data, int count) {
+        final MultiSearch multiSearch = new MultiSearch();
+
+        CompletableFuture<List<InfoSong>> futureSong = CompletableFuture
+                .supplyAsync(() -> searchMultiSongs(data, count).getSongs());
+        CompletableFuture<List<InfoArtist>> futureArtist = CompletableFuture
+                .supplyAsync(() -> searchMultiArtists(data, count).getArtists());
+
+        final List<InfoSong> songs = futureSong.join();
+        final List<InfoArtist> artists = futureArtist.join();
+
+        multiSearch.setSongs(songs);
+        multiSearch.setArtists(artists);
+
+        log.info(multiSearch.toString());
+        return multiSearch;
+    }
+
+    @Override
+    public MultiSearch searchMultiSongs(String data, int count) {
+        final MultiSearch multiSearch = new MultiSearch();
+
+        CompletableFuture<List<InfoSong>> futureOn = CompletableFuture
+                .supplyAsync(() -> getSongsOn(data, count));
+        CompletableFuture<List<InfoSong>> futureOff = CompletableFuture
+                .supplyAsync(() -> getSongsOff(data, count));
+        final List<InfoSong> songsOn = futureOn.join();
+        final List<InfoSong> songsOff = futureOff.join();
+        final List<InfoSong> songs = new ArrayList<>();
+        songs.addAll(songsOff);
+        songs.addAll(songsOn);
 
         multiSearch.setSongs(songs);
 
@@ -145,22 +220,181 @@ public class ImlSongRequest implements SongRequestService {
         return multiSearch;
     }
 
-    @Override
-    public StreamSourceSong getStreamSong(String idSong)
-            throws Exception {
-        final JSONObject dataJson = appManager.getDataRequest(
-                HostApi.uriHostApiV2,
-                SearchSong.streamSource,
-                Map.of("id", idSong),
-                Map.of(), false, true);
-
+    @Contract(pure = true)
+    private @NotNull List<InfoSong> getSongsOff(String data, int count) {
+        List<InfoSong> infoSongs;
         final ObjectMapper mapper = new ObjectMapper();
-        final StreamSourceSong sourceSong = mapper
-                .readValue(dataJson.toString(), StreamSourceSong.class);
+        List<Song> songs = songService.getSongsByTitle(data, count);
+        List<List<InfoArtist>> infoArtists = new ArrayList<>();
+        List<List<InfoGenre>> infoGenres = new ArrayList<>();
+        songs = songs.stream().peek(song -> {
+            List<Artist> artists = songService.getArtistByIdSong(song.getIdSong());
+            List<Genre> genres = songService.getGenresByIdSong(song.getIdSong());
 
-        log.info(sourceSong.toString());
+            List<InfoArtist> infoArtists1 = mapper
+                    .convertValue(artists, new TypeReference<>() {
+                    });
 
-        return sourceSong;
+            List<InfoGenre> infoGenres1 = mapper
+                    .convertValue(genres, new TypeReference<>() {
+                    });
+            infoArtists.add(infoArtists1);
+            infoGenres.add(infoGenres1);
+        }).toList();
+        infoSongs = mapper.convertValue(songs, new TypeReference<>() {
+        });
+
+        for (int i = 0; i < infoSongs.size(); i++) {
+            infoSongs.get(i).setArtists(infoArtists.get(i));
+            infoSongs.get(i).setIdGenres(
+                    infoGenres
+                            .get(i).stream()
+                            .map(InfoGenre::getId)
+                            .toList());
+        }
+
+        int minSelection = Math.min(infoSongs.size(), 5);
+        return infoSongs.subList(0, minSelection);
+    }
+
+    private List<InfoSong> getSongsOn(String data, int count) {
+        List<InfoSong> infoSongs = new ArrayList<>();
+
+        try {
+            final JSONObject jsonData = appManager.getDataRequest(
+                    HostApi.uriHostApiV2,
+                    SearchSong.search,
+                    Map.of("type", "song",
+                            "count", String.valueOf(count)),
+                    Map.of("q", data),
+                    false, true);
+
+            final ObjectMapper mapper = new ObjectMapper();
+
+
+            try {
+                final JSONArray jsonSongs = jsonData.getJSONArray("items");
+                infoSongs = mapper
+                        .readValue(jsonSongs.toString(), new TypeReference<>() {
+                        });
+            } catch (Exception ignore) {
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return infoSongs;
+    }
+
+    @Override
+    public MultiSearch searchMultiArtists(String data, int count) {
+        final MultiSearch multiSearch = new MultiSearch();
+
+        CompletableFuture<List<InfoArtist>> futureOn = CompletableFuture
+                .supplyAsync(() -> getArtistsOn(data, count));
+        CompletableFuture<List<InfoArtist>> futureOff = CompletableFuture
+                .supplyAsync(() -> getArtistsOff(data, count));
+        final List<InfoArtist> artistsOn = futureOn.join();
+        final List<InfoArtist> artistsOff = futureOff.join();
+        final List<InfoArtist> artists = new ArrayList<>();
+        artists.addAll(artistsOn);
+        artists.addAll(artistsOff);
+
+        multiSearch.setArtists(artists);
+
+        log.info(multiSearch.toString());
+        return multiSearch;
+    }
+
+    @Contract(pure = true)
+    private @NotNull List<InfoArtist> getArtistsOff(String data, int count) {
+        final ObjectMapper mapper = new ObjectMapper();
+        List<Artist> artists = artistService
+                .getArtistsByNameOrRealName(data, data, count);
+
+        return mapper.convertValue(artists, new TypeReference<>() {
+        });
+    }
+
+    private List<InfoArtist> getArtistsOn(String data, int count) {
+        List<InfoArtist> infoArtists = new ArrayList<>();
+
+        try {
+            final JSONObject jsonData = appManager.getDataRequest(
+                    HostApi.uriHostApiV2,
+                    SearchSong.search,
+                    Map.of("type", "artist",
+                            "count", String.valueOf(count)),
+                    Map.of("q", data),
+                    false, true);
+
+            final ObjectMapper mapper = new ObjectMapper();
+
+
+            try {
+                final JSONArray jsonSongs = jsonData.getJSONArray("items");
+                infoArtists = mapper
+                        .readValue(jsonSongs.toString(), new TypeReference<>() {
+                        });
+            } catch (Exception ignore) {
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return infoArtists;
+    }
+
+    @Override
+    public StreamSourceSong getStreamSong(@NotNull String idSong) {
+        CompletableFuture<StreamSourceSong> futureOn = CompletableFuture
+                .supplyAsync(() -> {
+                    try {
+                        return getSourceSongOn(idSong);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        CompletableFuture<StreamSourceSong> futureOff = CompletableFuture
+                .supplyAsync(() -> getSourceSongOff(idSong));
+        final StreamSourceSong sourceSongOn = futureOn.join();
+        final StreamSourceSong sourceSongOff = futureOff.join();
+
+        if (idSong.startsWith("Z")) {
+            log.info(sourceSongOn.toString());
+            return sourceSongOn;
+        } else {
+            log.info(sourceSongOff.toString());
+            return sourceSongOff;
+        }
+    }
+
+    private StreamSourceSong getSourceSongOff(String idSong) {
+        StreamSourceSong streamSourceSong;
+        final ObjectMapper mapper = new ObjectMapper();
+        SourceSong sourceSong = songService.getSourceSong(idSong);
+        streamSourceSong = mapper.convertValue(sourceSong, StreamSourceSong.class);
+        return streamSourceSong;
+    }
+
+    private StreamSourceSong getSourceSongOn(String idSong) {
+        try {
+            final JSONObject dataJson = appManager.getDataRequest(
+                    HostApi.uriHostApiV2,
+                    SearchSong.streamSource,
+                    Map.of("id", idSong),
+                    Map.of(), false, true);
+
+            final ObjectMapper mapper = new ObjectMapper();
+
+            return mapper
+                    .readValue(dataJson.toString(), StreamSourceSong.class);
+        } catch (Exception ignore) {
+
+        }
+
+        return new StreamSourceSong();
     }
 
     @Override
@@ -168,7 +402,7 @@ public class ImlSongRequest implements SongRequestService {
             @NotNull BasicNameValuePair valuePair) {
 
         String data;
-        TrackSong trackSong;
+        TrackSong trackSong = new TrackSong();
         try {
             if (valuePair.getName().equals(TypeParameter.id.name())) {
                 final JSONObject jsonData = appManager.getDataRequest(
@@ -178,8 +412,14 @@ public class ImlSongRequest implements SongRequestService {
                         Map.of(), false, true);
                 data = jsonData.getString("alias");
             } else {
-                SourceSong song = infoRequest.getInfoSourceSong(valuePair);
-                data = song.getTitle() + " " + song.getArtistsNames();
+                Optional<InfoSourceSong> song = infoRequest.getInfoSourceSong(valuePair);
+                if (song.isPresent()) {
+                    data = song.get().getTitle() + " " +
+                            song.get().getArtistsNames();
+                } else {
+                    throw new RuntimeException("");
+                }
+
             }
 
             final BasicNameValuePair nameValuePair =
@@ -231,17 +471,16 @@ public class ImlSongRequest implements SongRequestService {
             trackSong.getSourceSong().setUri320(source320);
 
             log.info(trackSong.getSourceSong().toString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception ignore) {
         }
 
         return trackSong.getSourceSong();
     }
 
     @Override
-    public List<MultiSearchSong> getChartsSong(int count)
+    public List<InfoSong> getChartsSong(int count)
             throws Exception {
-        List<MultiSearchSong> songs;
+        List<InfoSong> songs;
         final List<NameValuePair> nameValuePairs = new ArrayList<>();
         final BasicNameValuePair valuePair1 =
                 new BasicNameValuePair("chart", SearchField.song.name());
@@ -269,145 +508,160 @@ public class ImlSongRequest implements SongRequestService {
     }
 
     @Override
-    public List<InfoSong> getRecommendSongs(String idSong)
-            throws Exception {
+    public List<InfoSong> getRecommendSongs(String idSong) {
+        List<InfoSong> infoSongs = new ArrayList<>();
+        try {
+            final JSONObject jsonData = appManager
+                    .getDataRequest(
+                            HostApi.uriHostApiV2,
+                            SearchSong.recommendSong,
+                            Map.of("id", idSong),
+                            Map.of("historyIds", idSong,
+                                    "start", String.valueOf(0),
+                                    "count", String.valueOf(10)),
+                            false, true);
 
-        final JSONObject jsonData = appManager
-                .getDataRequest(
-                        HostApi.uriHostApiV2,
-                        SearchSong.recommendSong,
-                        Map.of("id", idSong),
-                        Map.of("historyIds", idSong,
-                                "start", String.valueOf(0),
-                                "count", String.valueOf(10)),
-                        false, true);
+            final ObjectMapper mapper = new ObjectMapper();
+            final JSONArray jsonItems = jsonData.getJSONArray("items");
+            infoSongs = mapper
+                    .readValue(jsonItems.toString(), new TypeReference<>() {
+                    });
 
-        final ObjectMapper mapper = new ObjectMapper();
-        final JSONArray jsonItems = jsonData.getJSONArray("items");
-        final List<InfoSong> infoSongs = mapper
-                .readValue(jsonItems.toString(), new TypeReference<>() {
-                });
-
-        log.info(infoSongs.toString());
+            log.info(infoSongs.toString());
+        } catch (Exception ignore) {
+        }
         return infoSongs;
     }
 
     @Override
-    public List<InfoAlbum> getAlbumsOfGenre(String idGenre)
-            throws Exception {
-        JSONObject jsonData = appManager
-                .getDataRequest(
-                        HostApi.uriHostApiV2,
-                        GetInfo.getAlbumsOfGenre,
-                        Map.of(TypeParameter.id.name(), String.valueOf(idGenre),
-                                TypeParameter.type.name(), "genre",
-                                TypeParameter.page.name(), String.valueOf(1),
-                                TypeParameter.count.name(), String.valueOf(10)),
-                        Map.of("sort", "listen"),
-                        false, true);
+    public List<InfoAlbum> getAlbumsOfGenre(String idGenre) {
+        List<InfoAlbum> albums = new ArrayList<>();
+        try {
+            JSONObject jsonData = appManager
+                    .getDataRequest(
+                            HostApi.uriHostApiV2,
+                            GetInfo.getAlbumsOfGenre,
+                            Map.of(TypeParameter.id.name(), String.valueOf(idGenre),
+                                    TypeParameter.type.name(), "genre",
+                                    TypeParameter.page.name(), String.valueOf(1),
+                                    TypeParameter.count.name(), String.valueOf(10)),
+                            Map.of("sort", "listen"),
+                            false, true);
 
-        final ObjectMapper mapper = new ObjectMapper();
-        final JSONArray jsonItems = jsonData.getJSONArray("items");
-
-        return mapper
-                .readValue(jsonItems.toString(), new TypeReference<>() {
-                });
+            final ObjectMapper mapper = new ObjectMapper();
+            final JSONArray jsonItems = jsonData.getJSONArray("items");
+            albums = mapper
+                    .readValue(jsonItems.toString(), new TypeReference<>() {
+                    });
+        } catch (Exception ignore) {
+        }
+        return albums;
     }
 
     @Override
-    public List<InfoSong> getSongsOfArtist(String idArtist, int count)
-            throws Exception {
-        //type=artist&page=1&count=0&sort=listen&sectionId=aSongs
-        JSONObject jsonData = appManager
-                .getDataRequest(
-                        HostApi.uriHostApiV2,
-                        SearchSong.getSongsOfArtist,
-                        Map.of(TypeParameter.id.name(), String.valueOf(idArtist),
-                                TypeParameter.type.name(), SearchField.artist.name(),
-                                TypeParameter.page.name(), String.valueOf(1),
-                                TypeParameter.count.name(), String.valueOf(count)),
-                        Map.of(TypeParameter.sort.name(), "listen",
-                                TypeParameter.sectionId.name(), "aSongs"),
-                        false, true);
+    public List<InfoSong> getSongsOfArtist(String idArtist, int count) {
+        List<InfoSong> infoSongs = new ArrayList<>();
+        try {
+            JSONObject jsonData = appManager
+                    .getDataRequest(
+                            HostApi.uriHostApiV2,
+                            SearchSong.getSongsOfArtist,
+                            Map.of(TypeParameter.id.name(), String.valueOf(idArtist),
+                                    TypeParameter.type.name(), SearchField.artist.name(),
+                                    TypeParameter.page.name(), String.valueOf(1),
+                                    TypeParameter.count.name(), String.valueOf(count)),
+                            Map.of(TypeParameter.sort.name(), "listen",
+                                    TypeParameter.sectionId.name(), "aSongs"),
+                            false, true);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JSONArray itemSong = jsonData.getJSONArray("items");
+            ObjectMapper mapper = new ObjectMapper();
+            JSONArray itemSong = jsonData.getJSONArray("items");
+            infoSongs = mapper
+                    .readValue(itemSong.toString(), new TypeReference<>() {
+                    });
+        } catch (Exception ignore) {
+        }
 
-        return mapper
-                .readValue(itemSong.toString(), new TypeReference<>() {
-                });
+        return infoSongs;
     }
 
     @Override
-    public List<InfoSong> getSongsOfAlbum(String idAlbum)
-            throws Exception {
-        JSONObject jsonData = appManager
-                .getDataRequest(
-                        HostApi.uriHostApiV2,
-                        SearchSong.infoPagePlaylist,
-                        Map.of(TypeParameter.id.name(), String.valueOf(idAlbum)),
-                        Map.of(),
-                        false, true);
+    public List<InfoSong> getSongsOfAlbum(String idAlbum) {
+        List<InfoSong> songs = new ArrayList<>();
+        try {
+            JSONObject jsonData = appManager
+                    .getDataRequest(
+                            HostApi.uriHostApiV2,
+                            SearchSong.infoPagePlaylist,
+                            Map.of(TypeParameter.id.name(), String.valueOf(idAlbum)),
+                            Map.of(),
+                            false, true);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JSONArray sections = jsonData.getJSONArray("sections");
-        JSONObject jsonSongs = jsonData.getJSONObject("song");
-        JSONArray songItems = jsonSongs.getJSONArray("items");
-        List<InfoSong> songMain = mapper.readValue(
-                songItems.toString(), new TypeReference<>() {
-                });
-        List<InfoSong> songs = new ArrayList<>(songMain);
-        sections.forEach(section -> {
-            JSONObject jsonSection = (JSONObject) section;
-            String sectionType = jsonSection.getString("sectionType");
+            ObjectMapper mapper = new ObjectMapper();
+            JSONArray sections = jsonData.getJSONArray("sections");
+            JSONObject jsonSongs = jsonData.getJSONObject("song");
+            JSONArray songItems = jsonSongs.getJSONArray("items");
+            List<InfoSong> songMain = mapper.readValue(
+                    songItems.toString(), new TypeReference<>() {
+                    });
+            songs.addAll(songMain);
+            sections.forEach(section -> {
+                JSONObject jsonSection = (JSONObject) section;
+                String sectionType = jsonSection.getString("sectionType");
 
-            if (sectionType.equals(SearchField.song.name())) {
-                JSONArray jsonArray = jsonSection.getJSONArray("items");
+                if (sectionType.equals(SearchField.song.name())) {
+                    JSONArray jsonArray = jsonSection.getJSONArray("items");
 
-                try {
-                    List<InfoSong> infoSongs = mapper
-                            .readValue(jsonArray.toString(), new TypeReference<>() {
-                            });
-                    songs.addAll(infoSongs);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+                    try {
+                        List<InfoSong> infoSongs = mapper
+                                .readValue(jsonArray.toString(), new TypeReference<>() {
+                                });
+                        songs.addAll(infoSongs);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-        });
+            });
+        } catch (Exception ignore) {
+        }
 
         return songs;
     }
 
     @Override
-    public List<InfoSong> getSongNewRelease() throws Exception {
+    public List<InfoSong> getSongNewRelease() {
+        List<InfoSong> infoSongs = new ArrayList<>();
+        try {
+            JSONObject jsonData = appManager
+                    .getDataRequest(
+                            HostApi.uriHostApiV2,
+                            SearchSong.getSongNewRelease,
+                            Map.of(TypeParameter.page.name(), String.valueOf(1),
+                                    TypeParameter.count.name(), String.valueOf(30)),
+                            Map.of(),
+                            false, true);
 
-        JSONObject jsonData = appManager
-                .getDataRequest(
-                        HostApi.uriHostApiV2,
-                        SearchSong.getSongNewRelease,
-                        Map.of(TypeParameter.page.name(), String.valueOf(1),
-                                TypeParameter.count.name(), String.valueOf(30)),
-                        Map.of(),
-                        false, true);
-
-        final ObjectMapper mapper = new ObjectMapper();
-        final JSONArray jsonItems = jsonData.getJSONArray("items");
-        JSONArray jsonAllSong = new JSONArray();
-        for (Object jsonItem : jsonItems) {
-            JSONObject jsonContain = (JSONObject) jsonItem;
-            String type = jsonContain.getString("sectionType");
-            if (type.equals("new-release")) {
-                final JSONObject jsonSelect = jsonContain.getJSONObject("items");
-                jsonAllSong = jsonSelect.getJSONArray("vPop");
-                break;
+            final ObjectMapper mapper = new ObjectMapper();
+            final JSONArray jsonItems = jsonData.getJSONArray("items");
+            JSONArray jsonAllSong = new JSONArray();
+            for (Object jsonItem : jsonItems) {
+                JSONObject jsonContain = (JSONObject) jsonItem;
+                String type = jsonContain.getString("sectionType");
+                if (type.equals("new-release")) {
+                    final JSONObject jsonSelect = jsonContain.getJSONObject("items");
+                    jsonAllSong = jsonSelect.getJSONArray("vPop");
+                    break;
+                }
             }
+
+            infoSongs = mapper
+                    .readValue(jsonAllSong.toString(), new TypeReference<>() {
+                    });
+
+            log.info(infoSongs.toString());
+        } catch (Exception ignore) {
         }
 
-        List<InfoSong> infoSongs = mapper
-                .readValue(jsonAllSong.toString(), new TypeReference<>() {
-                });
-
-        log.info(infoSongs.toString());
         return infoSongs;
     }
 

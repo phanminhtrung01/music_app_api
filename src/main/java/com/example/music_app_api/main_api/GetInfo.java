@@ -11,4 +11,6 @@ public class GetInfo {
     public static final String infoGenre = "genre/get/info";
     //?idSong
     public static final String infoLyric = "lyric/get/lyric";
+    //?media_id=Z6B0U0BC
+    public static final String lyric = "xhr/lyrics/get-lyrics";
 }

@@ -274,7 +274,7 @@ public class SongController {
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
-                                    "Query get songs by genre successful!",
+                                    "Query get songs by favorite song successful!",
                                     songs)
                             ) :
                     ResponseEntity

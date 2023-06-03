@@ -1,38 +1,81 @@
-6BACZ0DW,2023-05-17 00:00:00,Anh Không Quan Trọng Nữa (Single)
+PL1UUTAV,01/06/2023,Nhạc hay của tôi
+PUOA3TAT,12/09/2022,Nhạc trẻ hay nhất
 
-U1,avatar1,29-07-2001,test1@gmail.com,Test1,1111,0343421234,test1,false
-U2,avatar2,20-01-2000,test2@gmail.com,Test2,2222,0344321654,test2,false
+PL1UUTAV,SH3HB0MA
+PL1UUTAV,SOUO3QPF
 
-Z6ACUB98,"Tăng Phúc, Nguyễn Đình Vũ",263,1684324800,https://photo-resize-zmp3.zmdcdn.me/w94_r1x1_jpeg/cover/c/4/0/0/c400085748eb1fc513aa4492a5d56810.jpg,https://photo-resize-zmp3.zmdcdn.me/w240_r1x1_jpeg/cover/c/4/0/0/c400085748eb1fc513aa4492a5d56810.jpg,Anh Không Quan Trọng Nữa
-ZZDI9B7U,"Miu Lê, Karik, Châu Đăng Khoa",262,1655120700,https://photo-resize-zmp3.zmdcdn.me/w94_r1x1_jpeg/cover/1/b/8/9/1b8958017b04a663eb8c093905dd4d85.jpg,https://photo-resize-zmp3.zmdcdn.me/w240_r1x1_jpeg/cover/1/b/8/9/1b8958017b04a663eb8c093905dd4d85.jpg,Vì Mẹ Anh Bắt Chia Tay
+PUOA3TAT,UT2QTTQA
 
-1,Bài này hay quá!,Z6ACUB98,U2
+1,true,3214,12:12:20
+2,false,,
+3,false,,
 
-User user = new User();
-user.setAvatar("avatar1");
-user.setName("Test1");
-user.setBirthday("29-07-2001");
-user.setEmail("test1@gmail.com");
-user.setGender("Male");
-user.setUsername("test1");
-user.setPassword("1111");
-user.setPhoneNumber("0343421234");
-user.setCheckLogin(true)
+UT2QTTQA,https://th.bing.com/th/id/OIP.7i35GvRSp092_L3KWHr4jgHaHv,20-01-2000,test3@gmail.com,false,false,Test3,3333,0344321456,test3,1
+UTQ5TBAA,https://th.bing.com/th/id/OIP.7i35GvRSp092_L3KWHr4jgHaHv,20-01-2000,test2@gmail.com,false,false,Test2,2222,0344321654,test2,2
+UTQTTM1A,https://th.bing.com/th/id/OIP.7i35GvRSp092_L3KWHr4jgHaHv,11/05/2023,test1@gmail.com,true,false,Test1,1111,0344321113,test1,3
 
 
-private String name;
-private String username;
-private String password;
-private String gender;
-private String email;
-@Column(name = "phone_number")
-private String phoneNumber;
-private String avatar;
-private String birthday;
-@JsonAlias({"check_login", "checkLogin"})
-private boolean checkLogin;
+SUTI9BTU,"Miu Lê, Karik, Châu Đăng Khoa",262,1655120700,https://photo-resize-zmp3.zmdcdn.me/w94_r1x1_jpeg/cover/1/b/8/9/1b8958017b04a663eb8c093905dd4d85.jpg,https://photo-resize-zmp3.zmdcdn.me/w240_r1x1_jpeg/cover/1/b/8/9/1b8958017b04a663eb8c093905dd4d85.jpg,Nắng Mưa Thất Thường,,,
+S46VFMZ8,Do Van Tuyen,123,456,https://storage.googleapis.com/music-ed1de.appspot.com/cho.jpg,https://storage.googleapis.com/music-ed1de.appspot.com/dance.jpg,abv,,1
+SH3HB0MA,Nguyen Tien Tai,123123,12,https://storage.googleapis.com/music-ed1de.appspot.com/bolero.jpg,https://storage.googleapis.com/music-ed1de.appspot.com/rap.jpg,asd,,1
+SOUO3QPF,Phan Minh Trung,145,1,https://storage.googleapis.com/music-ed1de.appspot.com/dongque.jpg,https://storage.googleapis.com/music-ed1de.appspot.com/nhactre.jpg,7,,1
+
+
+A1TTUQMN,"",1991-07-05 00:00:00,Miu Lê,Việt Nam,Lê Ánh Nhật,là một nữ ca sĩ kiêm diễn viên người Việt Nam. Cô xuất hiện lần đầu vào năm 2009.,https://upload.wikimedia.org/wikipedia/commons/4/46/Miulesinger.JPG,https://upload.wikimedia.org/wikipedia/commons/4/46/Miulesinger.JPG,0
+ATQMN3UT,"",1989-04-12 23:37:42,Karik,Việt Nam,Phạm Hoàng Khoa,"là một rapper, nhạc sĩ chuyên nghiệp người Việt Nam.",https://upload.wikimedia.org/wikipedia/commons/c/ca/Rapper_Karik.jpg,https://upload.wikimedia.org/wikipedia/commons/c/ca/Rapper_Karik.jpg,0
+ATRQ2QQA,"",1990-06-26 00:00:00,Châu Đăng Khoa,Việt Nam,Châu Đăng Khoa,"là một nam ca sĩ, nhạc sĩ, nhà sản xuất âm nhạc người Việt Nam.",https://upload.wikimedia.org/wikipedia/commons/4/48/Chau_Dang_Khoa_2021.jpg,https://upload.wikimedia.org/wikipedia/commons/4/48/Chau_Dang_Khoa_2021.jpg,0
+
+GTU1TTAC,pop,Nhạc Trẻ
+GTUTT2AA,chill,Nhạc Chill
+
+SUTI9BTU,GTU1TTAC
+SUTI9BTU,GTUTT2AA
+
+UT2QTTQA,SH3HB0MA
+UT2QTTQA,SOUO3QPF
+
+UT2QTTQA,S46VFMZ8
+UT2QTTQA,SUTI9BTU
+
+SUTI9BTU,A1TTUQMN
+SUTI9BTU,ATQMN3UT
+SUTI9BTU,ATRQ2QQA
+
+CMA3PEQQ,Hay,SUTI9BTU,UT2QTTQA
+CMAA3EBU,Bài này hay quá!,SUTI9BTU,UT2QTTQA
+CMAMHI1O,Ok,S46VFMZ8,UTQ5TBAA
+CMOT4QRE,Tôi thích nó lắm,SOUO3QPF,UTQ5TBAA
+CMTU1IIO,Không hay,S46VFMZ8,UTQTTM1A
+
+CMAA3EBU,UT2QTTQA
+CMAA3EBU,UTQ5TBAA
+CMOT4QRE,UTQ5TBAA
+CMAA3EBU,UTQTTM1A
 
 
 SQL Dialect
 
-@Column(nullable = false, columnDefinition = "datetime default now()")
+select * from playlist;
+select * from user;
+select * from user_credential;
+select * from song;
+select * from artist;
+select * from genre;
+select * from lyric;
+select * from genre_song;
+select * from sing_song;
+select * from playlist_user;
+select * from listen_song;
+select * from playlist_song;
+select * from favorite_song;
+select * from comment;
+select * from comment_like;
+
+select * from comment
+where exists(select id_comment from comment_like
+             where id_user = ?1
+               and comment.id_comment = comment_like.id_comment);
+
+SELECT * FROM artist
+where EXISTS(SELECT * FROM sing_song WHERE id_song=?1
+                                       AND artist.id_artist = sing_song.id_artist);

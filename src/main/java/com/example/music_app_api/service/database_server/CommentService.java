@@ -7,13 +7,13 @@ import java.util.List;
 public interface CommentService {
     Comment saveComment(Comment comment, String idUser, String idSong);
 
-    Comment deleteComment(Long idComment);
+    Comment deleteComment(String idComment);
 
-    Comment getCommentById(Long idComment);
+    Comment getCommentById(String idComment);
 
-    Comment addLikeComment(Long idComment, String idUser);
+    Comment addLikeComment(String idComment, String idUser);
 
-    Comment removeLikeComment(Long idComment, String idUser);
+    Comment removeLikeComment(String idComment, String idUser);
 
     List<Comment> getLikeCommentsByUser(String idUser);
 

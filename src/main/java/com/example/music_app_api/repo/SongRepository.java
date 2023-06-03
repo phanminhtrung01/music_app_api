@@ -10,6 +10,16 @@ import java.util.Optional;
 
 @Repository
 public interface SongRepository extends JpaRepository<Song, String> {
+
+    @Query(
+            value = """
+                    SELECT *, MATCH(title) AGAINST(?1) AS relevance
+                    FROM song WHERE MATCH(title) AGAINST(?1) > 0
+                    ORDER BY relevance DESC LIMIT ?2
+                    """, nativeQuery = true
+    )
+    List<Song> getSongByTitle(String title, Integer count);
+
     @Query(
             value = """
                     select * from song where

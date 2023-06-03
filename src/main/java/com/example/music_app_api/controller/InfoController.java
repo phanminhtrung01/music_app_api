@@ -3,7 +3,7 @@ package com.example.music_app_api.controller;
 import com.example.music_app_api.model.*;
 import com.example.music_app_api.model.source_lyric.SourceLyric;
 import com.example.music_app_api.model.source_song.InfoSong;
-import com.example.music_app_api.model.source_song.SourceSong;
+import com.example.music_app_api.model.source_song.InfoSourceSong;
 import com.example.music_app_api.service.song_request.InfoRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -35,23 +36,33 @@ public class InfoController {
             @RequestParam(name = "id") String idSong) {
 
         try {
-            final InfoSong infoSong = infoRequestService.getInfoSong(idSong);
-            return ResponseEntity
+            final Optional<InfoSong> infoSong = infoRequestService
+                    .getInfoSong(idSong);
+
+            return infoSong.map(song -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Success",
-                            infoSong
-                    ));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                            song
+                    ))).orElseGet(() -> ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Failure",
-                            ""
+                            "Not fount song with ID: " + idSong,
+                            null
+                    )));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Not fount song with ID: " + idSong,
+                            null
                     ));
         }
+
+
     }
 
     @GetMapping("album")
@@ -59,24 +70,32 @@ public class InfoController {
             @RequestParam(name = "id") String idAlbum) {
 
         try {
-            final InfoAlbum infoAlbum = infoRequestService
+            final Optional<InfoAlbum> infoAlbum = infoRequestService
                     .getInfoAlbum(idAlbum);
-            return ResponseEntity
+
+            return infoAlbum.map(album -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Success",
-                            infoAlbum
-                    ));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                            album
+                    ))).orElseGet(() -> ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Failure",
-                            ""
+                            "Not fount album with ID: " + idAlbum,
+                            null
+                    )));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Not fount album with ID: " + idAlbum,
+                            null
                     ));
         }
+
     }
 
     @GetMapping("artist")
@@ -84,22 +103,29 @@ public class InfoController {
             @RequestParam(name = "id") String idArtist) {
 
         try {
-            final InfoArtist infoArtist = infoRequestService
+            final Optional<InfoArtist> infoArtist = infoRequestService
                     .getInfoArtist(idArtist);
-            return ResponseEntity
+            return infoArtist.map(artist -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Success",
-                            infoArtist
-                    ));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                            artist
+                    ))).orElseGet(() -> ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Failure",
-                            ""
+                            "Not fount artist with ID: " + idArtist,
+                            null
+                    )));
+        } catch (Exception e) {
+
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Not fount artist with ID: " + idArtist,
+                            null
                     ));
         }
     }
@@ -109,22 +135,28 @@ public class InfoController {
             @RequestParam(name = "id") String idGenre) {
 
         try {
-            final InfoGenre infoGenre = infoRequestService
+            final Optional<InfoGenre> infoGenre = infoRequestService
                     .getInfoGenre(idGenre);
-            return ResponseEntity
+            return infoGenre.map(genre -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Success",
-                            infoGenre
-                    ));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                            genre
+                    ))).orElseGet(() -> ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Failure",
-                            ""
+                            "Not fount genre with ID: " + idGenre,
+                            null
+                    )));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            e.getMessage(),
+                            null
                     ));
         }
     }
@@ -133,25 +165,20 @@ public class InfoController {
     public ResponseEntity<ResponseObject> getSourceSong(
             @RequestParam(name = "id") String id) {
 
-        try {
-            BasicNameValuePair valuePair = new BasicNameValuePair("id", id);
-            SourceSong song = infoRequestService.getInfoSourceSong(valuePair);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ResponseObject(
-                            HttpStatus.OK.value(),
-                            "Success",
-                            song
-                    ));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                    .body(new ResponseObject(
-                            HttpStatus.BAD_REQUEST.value(),
-                            "Failure",
-                            ""
-                    ));
-        }
+        BasicNameValuePair valuePair = new BasicNameValuePair("id", id);
+        Optional<InfoSourceSong> song = infoRequestService.getInfoSourceSong(valuePair);
+        return song.map(infoSourceSong -> ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ResponseObject(
+                        HttpStatus.OK.value(),
+                        "Success",
+                        infoSourceSong
+                ))).orElseGet(() -> ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                .body(new ResponseObject(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Failure",
+                        null
+                )));
     }
 
     @GetMapping("source/lyric")
@@ -159,22 +186,28 @@ public class InfoController {
             @RequestParam(name = "id") String idSong) {
 
         try {
-            SourceLyric sourceLyric = infoRequestService
+            Optional<SourceLyric> sourceLyric = infoRequestService
                     .getSourceLyric(idSong);
-            return ResponseEntity
+            return sourceLyric.map(lyric -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Success",
-                            sourceLyric
-                    ));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                            lyric
+                    ))).orElseGet(() -> ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Failure",
-                            ""
+                            "Not fount lyric of song with ID: " + idSong,
+                            null
+                    )));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseObject(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Not fount lyric of song with ID: " + idSong,
+                            null
                     ));
         }
     }

@@ -5,6 +5,7 @@ import com.example.music_app_api.entity.Lyric;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.repo.LyricRepo;
 import com.example.music_app_api.service.database_server.LyricService;
+import com.example.music_app_api.service.database_server.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,14 @@ import java.util.Optional;
 public class LyricServiceImpl implements LyricService {
 
     private final LyricRepo lyricRepo;
+    private final SongService songService;
 
     @Autowired
-    public LyricServiceImpl(LyricRepo lyricRepo) {
+    public LyricServiceImpl(
+            LyricRepo lyricRepo,
+            SongService songService) {
         this.lyricRepo = lyricRepo;
+        this.songService = songService;
     }
 
     @Override
@@ -60,6 +65,18 @@ public class LyricServiceImpl implements LyricService {
             } else {
                 throw new RuntimeException(e.getMessage());
             }
+        }
+    }
+
+    @Override
+    public Lyric getLyricByIdSong(String idSong) {
+        songService.getById(idSong);
+        Optional<Lyric> lyric = lyricRepo.findBySong(idSong);
+
+        if (lyric.isPresent()) {
+            return lyric.get();
+        } else {
+            throw new RuntimeException("Not found lyric of song with ID: " + idSong);
         }
     }
 }

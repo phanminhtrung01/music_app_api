@@ -12,4 +12,6 @@ public interface LyricService {
 
     Optional<Lyric> delete(String id);
 
+    Lyric getLyricByIdSong(String idSong);
+
 }

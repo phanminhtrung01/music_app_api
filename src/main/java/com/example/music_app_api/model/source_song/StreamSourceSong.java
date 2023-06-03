@@ -1,8 +1,8 @@
 package com.example.music_app_api.model.source_song;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -16,12 +16,12 @@ import org.eclipse.persistence.oxm.annotations.XmlCDATA;
 public class StreamSourceSong {
     @XmlCDATA
     @XmlElement(name = "location", required = true)
-    @JsonProperty(value = "128", required = true)
+    @JsonAlias({"128", "source128"})
     private String uri128;
     @XmlCDATA
     @XmlElement(name = "locationHQ")
-    @JsonProperty(value = "320")
+    @JsonAlias({"320", "source320"})
     private String uri320;
-    @JsonProperty(value = "lossless")
+    @JsonAlias({"lossless", "sourceLossless"})
     private String uriLossless;
 }

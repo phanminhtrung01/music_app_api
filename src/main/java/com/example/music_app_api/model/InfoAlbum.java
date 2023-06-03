@@ -1,6 +1,7 @@
 package com.example.music_app_api.model;
 
 import com.example.music_app_api.model.source_song.InfoSong;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,4 +26,9 @@ public class InfoAlbum {
     private List<InfoArtist> artists;
     private List<InfoSong> songs;
     private List<InfoSong> sectionsSong;
+
+    @JsonIgnore
+    public boolean isEmpty() {
+        return id == null || id.isEmpty();
+    }
 }

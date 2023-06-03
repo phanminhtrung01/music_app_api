@@ -9,6 +9,7 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 @Entity
 @Table(name = "user")
@@ -18,14 +19,19 @@ import java.util.Objects;
 @AllArgsConstructor
 @ToString
 public class User {
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int ID_LENGTH = 7;
+
     @Id
     @Column(name = "id_user")
     @JsonAlias({"id_user", "id"})
     private String idUser;
     private String name;
     private String username;
+    @Column(nullable = false)
     private String password;
     private String gender;
+    @Column(nullable = false)
     private String email;
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -34,6 +40,26 @@ public class User {
     @Column(name = "is_vip")
     private boolean isVip;
 
+    @PrePersist
+    public void generateId() {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(ID_LENGTH);
+        boolean hasDigit = false;
+        for (int i = 0; i < ID_LENGTH; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            char c = CHARACTERS.charAt(index);
+            sb.append(c);
+            if (Character.isDigit(c)) {
+                hasDigit = true;
+            }
+        }
+        if (!hasDigit) {
+            int index = random.nextInt(ID_LENGTH);
+            int digitIndex = random.nextInt(10) + 26;
+            sb.setCharAt(index, CHARACTERS.charAt(digitIndex));
+        }
+        this.idUser = "U" + sb;
+    }
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_credential", referencedColumnName = "id_credential")

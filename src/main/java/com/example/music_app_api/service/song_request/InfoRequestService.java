@@ -6,27 +6,29 @@ import com.example.music_app_api.model.InfoArtist;
 import com.example.music_app_api.model.InfoGenre;
 import com.example.music_app_api.model.source_lyric.SourceLyric;
 import com.example.music_app_api.model.source_song.InfoSong;
-import com.example.music_app_api.model.source_song.SourceSong;
+import com.example.music_app_api.model.source_song.InfoSourceSong;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface InfoRequestService {
 
-    InfoSong getInfoSong(String idSong) throws Exception;
+    Optional<InfoSong> getInfoSong(String idSong);
 
-    SourceSong getInfoSourceSong(BasicNameValuePair nameValuePair) throws Exception;
+    Optional<InfoSourceSong> getInfoSourceSong(
+            BasicNameValuePair nameValuePair);
 
-    InfoAlbum getInfoAlbum(String idAlbum) throws Exception;
+    Optional<InfoAlbum> getInfoAlbum(String idAlbum);
 
-    InfoArtist getInfoArtist(String idArtist) throws Exception;
+    Optional<InfoArtist> getInfoArtist(String idArtist);
 
-    InfoGenre getInfoGenre(String idGenre) throws Exception;
+    Optional<InfoGenre> getInfoGenre(String idGenre);
 
-    SourceLyric getSourceLyric(String idSong) throws Exception;
+    Optional<SourceLyric> getSourceLyric(String idSong);
 
-    List<Banner> getBanner() throws Exception;
+    List<Banner> getBanner();
 
-    List<InfoArtist> getArtistHot() throws Exception;
+    List<InfoArtist> getArtistHot();
 
 }

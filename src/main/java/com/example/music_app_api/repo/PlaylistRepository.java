@@ -9,7 +9,6 @@ import java.util.List;
 
 @Repository
 public interface PlaylistRepository extends JpaRepository<Playlist, String> {
-    //TODO:ADD QUERY
     @Query(
             value = "select * from playlist where " +
                     "exists(select id_playlist, id_user from playlist_user " +

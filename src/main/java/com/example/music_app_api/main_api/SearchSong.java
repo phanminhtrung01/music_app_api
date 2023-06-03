@@ -15,4 +15,6 @@ public class SearchSong {
     public static final String infoPagePlaylist = "page/get/playlist";
     //?page=1&count=30
     public static final String getSongNewRelease = "page/get/home";
+    //q=huong%20giang&type=song&page=1&count=18
+    public static final String search = "search";
 }

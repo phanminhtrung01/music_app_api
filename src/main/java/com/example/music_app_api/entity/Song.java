@@ -1,7 +1,6 @@
 package com.example.music_app_api.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -25,17 +24,22 @@ public class Song {
 
     @Id
     @Column(name = "id_song")
-    @JsonAlias({"encodeId", "id"})
     private String idSong;
+    @Column(
+            name = "title",
+            columnDefinition =
+                    "TEXT, FULLTEXT KEY titleFulltext (title)")
     private String title;
-    @Column(name = "artists_name")
+    @Column(name = "artists_name", nullable = false)
     private String artistsNames;
+    @Column(nullable = false)
     private String thumbnail;
     @Column(name = "thumbnail_m")
     private String thumbnailM;
+    @Column(nullable = false)
     private int duration;
     @Column(name = "release_date")
-    private long releaseDate;
+    private Long releaseDate;
 
     @PrePersist
     public void generateId() {
@@ -57,6 +61,10 @@ public class Song {
         }
         this.idSong = "S" + sb;
     }
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_file", referencedColumnName = "id_file")
+    private File file;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_source", referencedColumnName = "id_source")

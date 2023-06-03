@@ -10,6 +10,7 @@ import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.database_server.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +54,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment deleteComment(Long idComment) {
+    public Comment deleteComment(String idComment) {
         try {
             Comment comment = getCommentById(idComment);
             commentRepository.delete(comment);
@@ -69,7 +70,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment getCommentById(Long idComment) {
+    public Comment getCommentById(String idComment) {
         try {
             Optional<Comment> commentOptional = commentRepository.findById(idComment);
             if (commentOptional.isPresent()) {
@@ -87,6 +88,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public List<Comment> getCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);
@@ -131,7 +133,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment addLikeComment(Long idComment, String idUser) {
+    public Comment addLikeComment(String idComment, String idUser) {
         try {
             User user = userService.getUserById(idUser);
             Comment comment = getCommentById(idComment);
@@ -150,7 +152,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment removeLikeComment(Long idComment, String idUser) {
+    public Comment removeLikeComment(String idComment, String idUser) {
         try {
             User user = userService.getUserById(idUser);
             Comment comment = getCommentById(idComment);

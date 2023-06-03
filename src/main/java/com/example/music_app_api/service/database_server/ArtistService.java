@@ -7,7 +7,11 @@ import java.util.List;
 public interface ArtistService {
     List<Artist> getAllArtist();
 
+    List<Artist> getArtistsByNameOrRealName(String name, String realName, int count);
+
     Artist getArtist(String idArtist);
+
+    List<Artist> getArtistByIdSong(String idSong);
 
     Artist save(Artist artist);
 

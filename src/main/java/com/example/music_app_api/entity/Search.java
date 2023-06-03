@@ -17,7 +17,7 @@ public class Search {
     @Column(name = "id_search")
     private Long idSearch;
 
-    @Column(name = "key_search")
+    @Column(name = "key_search", nullable = false)
     private String key;
 
     @ManyToOne(fetch = FetchType.EAGER)
