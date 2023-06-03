@@ -7,6 +7,7 @@ import com.example.music_app_api.service.database_server.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -87,6 +88,7 @@ public class CommentController {
     }
 
     @GetMapping("get/comments_by_user")
+    @Transactional
     public ResponseEntity<ResponseObject> getCommentsByUser(
             @RequestParam("idUser") String idUser) {
 
@@ -127,6 +129,7 @@ public class CommentController {
     }
 
     @GetMapping("get/comments_by_song")
+    @Transactional
     public ResponseEntity<ResponseObject> getCommentsBySong(
             @RequestParam("idSong") String idSong) {
 
@@ -167,6 +170,7 @@ public class CommentController {
     }
 
     @GetMapping("get/comments_by_song_user")
+    @Transactional
     public ResponseEntity<ResponseObject> getCommentsBySongAndUser(
             @RequestParam("idSong") String idSong,
             @RequestParam("idUser") String idUser) {
@@ -274,6 +278,7 @@ public class CommentController {
     }
 
     @GetMapping("get/like_comment_by_user")
+    @Transactional
     public ResponseEntity<ResponseObject> getLikeCommentByUser(
             @RequestParam("idUser") String idUser) {
         try {
