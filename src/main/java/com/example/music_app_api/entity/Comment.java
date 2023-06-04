@@ -1,6 +1,7 @@
 package com.example.music_app_api.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ import java.util.Random;
 @Getter
 @Setter
 @ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Comment {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -48,20 +50,17 @@ public class Comment {
     }
 
     @ManyToOne(
-            cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER)
+            cascade = CascadeType.ALL)
     @JoinColumn(name = "id_song")
     private Song song;
 
     @ManyToOne(
-            cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER)
+            cascade = CascadeType.ALL)
     @JoinColumn(name = "id_user")
     private User user;
 
     @ManyToMany(
-            cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER)
+            cascade = CascadeType.ALL)
     @JoinTable(
             name = "comment_like",
             joinColumns = @JoinColumn(name = "id_comment"),

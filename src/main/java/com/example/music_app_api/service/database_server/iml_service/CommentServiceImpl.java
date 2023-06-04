@@ -10,7 +10,6 @@ import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.database_server.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -88,7 +87,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional
     public List<Comment> getCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);

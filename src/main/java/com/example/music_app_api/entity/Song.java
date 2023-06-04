@@ -71,7 +71,7 @@ public class Song {
     private SourceSong sourceSong;
 
     @ManyToMany(
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
     @JoinTable(
             name = "sing_song",
@@ -83,9 +83,7 @@ public class Song {
     @JsonIgnore
     private List<Artist> artistsSing = new ArrayList<>();
 
-    @ManyToMany(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "genre_song",
             joinColumns = @JoinColumn(name = "id_song"),

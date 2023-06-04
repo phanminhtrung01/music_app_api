@@ -64,9 +64,7 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_credential", referencedColumnName = "id_credential")
     private UserCredential userCredential;
-    @ManyToMany(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "favorite_song",
             joinColumns = @JoinColumn(name = "id_user"),
@@ -77,9 +75,7 @@ public class User {
     @JsonIgnore
     private List<Song> favoriteSongs = new ArrayList<>();
 
-    @ManyToMany(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "favorite_artist",
             joinColumns = @JoinColumn(name = "id_user"),
@@ -90,9 +86,7 @@ public class User {
     @JsonIgnore
     private List<Artist> favoriteArtists = new ArrayList<>();
 
-    @ManyToMany(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "listen_song",
             joinColumns = @JoinColumn(name = "id_user"),

@@ -88,7 +88,6 @@ public class CommentController {
     }
 
     @GetMapping("get/comments_by_user")
-    @Transactional
     public ResponseEntity<ResponseObject> getCommentsByUser(
             @RequestParam("idUser") String idUser) {
 

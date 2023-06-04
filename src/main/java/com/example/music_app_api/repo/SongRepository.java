@@ -24,7 +24,7 @@ public interface SongRepository extends JpaRepository<Song, String> {
             value = """
                     select * from song where
                     exists(select id_song, id_genre from genre_song
-                    where Song.id_song = genre_song.id_song && id_genre = ?1)
+                    where song.id_song = genre_song.id_song && id_genre = ?1)
                     """,
             nativeQuery = true)
     List<Song> getSongsByGenre(String idGenre);
