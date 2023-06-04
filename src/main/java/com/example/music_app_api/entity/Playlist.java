@@ -49,9 +49,7 @@ public class Playlist {
         this.idPlaylist = "PL" + sb;
     }
 
-    @ManyToMany(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "playlist_song",
             joinColumns = @JoinColumn(name = "id_playlist"),
@@ -62,9 +60,7 @@ public class Playlist {
     @JsonIgnore
     private List<Song> songs = new ArrayList<>();
 
-    @ManyToMany(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "playlist_user",
             joinColumns = @JoinColumn(name = "id_playlist"),
