@@ -18,7 +18,7 @@ public class UserCredential {
     @Column(unique = true)
     private Integer code;
     @Column(name = "time_verify")
-    private String timeVerify;
+    private Long timeVerify;
     @Column(name = "check_login")
     private boolean checkLogin;
 }

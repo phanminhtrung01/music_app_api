@@ -22,37 +22,42 @@ public interface SongRepository extends JpaRepository<Song, String> {
 
     @Query(
             value = """
-                    select * from song where
-                    exists(select id_song, id_genre from genre_song
-                    where song.id_song = genre_song.id_song && id_genre = ?1)
-                    """,
-            nativeQuery = true)
+                    SELECT s FROM Song s
+                    JOIN s.genres g
+                    WHERE g.idGenre = ?1
+                    """)
     List<Song> getSongsByGenre(String idGenre);
 
     @Query(
             value = """
-                    select * from song where exists(select id_playlist from playlist
-                    where exists(select id_song from playlist_song
-                    where playlist_song.id_song = song.id_song && id_playlist = ?1))""",
-            nativeQuery = true)
+                    SELECT s FROM Song s
+                    JOIN s.playlistsOfSong p
+                    WHERE p.idPlaylist = ?1
+                    """)
     List<Song> getSongsByPlaylist(String idPlaylist);
 
     @Query(
             value = """
-                    select * from song where
-                    exists(select id_song from favorite_song
-                    where id_user = ?1 && song.id_song = favorite_song.id_song)
-                    """,
-            nativeQuery = true)
+                    SELECT s FROM Song s
+                    JOIN s.playlistsOnOfSong po
+                    WHERE po.encodeId = ?1
+                    """)
+    List<Song> getSongsByPlaylistOn(String idPlaylist);
+
+    @Query(
+            value = """
+                    SELECT s FROM Song s
+                    JOIN s.usersFavorite u
+                    WHERE u.idUser = ?1
+                    """)
     List<Song> getFavoriteSongsByUser(String idUser);
 
     @Query(
             value = """
-                    select * from song where
-                    exists(select id_song from listen_song
-                    where id_user = ?1 && song.id_song = listen_song.id_song)
-                    """,
-            nativeQuery = true)
+                    SELECT s FROM Song s
+                    JOIN s.usersListen u
+                    WHERE u.idUser = ?1
+                    """)
     List<Song> getListenSongsByUser(String idUser);
 
     @Query(

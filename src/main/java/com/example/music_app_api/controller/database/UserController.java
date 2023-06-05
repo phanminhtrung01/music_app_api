@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @CrossOrigin(value = "*", maxAge = 3600)
@@ -164,11 +166,35 @@ public class UserController {
 
     @PostMapping("verify")
     public ResponseEntity<ResponseObject> verifyUser(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password) {
+            @RequestBody User userPar) {
 
         try {
-            Map<String, Object> mapVerify = userService.verifyUser(email, password);
+            if (userPar.getEmail() == null
+                    || userPar.getPassword() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ResponseObject(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Email Or Password NULL. " +
+                                        "User authentication failed!",
+                                null));
+            }
+
+            String regex = "^(.+)@(\\S+)$";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(userPar.getEmail());
+            boolean isValid = matcher.matches();
+
+            if (!isValid) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ResponseObject(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Email isValid. " +
+                                        "User authentication failed!",
+                                null));
+            }
+
+            Map<String, Object> mapVerify = userService
+                    .verifyUser(userPar.getEmail(), userPar.getPassword());
             boolean check = (boolean) mapVerify.get("check");
             User user = (User) mapVerify.get("user");
 
@@ -184,6 +210,127 @@ public class UserController {
                                     HttpStatus.OK.value(),
                                     "User authentication failed!",
                                     user));
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
+    @PostMapping("logout")
+    public ResponseEntity<ResponseObject> logout(
+            @RequestParam("email") String email) {
+
+        try {
+            String regex = "^(.+)@(\\S+)$";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(email);
+            boolean isValid = matcher.matches();
+
+            if (!isValid) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ResponseObject(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Email isValid. " +
+                                        "User authentication failed!",
+                                null));
+            }
+
+            User user = userService.logout(email);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Logout successful!",
+                            user));
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
+    @PostMapping("forget_password")
+    public ResponseEntity<ResponseObject> forgetPasswordUser(
+            @RequestParam("email") String email) {
+
+        try {
+            User userVerify = userService.forgetPasswordUser(email);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "User authentication successful!",
+                            userVerify));
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
+    @PostMapping("verify/forget_password")
+    public ResponseEntity<ResponseObject> verifyForgetPasswordUser(
+            @RequestParam("email") String email,
+            @RequestParam("code") Integer code) {
+
+        try {
+            if (code == null) {
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ResponseObject(
+                                HttpStatus.OK.value(),
+                                "Authentication failed!",
+                                null));
+            }
+
+            Map<String, Object> mapVerify = userService
+                    .verifyForgetPassword(email, code);
+            User userVerify = (User) mapVerify.get("user");
+            boolean check = (boolean) mapVerify.get("check");
+
+            return check ?
+                    ResponseEntity.status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "Authentication successful!",
+                                    userVerify)) :
+                    ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "Authentication failed!",
+                                    null));
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)

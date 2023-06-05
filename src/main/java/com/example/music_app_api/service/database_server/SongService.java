@@ -27,6 +27,8 @@ public interface SongService {
 
     List<Song> getSongsByPlayList(String idPlaylist);
 
+    List<Song> getSongsByPlayListOn(String idPlaylistOn);
+
     List<Song> getSongsByIdUser(String idUser, TypeSong typeSong);
 
     Song addSongToChart(String idSong, String idChart);

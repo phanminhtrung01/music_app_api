@@ -20,6 +20,7 @@ public class SongServiceImpl implements SongService {
     private final UserRepository userRepository;
     private final GenreService genreService;
     private final PlaylistService playlistService;
+    private final PlaylistOnService playlistOnService;
     private final ChartsService chartsService;
     private final SourceSongService sourceSongService;
 
@@ -30,6 +31,7 @@ public class SongServiceImpl implements SongService {
             UserRepository userRepository,
             GenreService genreService,
             PlaylistService playlistService,
+            PlaylistOnService playlistOnService,
             ChartsService chartsService,
             SourceSongService sourceSongService) {
         this.songRepository = songRepository;
@@ -37,6 +39,7 @@ public class SongServiceImpl implements SongService {
         this.userRepository = userRepository;
         this.genreService = genreService;
         this.playlistService = playlistService;
+        this.playlistOnService = playlistOnService;
         this.chartsService = chartsService;
         this.sourceSongService = sourceSongService;
     }
@@ -154,6 +157,13 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public List<Song> getSongsByPlayListOn(String idPlaylistOn) {
+        playlistOnService.getPlaylistOnById(idPlaylistOn);
+
+        return songRepository.getSongsByPlaylistOn(idPlaylistOn);
+    }
+
+    @Override
     public List<Song> getSongsByGenre(String idGenre) {
         genreService.getGenreById(idGenre);
         return songRepository.getSongsByGenre(idGenre);
@@ -206,6 +216,7 @@ public class SongServiceImpl implements SongService {
     @Override
     public Song removeSongFromChart(
             String idSong, String idChart) {
+
         try {
             Song song = getById(idSong);
             chartsService.getChartById(idChart);

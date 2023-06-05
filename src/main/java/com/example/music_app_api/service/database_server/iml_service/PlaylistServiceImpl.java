@@ -67,18 +67,14 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Override
     @Transactional
     public Playlist addUserToPlaylist(
-            String idUser, String idPlaylist) {
+            String idUser, Playlist playlist) {
         try {
             Optional<User> user = userRepository.findById(idUser);
             if (user.isPresent()) {
-                Playlist playlist = getById(idPlaylist);
-                user.get().getPlaylistsOfUser().add(playlist);
-                playlist.getUsers().add(user.get());
-                userRepository.save(user.get());
                 playlistRepository.save(playlist);
                 return playlist;
             } else {
-                throw new RuntimeException("Not fount user with ID: " + idUser);
+                throw new NotFoundException("Not fount user with ID: " + idUser);
             }
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
@@ -97,16 +93,7 @@ public class PlaylistServiceImpl implements PlaylistService {
             Optional<User> user = userRepository.findById(idUser);
             if (user.isPresent()) {
                 Playlist playlist = getById(idPlaylist);
-                if (playlist.getUsers().isEmpty()) {
-                    throw new NotFoundException("List user of playlist empty");
-                }
-
-                if (!playlist.getUsers().contains(user.get())) {
-                    throw new NotFoundException("Not found user from playlist");
-                }
-
-                playlist.getUsers().remove(user.get());
-                playlistRepository.save(playlist);
+                playlistRepository.delete(playlist);
 
                 return playlist;
             } else {

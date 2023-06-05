@@ -99,6 +99,11 @@ public class Song {
     @JsonIgnore
     private List<Playlist> playlistsOfSong = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "songs")
+    @ToString.Exclude
+    @JsonIgnore
+    private List<PlaylistOnline> playlistsOnOfSong = new ArrayList<>();
+
     @ManyToMany(mappedBy = "favoriteSongs")
     @ToString.Exclude
     @JsonIgnore

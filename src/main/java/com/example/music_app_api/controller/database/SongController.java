@@ -4,7 +4,10 @@ import com.example.music_app_api.component.enums.TypeSong;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.ResponseObject;
+import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.service.database_server.SongService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import java.util.List;
 @RequestMapping("/pmdv/db/song/")
 public class SongController {
     private final SongService songService;
+    final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public SongController(SongService songService) {
@@ -28,14 +32,16 @@ public class SongController {
     public ResponseEntity<ResponseObject> addSong(
             @RequestBody Song song) {
         try {
-            Song SongPar = songService.save(song);
+            Song songPar = songService.save(song);
+            InfoSong infoSong = mapper
+                    .convertValue(songPar, InfoSong.class);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(new ResponseObject(
                             HttpStatus.CREATED.value(),
                             "Query add song successful!",
-                            SongPar));
+                            infoSong));
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -58,13 +64,15 @@ public class SongController {
             @RequestParam("idSong") String idSong) {
         try {
             Song song = songService.delete(idSong);
+            InfoSong infoSong = mapper
+                    .convertValue(song, InfoSong.class);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Query remove song successful!",
-                            song));
+                            infoSong));
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -88,13 +96,15 @@ public class SongController {
             @RequestParam("idChart") String idChart) {
         try {
             Song song = songService.addSongToChart(idSong, idChart);
+            InfoSong infoSong = mapper
+                    .convertValue(song, InfoSong.class);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Query add song to chart successful!",
-                            song));
+                            infoSong));
 
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -119,13 +129,15 @@ public class SongController {
             @RequestParam("idChart") String idChart) {
         try {
             Song song = songService.removeSongFromChart(idSong, idChart);
+            InfoSong infoSong = mapper
+                    .convertValue(song, InfoSong.class);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Query remove song to chart successful!",
-                            song));
+                            infoSong));
 
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -149,6 +161,9 @@ public class SongController {
             @RequestParam("idPlaylist") String idPlaylist) {
         try {
             List<Song> songs = songService.getSongsByPlayList(idPlaylist);
+            List<InfoSong> infoSongs = mapper
+                    .convertValue(songs, new TypeReference<>() {
+                    });
 
             return songs.size() > 0 ?
                     ResponseEntity
@@ -156,14 +171,14 @@ public class SongController {
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "Query get songs by playlist successful!",
-                                    songs)
+                                    infoSongs)
                             ) :
                     ResponseEntity
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "List empty",
-                                    songs)
+                                    infoSongs)
                             );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -187,6 +202,9 @@ public class SongController {
             @RequestParam("idGenre") String idGenre) {
         try {
             List<Song> songs = songService.getSongsByGenre(idGenre);
+            List<InfoSong> infoSongs = mapper
+                    .convertValue(songs, new TypeReference<>() {
+                    });
 
             return songs.size() > 0 ?
                     ResponseEntity
@@ -194,14 +212,14 @@ public class SongController {
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "Query get songs by genre successful!",
-                                    songs)
+                                    infoSongs)
                             ) :
                     ResponseEntity
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "List empty",
-                                    songs)
+                                    infoSongs)
                             );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -225,6 +243,9 @@ public class SongController {
             @RequestParam("idUser") String idUser) {
         try {
             List<Song> songs = songService.getSongsByIdUser(idUser, TypeSong.FAVORITE);
+            List<InfoSong> infoSongs = mapper
+                    .convertValue(songs, new TypeReference<>() {
+                    });
 
             return songs.size() > 0 ?
                     ResponseEntity
@@ -232,14 +253,14 @@ public class SongController {
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "Query get songs by favorite song successful!",
-                                    songs)
+                                    infoSongs)
                             ) :
                     ResponseEntity
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "List empty!",
-                                    songs)
+                                    infoSongs)
                             );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -265,13 +286,14 @@ public class SongController {
         try {
             Song song = songService
                     .addSongToSongs(idSong, idUser, TypeSong.FAVORITE);
+            InfoSong infoSong = mapper.convertValue(song, InfoSong.class);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Query add song to favorite song successful!",
-                            song)
+                            infoSong)
                     );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -297,13 +319,15 @@ public class SongController {
         try {
             Song song = songService
                     .removeSongFromSongs(idSong, idUser, TypeSong.FAVORITE);
+            InfoSong infoSong = mapper
+                    .convertValue(song, InfoSong.class);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Query remove song from favorite song successful!",
-                            song)
+                            infoSong)
                     );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -327,6 +351,9 @@ public class SongController {
             @RequestParam("idUser") String idUser) {
         try {
             List<Song> songs = songService.getSongsByIdUser(idUser, TypeSong.LISTEN);
+            List<InfoSong> infoSongs = mapper
+                    .convertValue(songs, new TypeReference<>() {
+                    });
 
             return songs.size() > 0 ?
                     ResponseEntity
@@ -334,13 +361,13 @@ public class SongController {
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "Query get songs by genre successful!",
-                                    songs)) :
+                                    infoSongs)) :
                     ResponseEntity
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "List empty",
-                                    songs));
+                                    infoSongs));
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -365,13 +392,15 @@ public class SongController {
         try {
             Song song = songService
                     .addSongToSongs(idSong, idUser, TypeSong.LISTEN);
+            InfoSong infoSong = mapper
+                    .convertValue(song, InfoSong.class);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Query add song to favorite song successful!",
-                            song)
+                            infoSong)
                     );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -397,13 +426,15 @@ public class SongController {
         try {
             Song song = songService
                     .removeSongFromSongs(idSong, idUser, TypeSong.LISTEN);
+            InfoSong infoSong = mapper
+                    .convertValue(song, InfoSong.class);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Query remove song from favorite song successful!",
-                            song)
+                            infoSong)
                     );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity

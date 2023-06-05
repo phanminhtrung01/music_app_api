@@ -1,6 +1,6 @@
 package com.example.music_app_api.service.song_request;
 
-import com.example.music_app_api.model.Banner;
+import com.example.music_app_api.entity.PlaylistOnline;
 import com.example.music_app_api.model.InfoAlbum;
 import com.example.music_app_api.model.InfoArtist;
 import com.example.music_app_api.model.InfoGenre;
@@ -27,7 +27,7 @@ public interface InfoRequestService {
 
     Optional<SourceLyric> getSourceLyric(String idSong);
 
-    List<Banner> getBanner();
+    List<PlaylistOnline> getBanner(int count);
 
     List<InfoArtist> getArtistHot();
 

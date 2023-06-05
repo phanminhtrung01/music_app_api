@@ -60,16 +60,9 @@ public class Playlist {
     @JsonIgnore
     private List<Song> songs = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "playlist_user",
-            joinColumns = @JoinColumn(name = "id_playlist"),
-            inverseJoinColumns = @JoinColumn(name = "id_user"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"id_playlist", "id_user"})
-    )
-    @ToString.Exclude
-    @JsonIgnore
-    private List<User> users = new ArrayList<>();
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_user")
+    private User user;
 
     @Override
     public boolean equals(Object o) {

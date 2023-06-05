@@ -1,6 +1,10 @@
 package com.example.music_app_api.controller;
 
-import com.example.music_app_api.model.*;
+import com.example.music_app_api.entity.PlaylistOnline;
+import com.example.music_app_api.model.InfoAlbum;
+import com.example.music_app_api.model.InfoArtist;
+import com.example.music_app_api.model.InfoGenre;
+import com.example.music_app_api.model.ResponseObject;
 import com.example.music_app_api.model.source_lyric.SourceLyric;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.InfoSourceSong;
@@ -213,9 +217,13 @@ public class InfoController {
     }
 
     @GetMapping("/banner")
-    public ResponseEntity<ResponseObject> getBanner() {
+    public ResponseEntity<ResponseObject> getBanner(
+            @RequestParam(name = "count") Integer count) {
         try {
-            List<Banner> banners = infoRequestService.getBanner();
+            if (count == null) {
+                count = 10;
+            }
+            List<PlaylistOnline> banners = infoRequestService.getBanner(count);
 
             return ResponseEntity
                     .status(HttpStatus.OK)

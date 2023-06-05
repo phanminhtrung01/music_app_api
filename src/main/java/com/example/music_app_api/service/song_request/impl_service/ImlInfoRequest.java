@@ -3,24 +3,17 @@ package com.example.music_app_api.service.song_request.impl_service;
 import com.example.music_app_api.component.AppManager;
 import com.example.music_app_api.component.enums.SearchField;
 import com.example.music_app_api.component.enums.TypeParameter;
-import com.example.music_app_api.entity.Artist;
-import com.example.music_app_api.entity.Genre;
-import com.example.music_app_api.entity.Lyric;
-import com.example.music_app_api.entity.Song;
+import com.example.music_app_api.entity.*;
 import com.example.music_app_api.main_api.GetInfo;
 import com.example.music_app_api.main_api.HostApi;
 import com.example.music_app_api.main_api.SearchSong;
-import com.example.music_app_api.model.Banner;
 import com.example.music_app_api.model.InfoAlbum;
 import com.example.music_app_api.model.InfoArtist;
 import com.example.music_app_api.model.InfoGenre;
 import com.example.music_app_api.model.source_lyric.SourceLyric;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.InfoSourceSong;
-import com.example.music_app_api.service.database_server.ArtistService;
-import com.example.music_app_api.service.database_server.GenreService;
-import com.example.music_app_api.service.database_server.LyricService;
-import com.example.music_app_api.service.database_server.SongService;
+import com.example.music_app_api.service.database_server.*;
 import com.example.music_app_api.service.song_request.InfoRequestService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +43,7 @@ public class ImlInfoRequest implements InfoRequestService {
     private final ArtistService artistService;
     private final GenreService genreService;
     private final LyricService lyricService;
+    private final PlaylistOnService playlistOnService;
 
     @Autowired
     ImlInfoRequest(
@@ -57,12 +51,14 @@ public class ImlInfoRequest implements InfoRequestService {
             SongService songService,
             ArtistService artistService,
             GenreService genreService,
-            LyricService lyricService) {
+            LyricService lyricService,
+            PlaylistOnService playlistOnService) {
         this.appManager = appManager;
         this.songService = songService;
         this.artistService = artistService;
         this.genreService = genreService;
         this.lyricService = lyricService;
+        this.playlistOnService = playlistOnService;
     }
 
     @Override
@@ -380,9 +376,9 @@ public class ImlInfoRequest implements InfoRequestService {
     }
 
     @Override
-    public List<Banner> getBanner() {
-        List<Banner> banners = new ArrayList<>();
-        return banners;
+    public List<PlaylistOnline> getBanner(int count) {
+
+        return playlistOnService.getPlaylistOns(count);
     }
 
     @Override

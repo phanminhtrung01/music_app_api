@@ -10,6 +10,8 @@ import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.StreamSourceSong;
 import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.song_request.SongRequestService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,7 @@ public class SongController {
 
     private final SongRequestService songRequestSer;
     private final SongService songService;
+    final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public SongController(
@@ -267,7 +270,7 @@ public class SongController {
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
-                            "Success",
+                            "Query get songs new release successful!",
                             songs
                     ));
         } catch (Exception e) {
@@ -293,7 +296,7 @@ public class SongController {
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
-                            "Success",
+                            "Query get albums of genre successful!",
                             albums
                     ));
         } catch (Exception e) {
@@ -323,7 +326,7 @@ public class SongController {
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
-                            "Success",
+                            "Query get songs of artist successful!",
                             songs
                     ));
         } catch (Exception e) {
@@ -349,7 +352,7 @@ public class SongController {
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
-                            "Success",
+                            "Query get songs of album successful!",
                             songs
                     ));
         } catch (Exception e) {
@@ -373,21 +376,64 @@ public class SongController {
             }
 
             List<Song> songs = songService.getSongsDB(n);
+            List<InfoSong> infoSongs = mapper.convertValue(songs, new TypeReference<>() {
+            });
 
             return songs.size() > 0 ?
                     ResponseEntity
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
-                                    "Query get songs successful!",
-                                    songs)
+                                    "Query get songs database successful!",
+                                    infoSongs)
                             ) :
                     ResponseEntity
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "List empty",
-                                    songs)
+                                    infoSongs)
+                            );
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
+    @GetMapping("get/songs_by_playlist_on")
+    public ResponseEntity<ResponseObject> getSongsByPlaylistOnline(
+            @RequestParam(value = "idPlaylist") String id) {
+        try {
+
+            List<Song> songs = songService.getSongsByPlayListOn(id);
+            List<InfoSong> infoSongs = mapper.convertValue(songs, new TypeReference<>() {
+            });
+
+            return songs.size() > 0 ?
+                    ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "Query get songs by playlist online successful!",
+                                    infoSongs)
+                            ) :
+                    ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "List empty",
+                                    infoSongs)
                             );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity

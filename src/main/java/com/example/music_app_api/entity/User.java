@@ -109,12 +109,11 @@ public class User {
     @JsonIgnore
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToMany(
-            mappedBy = "users",
-            cascade = CascadeType.ALL)
+    @OneToMany()
+    @JoinColumn(name = "id_playlist")
     @ToString.Exclude
     @JsonIgnore
-    private List<Playlist> playlistsOfUser = new ArrayList<>();
+    private List<Playlist> playlists = new ArrayList<>();
 
     @ManyToMany(
             mappedBy = "usersLike",

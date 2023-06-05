@@ -24,58 +24,6 @@ public class PlaylistController {
         this.playlistService = playlistService;
     }
 
-    @PostMapping("add")
-    public ResponseEntity<ResponseObject> addPlaylist(
-            @RequestBody Playlist playlist) {
-        try {
-            Playlist playlistPar = playlistService.save(playlist);
-
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(new ResponseObject(
-                            HttpStatus.CREATED.value(),
-                            "Query add playlist successful!",
-                            playlistPar));
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseObject(
-                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
-                            null));
-        }
-    }
-
-    @DeleteMapping("delete")
-    public ResponseEntity<ResponseObject> deletePlaylist(
-            @RequestParam("idPlaylist") String idPlaylist) {
-        try {
-            Playlist playlist = playlistService.delete(idPlaylist);
-
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ResponseObject(
-                            HttpStatus.OK.value(),
-                            "Query remove playlist successful!",
-                            playlist));
-
-        } catch (NotFoundException notFoundException) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseObject(
-                            HttpStatus.NOT_FOUND.value(),
-                            notFoundException.getMessage(),
-                            null));
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseObject(
-                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
-                            null));
-        }
-    }
-
     @GetMapping("get/playlist_by_user")
     public ResponseEntity<ResponseObject> getPlayListByUser(
             @RequestParam("idUser") String idUser) {
@@ -117,17 +65,17 @@ public class PlaylistController {
     @PostMapping("add/user_to_playlist")
     public ResponseEntity<ResponseObject> addUserToPlaylist(
             @RequestParam("idUser") String idUser,
-            @RequestParam("idPlaylist") String idPlaylist) {
+            @RequestBody Playlist playlist) {
         try {
-            Playlist playlist = playlistService
-                    .addUserToPlaylist(idUser, idPlaylist);
+            Playlist playlistPar = playlistService
+                    .addUserToPlaylist(idUser, playlist);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Query add user to playlist successful!",
-                            playlist)
+                            playlistPar)
                     );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity

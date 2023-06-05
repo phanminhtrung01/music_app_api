@@ -10,7 +10,7 @@ public interface PlaylistService {
 
     Playlist save(Playlist playlist);
 
-    Playlist addUserToPlaylist(String idUser, String idPlaylist);
+    Playlist addUserToPlaylist(String idUser, Playlist playlist);
 
     Playlist removeUserFromPlaylist(String idUser, String idPlaylist);
 
