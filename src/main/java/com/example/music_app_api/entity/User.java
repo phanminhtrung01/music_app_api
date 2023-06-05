@@ -109,8 +109,8 @@ public class User {
     @JsonIgnore
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany()
-    @JoinColumn(name = "id_playlist")
+    @OneToMany
+    @JoinColumn(name = "id_user")
     @ToString.Exclude
     @JsonIgnore
     private List<Playlist> playlists = new ArrayList<>();
