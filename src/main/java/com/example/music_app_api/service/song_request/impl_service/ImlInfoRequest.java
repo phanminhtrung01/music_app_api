@@ -382,38 +382,7 @@ public class ImlInfoRequest implements InfoRequestService {
     @Override
     public List<Banner> getBanner() {
         List<Banner> banners = new ArrayList<>();
-
-        try {
-            JSONObject jsonData = appManager
-                    .getDataRequest(
-                            HostApi.uriHostApiV2,
-                            SearchSong.getSongNewRelease,
-                            Map.of(TypeParameter.page.name(), String.valueOf(1),
-                                    TypeParameter.count.name(), String.valueOf(30)),
-                            Map.of(),
-                            false, true);
-
-            final ObjectMapper mapper = new ObjectMapper();
-            final JSONArray jsonItems = jsonData.getJSONArray("items");
-            for (Object jsonItem : jsonItems) {
-                JSONObject jsonContain = (JSONObject) jsonItem;
-                String type = jsonContain.getString("sectionType");
-                if (type.equals("banner")) {
-                    JSONArray jsonAllBanner = jsonContain.getJSONArray("items");
-                    banners = mapper
-                            .readValue(
-                                    jsonAllBanner.toString(),
-                                    new TypeReference<>() {
-                                    });
-                    break;
-                }
-            }
-        } catch (Exception ignore) {
-        }
-
-        return banners.stream()
-                .filter(banner -> banner.getType() == 1)
-                .toList();
+        return banners;
     }
 
     @Override

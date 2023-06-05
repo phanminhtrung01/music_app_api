@@ -1,11 +1,14 @@
 package com.example.music_app_api.controller;
 
+import com.example.music_app_api.entity.Song;
+import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.InfoAlbum;
 import com.example.music_app_api.model.ResponseObject;
 import com.example.music_app_api.model.hot_search.HotSearch;
 import com.example.music_app_api.model.multi_search.MultiSearch;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.StreamSourceSong;
+import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.song_request.SongRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
@@ -28,11 +31,14 @@ import java.util.concurrent.Executors;
 public class SongController {
 
     private final SongRequestService songRequestSer;
+    private final SongService songService;
 
     @Autowired
     public SongController(
-            SongRequestService songRequestSer) {
+            SongRequestService songRequestSer,
+            SongService songService) {
         this.songRequestSer = songRequestSer;
+        this.songService = songService;
     }
 
     @GetMapping("search/hot/song")
@@ -354,6 +360,49 @@ public class SongController {
                             "Failure",
                             ""
                     ));
+        }
+    }
+
+    @GetMapping("get/songs/db")
+    public ResponseEntity<ResponseObject> getSongS(
+            @RequestParam(value = "count", required = false) Integer n) {
+        try {
+
+            if (n == null) {
+                n = 10;
+            }
+
+            List<Song> songs = songService.getSongsDB(n);
+
+            return songs.size() > 0 ?
+                    ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "Query get songs successful!",
+                                    songs)
+                            ) :
+                    ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "List empty",
+                                    songs)
+                            );
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
         }
     }
 

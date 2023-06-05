@@ -15,7 +15,7 @@ public interface SongService {
 
     SourceSong getSourceSong(String idSong);
 
-    List<Song> getSongs(int count);
+    List<Song> getSongsDB(int count);
 
     Song save(Song Song);
 

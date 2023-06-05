@@ -42,7 +42,6 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    @Transactional
     public List<Song> getAllSongs() {
         try {
             return songRepository.findAll();
@@ -56,8 +55,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    @Transactional
-    public List<Song> getSongs(int count) {
+    public List<Song> getSongsDB(int count) {
         List<Song> songs = getAllSongs();
         int min = Math.min(count, songs.size());
         return songs.subList(0, min);
@@ -223,6 +221,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional
     public Song addSongToSongs(
             String idSong, String idUser, TypeSong typeSong) {
         try {
@@ -263,6 +262,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional
     public Song removeSongFromSongs(
             String idSong, String idUser, TypeSong typeSong) {
         try {
