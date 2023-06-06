@@ -7,8 +7,6 @@ import com.example.music_app_api.service.database_server.SourceSongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class SourceSongServiceIml implements SourceSongService {
     private final SourceSongRepository sourceSongRepository;
@@ -22,11 +20,6 @@ public class SourceSongServiceIml implements SourceSongService {
     @Override
     public SourceSong getSourceSongByIdSong(String idSong) {
         try {
-            Optional<SourceSong> songOptional = sourceSongRepository.findById(idSong);
-            if (songOptional.isEmpty()) {
-                throw new NotFoundException("Not fount song with ID: " + idSong);
-            }
-
             return sourceSongRepository
                     .findSourceSongBySong(idSong)
                     .orElse(new SourceSong());

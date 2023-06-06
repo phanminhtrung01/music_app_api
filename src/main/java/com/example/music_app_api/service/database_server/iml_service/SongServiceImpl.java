@@ -81,11 +81,7 @@ public class SongServiceImpl implements SongService {
     @Override
     public SourceSong getSourceSong(String idSong) {
         try {
-            Optional<Song> songOptional = songRepository.findById(idSong);
-            if (songOptional.isEmpty()) {
-                throw new NotFoundException("Not fount song with ID: " + idSong);
-            }
-
+            getById(idSong);
             return sourceSongService.getSourceSongByIdSong(idSong);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
