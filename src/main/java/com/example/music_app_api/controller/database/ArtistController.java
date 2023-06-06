@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin("http://localhost:8080")
+@CrossOrigin(value = "*", maxAge = 3600)
 @RequestMapping("/pmdv/db/artist/")
 public class ArtistController {
     private final ArtistService artistService;

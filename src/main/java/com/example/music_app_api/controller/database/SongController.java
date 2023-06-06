@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController("DatabaseSongController")
-@CrossOrigin(value = "*", maxAge = 3600)
 @RequestMapping("/pmdv/db/song/")
+@CrossOrigin(value = "*", maxAge = 3600)
 public class SongController {
     private final SongService songService;
     final ObjectMapper mapper = new ObjectMapper();

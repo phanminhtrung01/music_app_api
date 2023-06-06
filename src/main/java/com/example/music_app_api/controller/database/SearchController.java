@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin("http://localhost:8080")
 @RequestMapping("/pmdv/db/search/")
+@CrossOrigin(value = "*", maxAge = 3600)
 public class SearchController {
 
     private final SearchService searchService;

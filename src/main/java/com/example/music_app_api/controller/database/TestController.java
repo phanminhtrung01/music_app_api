@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(value = "*", maxAge = 3600)
 @RequestMapping("/pmdv/db/test")
+@CrossOrigin(value = "*", maxAge = 3600)
 public class TestController {
     @GetMapping
     public ResponseEntity<String> hello() {

@@ -14,8 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RestController
-@CrossOrigin(value = "*", maxAge = 3600)
 @RequestMapping("/pmdv/db/user/")
+@CrossOrigin(value = "*", maxAge = 3600)
 public class UserController {
 
     private final UserService userService;

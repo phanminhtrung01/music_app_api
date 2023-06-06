@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(value = "*", maxAge = 3600)
 @RequestMapping("/pmdv/db/playlist/")
+@CrossOrigin(value = "*", maxAge = 3600)
 public class PlaylistController {
 
     private final PlaylistService playlistService;
