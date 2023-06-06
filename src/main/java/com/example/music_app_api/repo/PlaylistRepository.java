@@ -10,9 +10,10 @@ import java.util.List;
 @Repository
 public interface PlaylistRepository extends JpaRepository<Playlist, String> {
     @Query(
-            value = "select * from playlist where " +
-                    "exists(select id_playlist, id_user from playlist_user " +
-                    "where id_user = ?1 && id_playlist = playlist.id_playlist)",
-            nativeQuery = true)
+            value = """
+                    SELECT f FROM Playlist f
+                    JOIN f.user u
+                    WHERE u.idUser = ?1
+                    """)
     List<Playlist> findByUser(String idUser);
 }
