@@ -19,15 +19,14 @@ public class PlaylistOnServiceIml implements PlaylistOnService {
     }
 
     @Override
-    public PlaylistOnline getPlaylistOnById(String idPlaylistOn) {
+    public void getPlaylistOnById(String idPlaylistOn) {
         try {
             Optional<PlaylistOnline> playlistOptional = playlistOnRepository
                     .findById(idPlaylistOn);
             if (playlistOptional.isEmpty()) {
                 throw new NotFoundException("Not fount playlist online with ID: " + idPlaylistOn);
             }
-
-            return playlistOptional.get();
+            
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -39,6 +38,8 @@ public class PlaylistOnServiceIml implements PlaylistOnService {
 
     @Override
     public List<PlaylistOnline> getPlaylistOns(int count) {
-        return playlistOnRepository.findAll().subList(0, count);
+        List<PlaylistOnline> playlistsOnline = playlistOnRepository.findAll();
+        int min = Math.min(count, playlistsOnline.size());
+        return playlistsOnline.subList(0, min);
     }
 }

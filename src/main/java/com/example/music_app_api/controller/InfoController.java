@@ -218,7 +218,7 @@ public class InfoController {
 
     @GetMapping("/banner")
     public ResponseEntity<ResponseObject> getBanner(
-            @RequestParam(name = "count") Integer count) {
+            @RequestParam(name = "count", required = false) Integer count) {
         try {
             if (count == null) {
                 count = 10;

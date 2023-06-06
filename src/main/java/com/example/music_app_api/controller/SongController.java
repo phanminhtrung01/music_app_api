@@ -213,7 +213,7 @@ public class SongController {
 
     @GetMapping("get/charts/song")
     public ResponseEntity<ResponseObject> getChartsSong(
-            @RequestParam(name = "count") int n) {
+            @RequestParam(name = "count", required = false) int n) {
 
         try {
             List<InfoSong> songs = songRequestSer.getChartsSong(n);
