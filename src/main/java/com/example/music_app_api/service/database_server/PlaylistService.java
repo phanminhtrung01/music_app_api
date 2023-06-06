@@ -1,12 +1,13 @@
 package com.example.music_app_api.service.database_server;
 
 
+import com.example.music_app_api.dto.PlaylistDto;
 import com.example.music_app_api.entity.Playlist;
 
 import java.util.List;
 
 public interface PlaylistService {
-    List<Playlist> getPlayListByUser(String idUser);
+    List<PlaylistDto> getPlayListByUser(String idUser);
 
     Playlist save(Playlist playlist);
 

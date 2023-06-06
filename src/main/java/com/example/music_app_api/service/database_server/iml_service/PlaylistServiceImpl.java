@@ -1,5 +1,6 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
+import com.example.music_app_api.dto.PlaylistDto;
 import com.example.music_app_api.entity.Playlist;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
@@ -8,6 +9,8 @@ import com.example.music_app_api.repo.PlaylistRepository;
 import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.PlaylistService;
 import com.example.music_app_api.service.database_server.SongService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -71,6 +74,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         try {
             Optional<User> user = userRepository.findById(idUser);
             if (user.isPresent()) {
+                playlist.setUser(user.get());
                 playlistRepository.save(playlist);
                 return playlist;
             } else {
@@ -188,10 +192,13 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
-    public List<Playlist> getPlayListByUser(String idUser) {
+    public List<PlaylistDto> getPlayListByUser(String idUser) {
         Optional<User> user = userRepository.findById(idUser);
+        ObjectMapper mapper = new ObjectMapper();
         if (user.isPresent()) {
-            return playlistRepository.findByUser(idUser);
+            List<Playlist> playlistsDto = playlistRepository.findByUser(idUser);
+            return mapper.convertValue(playlistsDto, new TypeReference<>() {
+            });
         } else {
             throw new RuntimeException("Not fount user with ID: " + idUser);
         }

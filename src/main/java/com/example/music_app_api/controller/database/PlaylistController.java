@@ -1,5 +1,6 @@
 package com.example.music_app_api.controller.database;
 
+import com.example.music_app_api.dto.PlaylistDto;
 import com.example.music_app_api.entity.Playlist;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.ResponseObject;
@@ -28,7 +29,7 @@ public class PlaylistController {
     public ResponseEntity<ResponseObject> getPlayListByUser(
             @RequestParam("idUser") String idUser) {
         try {
-            List<Playlist> playlists = playlistService.getPlayListByUser(idUser);
+            List<PlaylistDto> playlists = playlistService.getPlayListByUser(idUser);
 
             return playlists.size() > 0 ?
                     ResponseEntity
