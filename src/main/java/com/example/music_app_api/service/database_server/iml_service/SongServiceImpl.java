@@ -7,6 +7,8 @@ import com.example.music_app_api.repo.SongRepository;
 import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,10 +67,10 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    @Transactional
     public List<Song> getSongsByTitle(String title, int count) {
         try {
-            return songRepository.getSongByTitle(title, count);
+            Pageable pageable = PageRequest.of(count, 1);
+            return songRepository.findByTitleContainingIgnoreCase(title, pageable);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -157,6 +159,11 @@ public class SongServiceImpl implements SongService {
         playlistOnService.getPlaylistOnById(idPlaylistOn);
 
         return songRepository.getSongsByPlaylistOn(idPlaylistOn);
+    }
+
+    @Override
+    public List<Song> getSongsOfChart(String idChart) {
+        return songRepository.getSongsByChart(idChart);
     }
 
     @Override

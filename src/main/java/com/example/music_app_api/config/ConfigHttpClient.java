@@ -42,7 +42,7 @@ public class ConfigHttpClient {
     @Bean
     HttpHost httpHost() {
 
-        return new HttpHost("103.101.90.181", 6446);
+        return new HttpHost("103.101.90.19", 6284);
     }
 
     @Bean
@@ -96,6 +96,7 @@ public class ConfigHttpClient {
 
         SocketConfig socketConfig = SocketConfig
                 .custom()
+                .setSoKeepAlive(true)
                 .setSoTimeout(timeoutRequest)
                 .build();
         connectionManager.setDefaultSocketConfig(socketConfig);

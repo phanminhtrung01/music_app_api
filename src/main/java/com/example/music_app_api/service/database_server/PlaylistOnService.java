@@ -5,7 +5,7 @@ import com.example.music_app_api.entity.PlaylistOnline;
 import java.util.List;
 
 public interface PlaylistOnService {
-    void getPlaylistOnById(String idPlaylistOn);
+    PlaylistOnline getPlaylistOnById(String idPlaylistOn);
 
     List<PlaylistOnline> getPlaylistOns(int count);
 }

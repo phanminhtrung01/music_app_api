@@ -29,7 +29,7 @@ public class InfoSong {
     private InfoAlbum album;
 
     @JsonIgnore
-    public boolean isEmpty() {
+    public Boolean isEmpty() {
         return id == null || id.isEmpty();
     }
 }

@@ -28,7 +28,7 @@ public class InfoAlbum {
     private List<InfoSong> sectionsSong;
 
     @JsonIgnore
-    public boolean isEmpty() {
+    public Boolean isEmpty() {
         return id == null || id.isEmpty();
     }
 }

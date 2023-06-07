@@ -1,5 +1,6 @@
 package com.example.music_app_api.controller;
 
+import com.example.music_app_api.entity.PlaylistOnline;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.InfoAlbum;
@@ -8,12 +9,14 @@ import com.example.music_app_api.model.hot_search.HotSearch;
 import com.example.music_app_api.model.multi_search.MultiSearch;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.StreamSourceSong;
+import com.example.music_app_api.service.database_server.PlaylistOnService;
 import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.song_request.SongRequestService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +35,17 @@ public class SongController {
 
     private final SongRequestService songRequestSer;
     private final SongService songService;
+    private final PlaylistOnService playlistOnService;
     final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public SongController(
             SongRequestService songRequestSer,
-            SongService songService) {
+            SongService songService,
+            PlaylistOnService playlistOnService) {
         this.songRequestSer = songRequestSer;
         this.songService = songService;
+        this.playlistOnService = playlistOnService;
     }
 
     @GetMapping("search/hot/song")
@@ -211,30 +217,6 @@ public class SongController {
                             e.getMessage()
                     ));
 
-        }
-    }
-
-    @GetMapping("get/charts/song")
-    public ResponseEntity<ResponseObject> getChartsSong(
-            @RequestParam(name = "count", required = false) int n) {
-
-        try {
-            List<InfoSong> songs = songRequestSer.getChartsSong(n);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ResponseObject(
-                            HttpStatus.OK.value(),
-                            "Success",
-                            songs
-                    ));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                    .body(new ResponseObject(
-                            HttpStatus.BAD_REQUEST.value(),
-                            "Failure",
-                            ""
-                    ));
         }
     }
 
@@ -416,10 +398,58 @@ public class SongController {
 
     @GetMapping("get/songs_by_playlist_on")
     public ResponseEntity<ResponseObject> getSongsByPlaylistOnline(
-            @RequestParam(value = "idPlaylist") String id) {
+            @RequestParam(value = "id") String id) {
         try {
 
             List<Song> songs = songService.getSongsByPlayListOn(id);
+            PlaylistOnline playlistOnline = playlistOnService.getPlaylistOnById(id);
+            List<InfoSong> infoSongs = mapper.convertValue(songs, new TypeReference<>() {
+            });
+            JSONObject response = new JSONObject();
+            JSONObject all = new JSONObject();
+            response.put("items", infoSongs);
+            response.put("playlistOn", playlistOnline);
+            all.put("data", response);
+
+
+            return songs.size() > 0 ?
+                    ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "Query get songs by playlist online successful!",
+                                    response.toMap())
+                            ) :
+                    ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(new ResponseObject(
+                                    HttpStatus.OK.value(),
+                                    "List empty",
+                                    response)
+                            );
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
+    @GetMapping("get/songs_by_chart")
+    public ResponseEntity<ResponseObject> getSongsByChart(
+            @RequestParam(value = "id") String id) {
+        try {
+
+            List<Song> songs = songService.getSongsOfChart(id);
             List<InfoSong> infoSongs = mapper.convertValue(songs, new TypeReference<>() {
             });
 
@@ -428,7 +458,7 @@ public class SongController {
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
-                                    "Query get songs by playlist online successful!",
+                                    "Query get songs by chart successful!",
                                     infoSongs)
                             ) :
                     ResponseEntity
@@ -454,5 +484,6 @@ public class SongController {
                             null));
         }
     }
+
 
 }

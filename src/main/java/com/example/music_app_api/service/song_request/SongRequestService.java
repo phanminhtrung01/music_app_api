@@ -22,8 +22,6 @@ public interface SongRequestService {
 
     StreamSourceSong getStreamSongN(BasicNameValuePair valuePair);
 
-    List<InfoSong> getChartsSong(int count) throws Exception;
-
     List<InfoSong> getRecommendSongs(String idSong) throws Exception;
 
     List<InfoAlbum> getAlbumsOfGenre(String idGenre) throws Exception;

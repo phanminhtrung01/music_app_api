@@ -30,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Unmarshaller;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
 import org.jetbrains.annotations.Contract;
@@ -265,7 +264,8 @@ public class ImlSongRequest implements SongRequestService {
                     HostApi.uriHostApiV2,
                     SearchSong.search,
                     Map.of("type", "song",
-                            "count", String.valueOf(count)),
+                            "page", String.valueOf(count / 18 + 1),
+                            "count", String.valueOf(18)),
                     Map.of("q", data),
                     false, true);
 
@@ -324,7 +324,8 @@ public class ImlSongRequest implements SongRequestService {
                     HostApi.uriHostApiV2,
                     SearchSong.search,
                     Map.of("type", "artist",
-                            "count", String.valueOf(count)),
+                            "page", String.valueOf(count / 18 + 1),
+                            "count", String.valueOf(18)),
                     Map.of("q", data),
                     false, true);
 
@@ -374,14 +375,14 @@ public class ImlSongRequest implements SongRequestService {
                     Map.of(), false, true);
 
             final ObjectMapper mapper = new ObjectMapper();
-
+            if (dataJson.isEmpty()) {
+                throw new RuntimeException(dataJson.toString());
+            }
             return mapper
                     .readValue(dataJson.toString(), StreamSourceSong.class);
-        } catch (Exception ignore) {
-
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        return new StreamSourceSong();
     }
 
     @Override
@@ -462,36 +463,6 @@ public class ImlSongRequest implements SongRequestService {
         }
 
         return trackSong.getSourceSong();
-    }
-
-    @Override
-    public List<InfoSong> getChartsSong(int count)
-            throws Exception {
-        List<InfoSong> songs;
-        final List<NameValuePair> nameValuePairs = new ArrayList<>();
-        final BasicNameValuePair valuePair1 =
-                new BasicNameValuePair("chart", SearchField.song.name());
-        final BasicNameValuePair valuePair2 =
-                new BasicNameValuePair("count", String.valueOf(count));
-        nameValuePairs.add(valuePair1);
-        nameValuePairs.add(valuePair2);
-        final URI uriChart = new URIBuilder(HostApi.uriHostApiOld)
-                .appendPath(SearchSong.getChart)
-                .setParameters(nameValuePairs)
-                .build();
-
-        final String response = appManager.getResponseRequest(uriChart);
-
-        final JSONObject responseJson = new JSONObject(response);
-        final JSONObject dataJson = responseJson.getJSONObject("data");
-        final JSONArray songJson = dataJson.getJSONArray("song");
-
-        final ObjectMapper mapper = new ObjectMapper();
-        songs = mapper.readValue(songJson.toString(), new TypeReference<>() {
-        });
-        log.info(songs.toString());
-
-        return songs;
     }
 
     @Override

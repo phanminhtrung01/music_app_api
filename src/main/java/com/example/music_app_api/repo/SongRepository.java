@@ -1,6 +1,7 @@
 package com.example.music_app_api.repo;
 
 import com.example.music_app_api.entity.Song;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -11,14 +12,13 @@ import java.util.Optional;
 @Repository
 public interface SongRepository extends JpaRepository<Song, String> {
 
-    @Query(
-            value = """
-                    SELECT *, MATCH(title) AGAINST(?1) AS relevance
-                    FROM song WHERE MATCH(title) AGAINST(?1) > 0
-                    ORDER BY relevance DESC LIMIT ?2
-                    """, nativeQuery = true
+    @Query("""
+            SELECT s FROM Song s
+            WHERE LOWER(s.title)
+            LIKE LOWER(CONCAT('%', ?1, '%'))
+            """
     )
-    List<Song> getSongByTitle(String title, Integer count);
+    List<Song> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
     @Query(
             value = """
@@ -43,6 +43,15 @@ public interface SongRepository extends JpaRepository<Song, String> {
                     WHERE po.encodeId = ?1
                     """)
     List<Song> getSongsByPlaylistOn(String idPlaylist);
+
+
+    @Query(
+            value = """
+                    SELECT s FROM Song s
+                    JOIN s.chart ch
+                    WHERE ch.idChart = ?1
+                    """)
+    List<Song> getSongsByChart(String idChart);
 
     @Query(
             value = """

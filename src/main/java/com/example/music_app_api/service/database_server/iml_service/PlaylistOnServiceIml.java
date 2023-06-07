@@ -19,14 +19,16 @@ public class PlaylistOnServiceIml implements PlaylistOnService {
     }
 
     @Override
-    public void getPlaylistOnById(String idPlaylistOn) {
+    public PlaylistOnline getPlaylistOnById(String idPlaylistOn) {
         try {
             Optional<PlaylistOnline> playlistOptional = playlistOnRepository
                     .findById(idPlaylistOn);
             if (playlistOptional.isEmpty()) {
                 throw new NotFoundException("Not fount playlist online with ID: " + idPlaylistOn);
             }
-            
+
+            return playlistOptional.get();
+
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());

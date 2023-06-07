@@ -23,7 +23,7 @@ public class InfoSourceSong {
     private String source128;
 
     @JsonIgnore
-    public boolean isEmpty() {
+    public Boolean isEmpty() {
         return title == null || title.isEmpty();
     }
 }
