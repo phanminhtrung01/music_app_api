@@ -27,6 +27,7 @@ public class Playlist {
     private String name;
     @Column(name = "date_create", nullable = false)
     private String dateCreate;
+    private String thumbnail;
 
     @PrePersist
     public void generateId() {
