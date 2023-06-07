@@ -22,6 +22,7 @@ public class InfoSong {
     private String thumbnailM;
     private String duration;
     private Long releaseDate;
+    private String genresNames;
     @JsonAlias({"genreIds", ""})
     private List<String> idGenres;
     @JsonAlias({"artists", "artistsSing"})

@@ -69,8 +69,13 @@ public class ImlInfoRequest implements InfoRequestService {
             Song song = songService.getById(idSong);
             List<Artist> artists = songService.getArtistByIdSong(idSong);
             List<Genre> genres = songService.getGenresByIdSong(idSong);
-
+            List<String> genresNames = genres
+                    .stream()
+                    .map(Genre::getName)
+                    .toList();
+            String genresNamesStr = String.join(", ", genresNames);
             infoSong = mapper.convertValue(song, InfoSong.class);
+
             List<InfoArtist> infoArtists1 = mapper
                     .convertValue(artists, new TypeReference<>() {
                     });
@@ -79,6 +84,7 @@ public class ImlInfoRequest implements InfoRequestService {
                     .convertValue(genres, new TypeReference<>() {
                     });
 
+            infoSong.setGenresNames(genresNamesStr);
             infoSong.setArtists(infoArtists1);
             infoSong.setIdGenres(infoGenres1
                     .stream()
@@ -96,6 +102,24 @@ public class ImlInfoRequest implements InfoRequestService {
 
                 infoSong = mapper
                         .readValue(jsonData.toString(), InfoSong.class);
+                List<String> genresId = infoSong.getIdGenres();
+                List<String> genresNames = new ArrayList<>();
+
+                genresId.forEach(genreId -> {
+                    try {
+                        final JSONObject jsonData1 = appManager
+                                .getDataRequest(
+                                        HostApi.uriHostApiV2,
+                                        GetInfo.infoGenre,
+                                        Map.of("id", genreId),
+                                        Map.of(), false, true);
+
+                        genresNames.add(jsonData1.getString("name"));
+                    } catch (Exception ignore) {
+                    }
+                });
+
+                infoSong.setGenresNames(String.join(", ", genresNames));
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
