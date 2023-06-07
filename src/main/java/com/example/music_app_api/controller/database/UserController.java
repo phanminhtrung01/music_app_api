@@ -107,7 +107,7 @@ public class UserController {
             @RequestBody User user) {
 
         try {
-            User userPar = userService.save(user);
+            User userPar = userService.update(user);
 
             return ResponseEntity
                     .status(HttpStatus.OK)

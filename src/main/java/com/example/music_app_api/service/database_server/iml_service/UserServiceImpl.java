@@ -58,6 +58,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User update(User user) {
+        try {
+            User userDB = getUserById(user.getIdUser());
+            UserCredential userCredential = userDB.getUserCredential();
+            userDB.setUserCredential(userCredential);
+
+            userRepository.save(userDB);
+
+            return userDB;
+        } catch (Exception e) {
+            if (e instanceof NotFoundException) {
+                throw new NotFoundException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+    }
+
+    @Override
     public User delete(String idUser) {
         try {
             User user = getUserById(idUser);

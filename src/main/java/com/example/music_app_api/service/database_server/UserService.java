@@ -9,6 +9,8 @@ public interface UserService {
 
     User save(User user);
 
+    User update(User user);
+
     User delete(String idUser);
 
     Map<String, Object> verifyUser(String email, String password);

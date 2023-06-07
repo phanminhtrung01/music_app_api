@@ -347,27 +347,14 @@ public class ImlSongRequest implements SongRequestService {
 
     @Override
     public StreamSourceSong getStreamSong(@NotNull String idSong) {
-        CompletableFuture<StreamSourceSong> futureOn = CompletableFuture
-                .supplyAsync(() -> {
-                    try {
-                        return getSourceSongOn(idSong);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
-        CompletableFuture<StreamSourceSong> futureOff = CompletableFuture
-                .supplyAsync(() -> getSourceSongOff(idSong));
-        final StreamSourceSong sourceSongOn = futureOn.join();
-        final StreamSourceSong sourceSongOff = futureOff.join();
-
+        StreamSourceSong streamSourceSong;
         if (idSong.startsWith("Z")) {
-            log.info(sourceSongOn.toString());
-            return sourceSongOn;
+            streamSourceSong = getSourceSongOn(idSong);
         } else {
-            log.info(sourceSongOff.toString());
-            return sourceSongOff;
+            streamSourceSong = getSourceSongOff(idSong);
         }
+        log.info(streamSourceSong.toString());
+        return streamSourceSong;
     }
 
     private StreamSourceSong getSourceSongOff(String idSong) {

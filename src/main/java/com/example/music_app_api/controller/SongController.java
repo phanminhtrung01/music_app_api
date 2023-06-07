@@ -173,16 +173,21 @@ public class SongController {
                 }, executorService);
         final CompletableFuture<StreamSourceSong> streamSourceSongCompletableFuture =
                 CompletableFuture.supplyAsync(() -> {
-                            try {
-                                return songRequestSer.getStreamSong(id);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        }, executorService)
-                        .exceptionally(throwable -> streamSourceSongCompletableFutureN.join());
+                    try {
+                        return songRequestSer.getStreamSong(id);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }, executorService);
+
+        CompletableFuture<StreamSourceSong> result = streamSourceSongCompletableFuture
+                .exceptionally(ex -> null)
+                .thenCompose(res -> res != null
+                        ? streamSourceSongCompletableFuture
+                        : streamSourceSongCompletableFutureN);
 
         try {
-            streamSourceSong = streamSourceSongCompletableFuture.join();
+            streamSourceSong = result.join();
             streamSourceSongCompletableFuture.cancel(true);
             streamSourceSongCompletableFutureN.cancel(true);
             executorService.shutdownNow();

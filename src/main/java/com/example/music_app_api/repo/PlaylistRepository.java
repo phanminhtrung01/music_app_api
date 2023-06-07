@@ -4,6 +4,7 @@ import com.example.music_app_api.entity.Playlist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,5 +16,6 @@ public interface PlaylistRepository extends JpaRepository<Playlist, String> {
                     JOIN f.user u
                     WHERE u.idUser = ?1
                     """)
+    @Transactional(readOnly = true)
     List<Playlist> findByUser(String idUser);
 }
