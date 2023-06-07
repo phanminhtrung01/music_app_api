@@ -51,7 +51,7 @@ public class ArtistServiceImpl implements ArtistService {
     @Transactional
     public List<Artist> getArtistsByNameOrRealName(
             String name, String realName, int count) {
-        Pageable topTen = PageRequest.of(0, count);
+        Pageable topTen = PageRequest.of(1, count);
         return artistRepository.getArtistByNameOrRealName(name, realName, topTen);
     }
 

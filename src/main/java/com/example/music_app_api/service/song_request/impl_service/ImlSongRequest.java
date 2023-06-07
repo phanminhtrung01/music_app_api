@@ -277,6 +277,7 @@ public class ImlSongRequest implements SongRequestService {
                 infoSongs = mapper
                         .readValue(jsonSongs.toString(), new TypeReference<>() {
                         });
+
             } catch (Exception ignore) {
             }
         } catch (Exception e) {
@@ -517,8 +518,18 @@ public class ImlSongRequest implements SongRequestService {
     }
 
     @Override
-    public List<InfoSong> getSongsOfArtist(String idArtist, int count) {
+    public List<InfoSong> getSongsOfArtist(
+            @NotNull String idArtist, int count) {
+        if (idArtist.startsWith("A")) {
+            return getSongsOfArtistOff(idArtist, count);
+        } else {
+            return getSongsOfArtistOn(idArtist, count);
+        }
+    }
+
+    private List<InfoSong> getSongsOfArtistOn(String idArtist, int count) {
         List<InfoSong> infoSongs = new ArrayList<>();
+
         try {
             JSONObject jsonData = appManager
                     .getDataRequest(
@@ -537,6 +548,19 @@ public class ImlSongRequest implements SongRequestService {
             infoSongs = mapper
                     .readValue(itemSong.toString(), new TypeReference<>() {
                     });
+        } catch (Exception ignore) {
+        }
+
+        return infoSongs;
+    }
+
+    private List<InfoSong> getSongsOfArtistOff(String idArtist, int count) {
+        List<InfoSong> infoSongs = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            List<Song> songs = songService.getSongsByArtist(idArtist, count);
+            infoSongs = objectMapper.convertValue(songs, new TypeReference<>() {
+            });
         } catch (Exception ignore) {
         }
 

@@ -31,6 +31,14 @@ public interface SongRepository extends JpaRepository<Song, String> {
     @Query(
             value = """
                     SELECT s FROM Song s
+                    JOIN FETCH s.artistsSing a
+                    WHERE a.idArtist = ?1
+                    """)
+    List<Song> getSongsByArtist(String idArtist, Pageable pageable);
+
+    @Query(
+            value = """
+                    SELECT s FROM Song s
                     JOIN s.playlistsOfSong p
                     WHERE p.idPlaylist = ?1
                     """)

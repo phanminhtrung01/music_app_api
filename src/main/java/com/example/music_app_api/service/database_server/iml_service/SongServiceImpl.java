@@ -173,6 +173,13 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public List<Song> getSongsByArtist(String idArtist, int count) {
+        artistService.getArtist(idArtist);
+        Pageable pageable = PageRequest.of(1, count);
+        return songRepository.getSongsByArtist(idArtist, pageable);
+    }
+
+    @Override
     public List<Song> getSongsByIdUser(
             String idUser, TypeSong typeSong) {
         try {

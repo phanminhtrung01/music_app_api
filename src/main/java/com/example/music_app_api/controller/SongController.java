@@ -361,8 +361,9 @@ public class SongController {
             }
 
             List<Song> songs = songService.getSongsDB(n);
-            List<InfoSong> infoSongs = mapper.convertValue(songs, new TypeReference<>() {
-            });
+            List<InfoSong> infoSongs = mapper
+                    .convertValue(songs, new TypeReference<>() {
+                    });
 
             return songs.size() > 0 ?
                     ResponseEntity

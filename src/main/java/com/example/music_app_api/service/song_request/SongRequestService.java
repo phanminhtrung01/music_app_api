@@ -10,7 +10,7 @@ import org.apache.hc.core5.http.message.BasicNameValuePair;
 import java.util.List;
 
 public interface SongRequestService {
-    HotSearch searchHotSongs(String data) throws Exception;
+    HotSearch searchHotSongs(String data);
 
     MultiSearch searchMulti(String data, int count);
 
@@ -22,15 +22,15 @@ public interface SongRequestService {
 
     StreamSourceSong getStreamSongN(BasicNameValuePair valuePair);
 
-    List<InfoSong> getRecommendSongs(String idSong) throws Exception;
+    List<InfoSong> getRecommendSongs(String idSong);
 
-    List<InfoAlbum> getAlbumsOfGenre(String idGenre) throws Exception;
+    List<InfoAlbum> getAlbumsOfGenre(String idGenre);
 
-    List<InfoSong> getSongsOfArtist(String idArtist, int count) throws Exception;
+    List<InfoSong> getSongsOfArtist(String idArtist, int count);
 
     List<InfoSong> getSongsOfAlbum(String idAlbum) throws Exception;
 
-    List<InfoSong> getSongNewRelease() throws Exception;
+    List<InfoSong> getSongNewRelease();
 
 
 }
