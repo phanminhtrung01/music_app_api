@@ -30,6 +30,7 @@ public class Song {
         this.artistsNames = artistsNames;
         this.thumbnail = thumbnail;
         this.duration = duration;
+        this.equalsCode = equalsCode;
     }
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

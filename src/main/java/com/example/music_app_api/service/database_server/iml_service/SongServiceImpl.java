@@ -181,7 +181,7 @@ public class SongServiceImpl implements SongService {
                     infoSong.getTitle(),
                     infoSong.getArtistsNames(),
                     Integer.parseInt(infoSong.getDuration()));
-            System.out.println();
+
             song = songDB.orElseGet(() -> new Song(
                     infoSong.getId(),
                     infoSong.getTitle(),
