@@ -74,7 +74,9 @@ public class SongServiceImpl implements SongService {
     public List<Song> getSongsDB(int count) {
         List<Song> songs = getAllSongs();
         int min = Math.min(count, songs.size());
-        return songs.subList(0, min);
+        return songs.subList(0, min)
+                .stream().map(this::getSong)
+                .toList();
     }
 
     @Override
@@ -82,7 +84,10 @@ public class SongServiceImpl implements SongService {
     public List<Song> getSongsByTitle(String title, int count) {
         try {
             Pageable pageable = PageRequest.of(count, 1);
-            return songRepository.findByTitleContainingIgnoreCase(title, pageable);
+            List<Song> songs = songRepository
+                    .findByTitleContainingIgnoreCase(title, pageable);
+
+            return songs.stream().map(this::getSong).toList();
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -123,7 +128,7 @@ public class SongServiceImpl implements SongService {
                 throw new RuntimeException(e.getMessage());
             }
         }
-        return song;
+        return getSong(song);
     }
 
     @Override
@@ -132,7 +137,7 @@ public class SongServiceImpl implements SongService {
             Song song = getById(idSong);
             songRepository.delete(song);
 
-            return song;
+            return getSong(song);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -182,10 +187,23 @@ public class SongServiceImpl implements SongService {
                     infoSong.getTitle(),
                     infoSong.getArtistsNames(),
                     infoSong.getThumbnail(),
-                    Integer.parseInt(infoSong.getDuration())));
+                    Integer.parseInt(infoSong.getDuration()),
+                    infoSong.getId()
+            ));
 
         }
         return song;
+    }
+
+    @Override
+    public Song getSong(@NotNull Song song) {
+        Song songTemp;
+        if (song.getEqualsCode() != null) {
+            song.setIdSong(song.getEqualsCode());
+        }
+        songTemp = song;
+
+        return songTemp;
     }
 
     private Optional<Song> getByAllParameter(
@@ -207,30 +225,36 @@ public class SongServiceImpl implements SongService {
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsByPlayList(String idPlaylist) {
         playlistService.getById(idPlaylist);
-        return songRepository.getSongsByPlaylist(idPlaylist);
+        List<Song> songs = songRepository.getSongsByPlaylist(idPlaylist);
+
+        return songs.stream().map(this::getSong).toList();
     }
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsByPlayListOn(String idPlaylistOn) {
         playlistOnService.getPlaylistOnById(idPlaylistOn);
+        List<Song> songs = songRepository.getSongsByPlaylistOn(idPlaylistOn);
 
-        return songRepository.getSongsByPlaylistOn(idPlaylistOn);
+        return songs.stream().map(this::getSong).toList();
     }
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsOfChart(String idChart) {
         chartsService.getChartById(idChart);
+        List<Song> songs = songRepository.getSongsByChart(idChart);
 
-        return songRepository.getSongsByChart(idChart);
+        return songs.stream().map(this::getSong).toList();
     }
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsByGenre(String idGenre) {
         genreService.getGenreById(idGenre);
-        return songRepository.getSongsByGenre(idGenre);
+        List<Song> songs = songRepository.getSongsByGenre(idGenre);
+
+        return songs.stream().map(this::getSong).toList();
     }
 
     @Override
@@ -238,7 +262,9 @@ public class SongServiceImpl implements SongService {
     public List<Song> getSongsByArtist(String idArtist, int count) {
         artistService.getArtist(idArtist);
         Pageable pageable = PageRequest.of(1, count);
-        return songRepository.getSongsByArtist(idArtist, pageable);
+        List<Song> songs = songRepository.getSongsByArtist(idArtist, pageable);
+
+        return songs.stream().map(this::getSong).toList();
     }
 
     @Override
@@ -248,12 +274,17 @@ public class SongServiceImpl implements SongService {
         try {
             Optional<User> user = userRepository.findById(idUser);
             if (user.isPresent()) {
+                List<Song> songs;
                 switch (typeSong) {
                     case FAVORITE -> {
-                        return songRepository.getFavoriteSongsByUser(idUser);
+                        songs = songRepository.getFavoriteSongsByUser(idUser);
+
+                        return songs.stream().map(this::getSong).toList();
                     }
                     case LISTEN -> {
-                        return songRepository.getListenSongsByUser(idUser);
+                        songs = songRepository.getListenSongsByUser(idUser);
+
+                        return songs.stream().map(this::getSong).toList();
                     }
                 }
                 return songRepository.getFavoriteSongsByUser(idUser);
@@ -276,7 +307,8 @@ public class SongServiceImpl implements SongService {
             Song song = getSong(idSong);
             Charts charts = chartsService.getChartById(idChart);
             song.setChart(charts);
-            return song;
+
+            return getSong(song);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -294,7 +326,8 @@ public class SongServiceImpl implements SongService {
             Song song = getSong(idSong);
             chartsService.getChartById(idChart);
             song.setChart(null);
-            return song;
+
+            return getSong(song);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -328,9 +361,9 @@ public class SongServiceImpl implements SongService {
                     user.getHistoryListen().add(song);
                 }
             }
-
             songRepository.save(song);
-            return song;
+
+            return getSong(song);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -358,9 +391,9 @@ public class SongServiceImpl implements SongService {
                 case FAVORITE -> user.getFavoriteSongs().remove(song);
                 case LISTEN -> user.getHistoryListen().remove(song);
             }
-
             userRepository.save(user);
-            return song;
+
+            return getSong(song);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());

@@ -129,22 +129,22 @@ public class UserServiceImpl implements UserService {
             String newGender, String newPhoneNumber,
             String newAvatar, String newBirthday) {
         if (newName.isEmpty() || isValidUsername(newName)) {
-            throw new RuntimeException("Invalid Name!");
+            throw new RuntimeException("Invalid Name User!");
         }
         if (newUsername.isEmpty() || isValidUsername(newUsername)) {
-            throw new RuntimeException("Invalid Username!");
+            throw new RuntimeException("Invalid Username User!");
         }
         if (newGender.isEmpty() || !isValidGenre(newGender)) {
-            throw new RuntimeException("Invalid Genre!");
+            throw new RuntimeException("Invalid Genre User!");
         }
         if (newPhoneNumber.isEmpty() || !isValidPhoneNumber(newPhoneNumber)) {
-            throw new RuntimeException("Invalid PhoneNumber!");
+            throw new RuntimeException("Invalid PhoneNumber User!");
         }
         if (newAvatar.isEmpty()) {
-            throw new RuntimeException("Invalid Avatar!");
+            throw new RuntimeException("Invalid Avatar User!");
         }
         if (newBirthday.isEmpty() || !isValidDate(newBirthday)) {
-            throw new RuntimeException("Invalid Birthday!");
+            throw new RuntimeException("Invalid Birthday User!");
         }
     }
 

@@ -33,6 +33,7 @@ public class UserController {
         try {
             String avatar = user.getAvatar();
             String gender = user.getGender();
+
             if (avatar == null || avatar.isEmpty()) {
                 if (gender.equals("Male") || gender.equals("male")) {
                     user.setAvatar("https://cdn1.iconfinder.com/" +
@@ -62,7 +63,13 @@ public class UserController {
                             notFoundException.getMessage(),
                             null));
         } catch (RuntimeException e) {
-            return ResponseEntity
+            return e.getMessage().contains("Invalid")
+                    ? ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ResponseObject(
+                            HttpStatus.CONFLICT.value(),
+                            e.getMessage(),
+                            null)) : ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),

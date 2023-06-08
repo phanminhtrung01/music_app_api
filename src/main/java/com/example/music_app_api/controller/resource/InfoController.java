@@ -51,7 +51,7 @@ public class InfoController {
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount song with ID: " + idSong,
+                            "Not found song with ID: " + idSong,
                             null
                     )));
         } catch (Exception e) {
@@ -59,7 +59,7 @@ public class InfoController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount song with ID: " + idSong,
+                            "Not found song with ID: " + idSong,
                             null
                     ));
         }
@@ -85,7 +85,7 @@ public class InfoController {
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount album with ID: " + idAlbum,
+                            "Not found album with ID: " + idAlbum,
                             null
                     )));
         } catch (Exception e) {
@@ -93,7 +93,7 @@ public class InfoController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount album with ID: " + idAlbum,
+                            "Not found album with ID: " + idAlbum,
                             null
                     ));
         }
@@ -117,7 +117,7 @@ public class InfoController {
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount artist with ID: " + idArtist,
+                            "Not found artist with ID: " + idArtist,
                             null
                     )));
         } catch (Exception e) {
@@ -126,7 +126,7 @@ public class InfoController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount artist with ID: " + idArtist,
+                            "Not found artist with ID: " + idArtist,
                             null
                     ));
         }
@@ -149,7 +149,7 @@ public class InfoController {
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount genre with ID: " + idGenre,
+                            "Not found genre with ID: " + idGenre,
                             null
                     )));
         } catch (Exception e) {
@@ -200,7 +200,7 @@ public class InfoController {
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount lyric of song with ID: " + idSong,
+                            "Not found lyric of song with ID: " + idSong,
                             null
                     )));
         } catch (Exception e) {
@@ -208,7 +208,7 @@ public class InfoController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseObject(
                             HttpStatus.BAD_REQUEST.value(),
-                            "Not fount lyric of song with ID: " + idSong,
+                            "Not found lyric of song with ID: " + idSong,
                             null
                     ));
         }

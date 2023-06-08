@@ -23,7 +23,8 @@ public class Song {
     public Song(
             String id, String title,
             String artistsNames,
-            String thumbnail, int duration) {
+            String thumbnail, int duration,
+            String equalsCode) {
         this.idSong = id;
         this.title = title;
         this.artistsNames = artistsNames;
@@ -53,6 +54,9 @@ public class Song {
     private int duration;
     @Column(name = "release_date")
     private Long releaseDate;
+    @JsonIgnore
+    @Column(name = "equals_code")
+    private String equalsCode;
 
     @PrePersist
     public void generateId() {

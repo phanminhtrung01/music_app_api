@@ -58,7 +58,9 @@ public class ArtistServiceImpl implements ArtistService {
     public List<Artist> getArtistsByNameOrRealName(
             String name, String realName, int count) {
         Pageable topTen = PageRequest.of(1, count);
-        return artistRepository.getArtistByNameOrRealName(name, realName, topTen);
+        List<Artist> artists = artistRepository.getArtistByNameOrRealName(name, realName, topTen);
+        artists = artists.stream().map(this::getArtist).toList();
+        return artists;
     }
 
     @Override
@@ -98,7 +100,8 @@ public class ArtistServiceImpl implements ArtistService {
                     infoArtist.getName(),
                     infoArtist.getBirthday(),
                     infoArtist.getThumbnail(),
-                    infoArtist.getSortBiography()
+                    infoArtist.getSortBiography(),
+                    infoArtist.getId()
             ));
 
         }
@@ -106,12 +109,25 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
+    public Artist getArtist(@NotNull Artist artist) {
+        Artist artistTemp;
+        if (artist.getEqualsCode() != null) {
+            artist.setIdArtist(artist.getEqualsCode());
+        }
+        artistTemp = artist;
+
+        return artistTemp;
+    }
+
+    @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Artist> getArtistByIdSong(String idSong) {
         try {
             songService.getSong(idSong);
+            List<Artist> artists = artistRepository.getArtistsBySong(idSong);
+            artists = artists.stream().map(this::getArtist).toList();
 
-            return artistRepository.getArtistsBySong(idSong);
+            return artists;
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -132,7 +148,8 @@ public class ArtistServiceImpl implements ArtistService {
                 throw new RuntimeException(e.getMessage());
             }
         }
-        return artist;
+
+        return getArtist(artist);
     }
 
     @Override
@@ -141,7 +158,7 @@ public class ArtistServiceImpl implements ArtistService {
             Artist artist = getArtistById(idArtist);
             artistRepository.delete(artist);
 
-            return artist;
+            return getArtist(artist);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -163,7 +180,7 @@ public class ArtistServiceImpl implements ArtistService {
             user.getFavoriteArtists().add(artist);
             userService.save(user);
 
-            return artist;
+            return getArtist(artist);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -184,7 +201,7 @@ public class ArtistServiceImpl implements ArtistService {
             user.getFavoriteArtists().remove(artist);
             userService.save(user);
 
-            return artist;
+            return getArtist(artist);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());

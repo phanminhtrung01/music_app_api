@@ -1,10 +1,12 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
 import com.example.music_app_api.dto.PlaylistDto;
+import com.example.music_app_api.entity.ImagePlaylist;
 import com.example.music_app_api.entity.Playlist;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
 import com.example.music_app_api.exception.NotFoundException;
+import com.example.music_app_api.repo.ImagePlaylistRepository;
 import com.example.music_app_api.repo.PlaylistRepository;
 import com.example.music_app_api.service.database_server.PlaylistService;
 import com.example.music_app_api.service.database_server.SongService;
@@ -17,6 +19,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +28,7 @@ import java.util.Optional;
 public class PlaylistServiceImpl implements PlaylistService {
 
     private final PlaylistRepository playlistRepository;
+    private final ImagePlaylistRepository imagePlaylistRepository;
     private final UserService userService;
     private final SongService songService;
 
@@ -31,9 +36,10 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Lazy
     public PlaylistServiceImpl(
             PlaylistRepository playlistRepository,
-            UserService userService,
+            ImagePlaylistRepository imagePlaylistRepository, UserService userService,
             SongService songService) {
         this.playlistRepository = playlistRepository;
+        this.imagePlaylistRepository = imagePlaylistRepository;
         this.userService = userService;
         this.songService = songService;
     }
@@ -78,7 +84,12 @@ public class PlaylistServiceImpl implements PlaylistService {
         ObjectMapper mapper = new ObjectMapper();
         try {
             User user = userService.getUserById(idUser);
+            isValidPlaylist(playlist);
 
+            ImagePlaylist imagePlaylist
+                    = imagePlaylistRepository.findRandomImagePlaylist();
+            playlist.setDateCreate(dateNow());
+            playlist.setThumbnail(imagePlaylist.getThumbnail());
             playlist.setUser(user);
             playlistRepository.save(playlist);
 
@@ -90,6 +101,26 @@ public class PlaylistServiceImpl implements PlaylistService {
                 throw new RuntimeException(e.getMessage());
             }
         }
+    }
+
+    private @NotNull String dateNow() {
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter
+                = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        return today.format(formatter);
+    }
+
+    private void isValidPlaylist(@NotNull Playlist playlist) {
+        String name = playlist.getName();
+        boolean check;
+        String regex = "^[a-zA-Z]\\w*$";
+        check = name == null || name.isEmpty() || !name.matches(regex);
+
+        if (check) {
+            throw new RuntimeException("Invalid Name Playlist!");
+        }
+
     }
 
     @Override

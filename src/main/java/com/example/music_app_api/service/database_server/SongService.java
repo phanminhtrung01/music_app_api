@@ -21,6 +21,8 @@ public interface SongService {
 
     Song getById(String idSong);
 
+    Song getSong(Song song);
+
     List<Song> getSongsByGenre(String idGenre);
 
     List<Song> getSongsByArtist(String idArtist, int count);

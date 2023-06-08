@@ -108,23 +108,25 @@ public class ImlInfoRequest implements InfoRequestService {
 
                 if (!isFast) {
                     List<String> genresId = infoSong.getIdGenres();
-                    List<String> genresNames = new ArrayList<>();
+                    if (genresId != null) {
+                        List<String> genresNames = new ArrayList<>();
 
-                    genresId.forEach(genreId -> {
-                        try {
-                            final JSONObject jsonData1 = appManager
-                                    .getDataRequest(
-                                            HostApi.uriHostApiV2,
-                                            GetInfo.infoGenre,
-                                            Map.of("id", genreId),
-                                            Map.of(), false, true);
+                        genresId.forEach(genreId -> {
+                            try {
+                                final JSONObject jsonData1 = appManager
+                                        .getDataRequest(
+                                                HostApi.uriHostApiV2,
+                                                GetInfo.infoGenre,
+                                                Map.of("id", genreId),
+                                                Map.of(), false, true);
 
-                            genresNames.add(jsonData1.getString("name"));
-                        } catch (Exception ignore) {
-                        }
-                    });
+                                genresNames.add(jsonData1.getString("name"));
+                            } catch (Exception ignore) {
+                            }
+                        });
 
-                    infoSong.setGenresNames(String.join(", ", genresNames));
+                        infoSong.setGenresNames(String.join(", ", genresNames));
+                    }
                 }
 
             } catch (Exception e) {

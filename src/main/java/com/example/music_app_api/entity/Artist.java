@@ -1,6 +1,7 @@
 package com.example.music_app_api.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,11 +20,13 @@ public class Artist {
 
     public Artist(
             String name, String birthday,
-            String thumbnail, String sortBiography) {
+            String thumbnail, String sortBiography,
+            String equalsCode) {
         this.name = name;
         this.birthday = birthday;
         this.thumbnail = thumbnail;
         this.sortBiography = sortBiography;
+        this.equalsCode = equalsCode;
     }
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -47,6 +50,9 @@ public class Artist {
     private String national;
     @Column(name = "total_follow")
     private String totalFollow;
+    @JsonIgnore
+    @Column(name = "equals_code")
+    private String equalsCode;
 
     @PrePersist
     public void generateId() {
