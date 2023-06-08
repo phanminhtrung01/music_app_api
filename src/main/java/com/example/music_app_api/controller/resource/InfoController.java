@@ -1,4 +1,4 @@
-package com.example.music_app_api.controller;
+package com.example.music_app_api.controller.resource;
 
 import com.example.music_app_api.entity.PlaylistOnline;
 import com.example.music_app_api.model.InfoAlbum;

@@ -302,12 +302,19 @@ public class SongController {
                             HttpStatus.NOT_FOUND.value(),
                             notFoundException.getMessage(),
                             null));
-        } catch (RuntimeException e) {
-            return ResponseEntity
+        } catch (RuntimeException runtimeException) {
+            return runtimeException.getMessage().contains("constraint")
+                    ? ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ResponseObject(
+                            HttpStatus.CONFLICT.value(),
+                            "The song already in favorites song",
+                            null))
+                    : ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
+                            runtimeException.getMessage(),
                             null));
         }
     }
@@ -409,12 +416,19 @@ public class SongController {
                             HttpStatus.NOT_FOUND.value(),
                             notFoundException.getMessage(),
                             null));
-        } catch (RuntimeException e) {
-            return ResponseEntity
+        } catch (RuntimeException runtimeException) {
+            return runtimeException.getMessage().contains("constraint")
+                    ? ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ResponseObject(
+                            HttpStatus.CONFLICT.value(),
+                            "The song is already on the playlist",
+                            null))
+                    : ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
+                            runtimeException.getMessage(),
                             null));
         }
     }

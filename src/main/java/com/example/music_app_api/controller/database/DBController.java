@@ -7,12 +7,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/pmdv/db/test")
+@RequestMapping("/pmdv/db")
 @CrossOrigin(value = "*", maxAge = 3600)
-public class TestController {
+public class DBController {
     @GetMapping
-    public ResponseEntity<String> hello() {
-        return ResponseEntity.ok("Tuyen chao moi nguoi");
+    public ResponseEntity<String> db() {
+
+        return ResponseEntity.ok("MUSIC API DATABASE");
     }
 
 }

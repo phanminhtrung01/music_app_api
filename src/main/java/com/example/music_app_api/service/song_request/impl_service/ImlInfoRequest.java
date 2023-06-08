@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -46,6 +47,7 @@ public class ImlInfoRequest implements InfoRequestService {
     private final PlaylistOnService playlistOnService;
 
     @Autowired
+    @Lazy
     ImlInfoRequest(
             AppManager appManager,
             SongService songService,
@@ -68,8 +70,8 @@ public class ImlInfoRequest implements InfoRequestService {
         ObjectMapper mapper = new ObjectMapper();
         if (idSong.startsWith("S")) {
             Song song = songService.getById(idSong);
-            List<Artist> artists = songService.getArtistByIdSong(idSong);
-            List<Genre> genres = songService.getGenresByIdSong(idSong);
+            List<Artist> artists = artistService.getArtistByIdSong(idSong);
+            List<Genre> genres = genreService.getGenresByIdSong(idSong);
             List<String> genresNames = genres
                     .stream()
                     .map(Genre::getName)

@@ -11,6 +11,7 @@ import com.example.music_app_api.service.database_server.UserService;
 import com.example.music_app_api.service.song_request.InfoRequestService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class ArtistServiceImpl implements ArtistService {
     private final InfoRequestService infoRequestService;
 
     @Autowired
+    @Lazy
     public ArtistServiceImpl(
             ArtistRepository artistRepository,
             UserService userService,
@@ -39,7 +41,6 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Artist> getAllArtist() {
         try {
             return artistRepository.findAll();
@@ -53,7 +54,7 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Artist> getArtistsByNameOrRealName(
             String name, String realName, int count) {
         Pageable topTen = PageRequest.of(1, count);
@@ -105,7 +106,7 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Artist> getArtistByIdSong(String idSong) {
         try {
             songService.getSong(idSong);

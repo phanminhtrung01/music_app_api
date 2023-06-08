@@ -22,6 +22,7 @@ import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.model.source_song.InfoSourceSong;
 import com.example.music_app_api.model.source_song.StreamSourceSong;
 import com.example.music_app_api.service.database_server.ArtistService;
+import com.example.music_app_api.service.database_server.GenreService;
 import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.song_request.SongRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,6 +61,7 @@ public class ImlSongRequest implements SongRequestService {
     private final AppManager appManager;
     private final SongService songService;
     private final ArtistService artistService;
+    private final GenreService genreService;
 
 
     @Autowired
@@ -67,11 +69,13 @@ public class ImlSongRequest implements SongRequestService {
             ImlInfoRequest infoRequest,
             AppManager appManager,
             SongService songService,
-            ArtistService artistService) {
+            ArtistService artistService,
+            GenreService genreService) {
         this.infoRequest = infoRequest;
         this.appManager = appManager;
         this.songService = songService;
         this.artistService = artistService;
+        this.genreService = genreService;
     }
 
     @Override
@@ -227,8 +231,8 @@ public class ImlSongRequest implements SongRequestService {
         List<List<InfoArtist>> infoArtists = new ArrayList<>();
         List<List<InfoGenre>> infoGenres = new ArrayList<>();
         songs = songs.stream().peek(song -> {
-            List<Artist> artists = songService.getArtistByIdSong(song.getIdSong());
-            List<Genre> genres = songService.getGenresByIdSong(song.getIdSong());
+            List<Artist> artists = artistService.getArtistByIdSong(song.getIdSong());
+            List<Genre> genres = genreService.getGenresByIdSong(song.getIdSong());
 
             List<InfoArtist> infoArtists1 = mapper
                     .convertValue(artists, new TypeReference<>() {

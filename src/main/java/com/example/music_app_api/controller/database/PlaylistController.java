@@ -68,7 +68,7 @@ public class PlaylistController {
             @RequestParam("idUser") String idUser,
             @RequestBody Playlist playlist) {
         try {
-            Playlist playlistPar = playlistService
+            PlaylistDto playlistPar = playlistService
                     .addUserToPlaylist(idUser, playlist);
 
             return ResponseEntity
@@ -85,12 +85,12 @@ public class PlaylistController {
                             HttpStatus.NOT_FOUND.value(),
                             notFoundException.getMessage(),
                             null));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException runtimeException) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
+                            runtimeException.getMessage(),
                             null));
         }
     }
@@ -100,7 +100,7 @@ public class PlaylistController {
             @RequestParam("idUser") String idUser,
             @RequestParam("idPlaylist") String idPlaylist) {
         try {
-            Playlist playlist = playlistService
+            PlaylistDto playlist = playlistService
                     .removeUserFromPlaylist(idUser, idPlaylist);
 
             return ResponseEntity
@@ -132,7 +132,7 @@ public class PlaylistController {
             @RequestParam("idSong") String idSong,
             @RequestParam("idPlaylist") String idPlaylist) {
         try {
-            Playlist playlist = playlistService
+            PlaylistDto playlist = playlistService
                     .addSongToPlaylist(idSong, idPlaylist);
 
             return ResponseEntity
@@ -149,12 +149,19 @@ public class PlaylistController {
                             HttpStatus.NOT_FOUND.value(),
                             notFoundException.getMessage(),
                             null));
-        } catch (RuntimeException e) {
-            return ResponseEntity
+        } catch (RuntimeException runtimeException) {
+            return runtimeException.getMessage().contains("constraint")
+                    ? ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ResponseObject(
+                            HttpStatus.CONFLICT.value(),
+                            "Song already in playlist",
+                            null))
+                    : ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
+                            runtimeException.getMessage(),
                             null));
         }
     }
@@ -164,7 +171,7 @@ public class PlaylistController {
             @RequestParam("idSong") String idSong,
             @RequestParam("idPlaylist") String idPlaylist) {
         try {
-            Playlist playlist = playlistService
+            PlaylistDto playlist = playlistService
                     .removeSongFromPlaylist(idSong, idPlaylist);
 
             return ResponseEntity
@@ -217,7 +224,7 @@ public class PlaylistController {
                         );
             }
 
-            Playlist playlist = playlistService
+            PlaylistDto playlist = playlistService
                     .removeSongsFromPlaylist(idSongs, idPlaylist);
 
             return ResponseEntity
@@ -248,7 +255,7 @@ public class PlaylistController {
     public ResponseEntity<ResponseObject> removeAllSongsFromPlaylist(
             @RequestParam("idPlaylist") String idPlaylist) {
         try {
-            Playlist playlist = playlistService
+            PlaylistDto playlist = playlistService
                     .removeAllSongsFromPlaylist(idPlaylist);
 
             return ResponseEntity

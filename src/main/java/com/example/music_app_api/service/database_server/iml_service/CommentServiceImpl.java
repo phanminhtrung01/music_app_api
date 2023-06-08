@@ -33,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public Comment saveComment(
             Comment comment, String idUser, String idSong) {
         try {
@@ -57,6 +58,9 @@ public class CommentServiceImpl implements CommentService {
     public Comment deleteComment(String idComment) {
         try {
             Comment comment = getCommentById(idComment);
+            comment.setUser(null);
+            comment.setUsersLike(null);
+
             commentRepository.delete(comment);
 
             return comment;
@@ -88,7 +92,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Comment> getCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);
@@ -103,7 +107,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Comment> getCommentsBySong(String idSong) {
         try {
             songService.getSong(idSong);
@@ -118,7 +122,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Comment> getCommentsByUserAndSong(
             String idUser, String idSong) {
         try {
@@ -172,7 +176,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Comment> getLikeCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);

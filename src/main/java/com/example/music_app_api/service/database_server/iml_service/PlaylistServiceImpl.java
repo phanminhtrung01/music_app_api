@@ -219,7 +219,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<PlaylistDto> getPlayListByUser(String idUser) {
         userService.getUserById(idUser);
         ObjectMapper mapper = new ObjectMapper();

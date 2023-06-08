@@ -6,6 +6,7 @@ import com.example.music_app_api.repo.GenreRepository;
 import com.example.music_app_api.service.database_server.GenreService;
 import com.example.music_app_api.service.database_server.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class GenreServiceImpl implements GenreService {
     private final SongService songService;
 
     @Autowired
+    @Lazy
     public GenreServiceImpl(
             GenreRepository genreRepository,
             SongService songService) {

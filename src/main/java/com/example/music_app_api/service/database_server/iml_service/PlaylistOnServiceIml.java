@@ -40,7 +40,7 @@ public class PlaylistOnServiceIml implements PlaylistOnService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<PlaylistOnline> getPlaylistOns(int count) {
         List<PlaylistOnline> playlistsOnline = playlistOnRepository.findAll();
         int min = Math.min(count, playlistsOnline.size());

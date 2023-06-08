@@ -1,7 +1,10 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
 import com.example.music_app_api.component.enums.TypeSong;
-import com.example.music_app_api.entity.*;
+import com.example.music_app_api.entity.Charts;
+import com.example.music_app_api.entity.Song;
+import com.example.music_app_api.entity.SourceSong;
+import com.example.music_app_api.entity.User;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.repo.SongRepository;
@@ -201,14 +204,14 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsByPlayList(String idPlaylist) {
         playlistService.getById(idPlaylist);
         return songRepository.getSongsByPlaylist(idPlaylist);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsByPlayListOn(String idPlaylistOn) {
         playlistOnService.getPlaylistOnById(idPlaylistOn);
 
@@ -216,7 +219,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsOfChart(String idChart) {
         chartsService.getChartById(idChart);
 
@@ -224,14 +227,14 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsByGenre(String idGenre) {
         genreService.getGenreById(idGenre);
         return songRepository.getSongsByGenre(idGenre);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsByArtist(String idArtist, int count) {
         artistService.getArtist(idArtist);
         Pageable pageable = PageRequest.of(1, count);
@@ -239,7 +242,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Song> getSongsByIdUser(
             String idUser, TypeSong typeSong) {
         try {
@@ -365,17 +368,5 @@ public class SongServiceImpl implements SongService {
                 throw new RuntimeException(e.getMessage());
             }
         }
-    }
-
-    @Override
-    @Transactional
-    public List<Artist> getArtistByIdSong(String idSong) {
-        return artistService.getArtistByIdSong(idSong);
-    }
-
-    @Override
-    @Transactional
-    public List<Genre> getGenresByIdSong(String idSong) {
-        return genreService.getGenresByIdSong(idSong);
     }
 }

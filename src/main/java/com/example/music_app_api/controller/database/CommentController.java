@@ -235,7 +235,14 @@ public class CommentController {
                             notFoundException.getMessage(),
                             null));
         } catch (RuntimeException runtimeException) {
-            return ResponseEntity
+            return runtimeException.getMessage().contains("constraint")
+                    ? ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ResponseObject(
+                            HttpStatus.CONFLICT.value(),
+                            "User liked this comment!",
+                            null))
+                    : ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),

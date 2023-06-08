@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
         if (newName.isEmpty() || isValidUsername(newName)) {
             throw new RuntimeException("Invalid Name!");
         }
-        if (newUsername.isEmpty() || !isValidUsername(newUsername)) {
+        if (newUsername.isEmpty() || isValidUsername(newUsername)) {
             throw new RuntimeException("Invalid Username!");
         }
         if (newGender.isEmpty() || !isValidGenre(newGender)) {
@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean isValidDate(String dateString) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         dateFormat.setLenient(false);
         try {
             dateFormat.parse(dateString);
@@ -159,13 +159,14 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private boolean isValidGenre(String dateString) {
-        return dateString.contains("female") || dateString.contains("male");
+    private boolean isValidGenre(@NotNull String dateString) {
+        return dateString.equalsIgnoreCase("male")
+                || dateString.equalsIgnoreCase("female");
     }
 
     private boolean isValidUsername(String username) {
         String regex = "^[a-zA-Z]\\w*$";
-        return username != null && username.matches(regex);
+        return username == null || !username.matches(regex);
     }
 
     private boolean isValidPhoneNumber(String phoneNumber) {

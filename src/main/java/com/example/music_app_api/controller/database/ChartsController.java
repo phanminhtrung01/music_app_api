@@ -98,12 +98,12 @@ public class ChartsController {
                             HttpStatus.CREATED.value(),
                             "Query add chart successful!",
                             chartsPar));
-        } catch (Exception e) {
+        } catch (RuntimeException runtimeException) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
+                            runtimeException.getMessage(),
                             null));
         }
     }

@@ -45,12 +45,19 @@ public class SearchController {
                             HttpStatus.NOT_FOUND.value(),
                             notFoundException.getMessage(),
                             null));
-        } catch (Exception e) {
-            return ResponseEntity
+        } catch (RuntimeException runtimeException) {
+            return runtimeException.getMessage().contains("constraint")
+                    ? ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ResponseObject(
+                            HttpStatus.CONFLICT.value(),
+                            "Artist already in favorites",
+                            null))
+                    : ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
+                            runtimeException.getMessage(),
                             null));
         }
     }

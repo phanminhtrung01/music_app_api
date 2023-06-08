@@ -104,7 +104,7 @@ public class SearchServiceIml implements SearchService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Search> getSearchesByIdUser(String idUser) {
         try {
             Optional<User> userOptional = userRepository.findById(idUser);
