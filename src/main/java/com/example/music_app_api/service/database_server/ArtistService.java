@@ -9,6 +9,8 @@ public interface ArtistService {
 
     List<Artist> getArtistsByNameOrRealName(String name, String realName, int count);
 
+    Artist getArtistById(String idArtist);
+
     Artist getArtist(String idArtist);
 
     List<Artist> getArtistByIdSong(String idSong);

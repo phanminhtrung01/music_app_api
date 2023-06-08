@@ -1,40 +1,45 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
 import com.example.music_app_api.entity.Artist;
-import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
 import com.example.music_app_api.exception.NotFoundException;
+import com.example.music_app_api.model.InfoArtist;
 import com.example.music_app_api.repo.ArtistRepository;
-import com.example.music_app_api.repo.SongRepository;
-import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.ArtistService;
+import com.example.music_app_api.service.database_server.SongService;
+import com.example.music_app_api.service.database_server.UserService;
+import com.example.music_app_api.service.song_request.InfoRequestService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ArtistServiceImpl implements ArtistService {
     private final ArtistRepository artistRepository;
-    private final UserRepository userRepository;
-    private final SongRepository songRepository;
+    private final UserService userService;
+    private final SongService songService;
+    private final InfoRequestService infoRequestService;
 
     @Autowired
     public ArtistServiceImpl(
             ArtistRepository artistRepository,
-            UserRepository userRepository,
-            SongRepository songRepository) {
+            UserService userService,
+            SongService songService,
+            InfoRequestService infoRequestService) {
         this.artistRepository = artistRepository;
-        this.userRepository = userRepository;
-        this.songRepository = songRepository;
+        this.userService = userService;
+        this.songService = songService;
+        this.infoRequestService = infoRequestService;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Artist> getAllArtist() {
         try {
             return artistRepository.findAll();
@@ -48,7 +53,7 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Artist> getArtistsByNameOrRealName(
             String name, String realName, int count) {
         Pageable topTen = PageRequest.of(1, count);
@@ -56,7 +61,7 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    public Artist getArtist(String idArtist) {
+    public Artist getArtistById(String idArtist) {
         try {
             Optional<Artist> artistOptional = artistRepository.findById(idArtist);
             if (artistOptional.isEmpty()) {
@@ -73,14 +78,38 @@ public class ArtistServiceImpl implements ArtistService {
         }
     }
 
+    public Artist getArtist(@NotNull String idArtist) {
+        Artist artist;
+        if (idArtist.startsWith("A")) {
+            artist = getArtistById(idArtist);
+        } else {
+
+            Optional<InfoArtist> infoArtistOptional = infoRequestService
+                    .getInfoArtist(idArtist, true);
+            if (infoArtistOptional.isEmpty()) {
+                throw new NotFoundException("Not fount artist with ID: " + idArtist);
+            }
+            InfoArtist infoArtist = infoArtistOptional.get();
+            Optional<Artist> artistOptional = artistRepository
+                    .findByNameAndBirthday(infoArtist.getName(), infoArtist.getBirthday());
+
+            artist = artistOptional.orElseGet(() -> new Artist(
+                    infoArtist.getName(),
+                    infoArtist.getBirthday(),
+                    infoArtist.getThumbnail(),
+                    infoArtist.getSortBiography()
+            ));
+
+        }
+        return artist;
+    }
+
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Artist> getArtistByIdSong(String idSong) {
         try {
-            Optional<Song> songOptional = songRepository.findById(idSong);
-            if (songOptional.isEmpty()) {
-                throw new NotFoundException("Not fount song with ID: " + idSong);
-            }
+            songService.getSong(idSong);
+
             return artistRepository.getArtistsBySong(idSong);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
@@ -108,7 +137,7 @@ public class ArtistServiceImpl implements ArtistService {
     @Override
     public Artist delete(String idArtist) {
         try {
-            Artist artist = getArtist(idArtist);
+            Artist artist = getArtistById(idArtist);
             artistRepository.delete(artist);
 
             return artist;
@@ -122,20 +151,16 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
+    @Transactional
     public Artist addArtistToFavoriteArtist(
             String idArtist, String idUser) {
         try {
             Artist artist = getArtist(idArtist);
-            Optional<User> userOptional = userRepository.findById(idUser);
+            User user = userService.getUserById(idUser);
 
-            if (userOptional.isEmpty()) {
-                throw new NotFoundException("Not fount user with ID: " + idUser);
-            }
-
-            User user = userOptional.get();
             artist.getUsers().add(user);
             user.getFavoriteArtists().add(artist);
-            userRepository.save(user);
+            userService.save(user);
 
             return artist;
         } catch (Exception e) {
@@ -148,20 +173,15 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
+    @Transactional
     public Artist removeArtistFromFavoriteArtist(
             String idArtist, String idUser) {
         try {
-            File file = new File("URI");
             Artist artist = getArtist(idArtist);
-            Optional<User> userOptional = userRepository.findById(idUser);
+            User user = userService.getUserById(idUser);
 
-            if (userOptional.isEmpty()) {
-                throw new RuntimeException("Not fount user with ID: " + idUser);
-            }
-
-            User user = userOptional.get();
             user.getFavoriteArtists().remove(artist);
-            userRepository.save(user);
+            userService.save(user);
 
             return artist;
         } catch (Exception e) {

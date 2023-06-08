@@ -14,14 +14,14 @@ import java.util.Optional;
 
 public interface InfoRequestService {
 
-    Optional<InfoSong> getInfoSong(String idSong);
+    Optional<InfoSong> getInfoSong(String idSong, boolean isFast);
 
     Optional<InfoSourceSong> getInfoSourceSong(
             BasicNameValuePair nameValuePair);
 
     Optional<InfoAlbum> getInfoAlbum(String idAlbum);
 
-    Optional<InfoArtist> getInfoArtist(String idArtist);
+    Optional<InfoArtist> getInfoArtist(String idArtist, boolean isFast);
 
     Optional<InfoGenre> getInfoGenre(String idGenre);
 

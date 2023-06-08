@@ -10,9 +10,9 @@ public interface SearchService {
 
     boolean deleteSearchAllByIdUser(String idUser);
 
-    Search deleteSearch(Long idSearch);
+    Search deleteSearch(String idSearch);
 
-    Search getSearchById(Long idSearch);
+    Search getSearchById(String idSearch);
 
     List<Search> getSearchesByIdUser(String idUser);
 }

@@ -1,11 +1,10 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
 import com.example.music_app_api.entity.Genre;
-import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.repo.GenreRepository;
-import com.example.music_app_api.repo.SongRepository;
 import com.example.music_app_api.service.database_server.GenreService;
+import com.example.music_app_api.service.database_server.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +14,14 @@ import java.util.Optional;
 @Service
 public class GenreServiceImpl implements GenreService {
     private final GenreRepository genreRepository;
-    private final SongRepository songRepository;
+    private final SongService songService;
 
     @Autowired
     public GenreServiceImpl(
             GenreRepository genreRepository,
-            SongRepository songRepository) {
+            SongService songService) {
         this.genreRepository = genreRepository;
-        this.songRepository = songRepository;
+        this.songService = songService;
     }
 
 
@@ -42,10 +41,8 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public List<Genre> getGenresByIdSong(String idSong) {
         try {
-            Optional<Song> songOptional = songRepository.findById(idSong);
-            if (songOptional.isEmpty()) {
-                throw new NotFoundException("Not fount song with ID: " + idSong);
-            }
+            songService.getSong(idSong);
+
             return genreRepository.getGenresBySong(idSong);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {

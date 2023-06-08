@@ -62,7 +62,8 @@ public class ImlInfoRequest implements InfoRequestService {
     }
 
     @Override
-    public Optional<InfoSong> getInfoSong(@NotNull String idSong) {
+    public Optional<InfoSong> getInfoSong(
+            @NotNull String idSong, boolean isFast) {
         InfoSong infoSong;
         ObjectMapper mapper = new ObjectMapper();
         if (idSong.startsWith("S")) {
@@ -102,24 +103,27 @@ public class ImlInfoRequest implements InfoRequestService {
 
                 infoSong = mapper
                         .readValue(jsonData.toString(), InfoSong.class);
-                List<String> genresId = infoSong.getIdGenres();
-                List<String> genresNames = new ArrayList<>();
 
-                genresId.forEach(genreId -> {
-                    try {
-                        final JSONObject jsonData1 = appManager
-                                .getDataRequest(
-                                        HostApi.uriHostApiV2,
-                                        GetInfo.infoGenre,
-                                        Map.of("id", genreId),
-                                        Map.of(), false, true);
+                if (!isFast) {
+                    List<String> genresId = infoSong.getIdGenres();
+                    List<String> genresNames = new ArrayList<>();
 
-                        genresNames.add(jsonData1.getString("name"));
-                    } catch (Exception ignore) {
-                    }
-                });
+                    genresId.forEach(genreId -> {
+                        try {
+                            final JSONObject jsonData1 = appManager
+                                    .getDataRequest(
+                                            HostApi.uriHostApiV2,
+                                            GetInfo.infoGenre,
+                                            Map.of("id", genreId),
+                                            Map.of(), false, true);
 
-                infoSong.setGenresNames(String.join(", ", genresNames));
+                            genresNames.add(jsonData1.getString("name"));
+                        } catch (Exception ignore) {
+                        }
+                    });
+
+                    infoSong.setGenresNames(String.join(", ", genresNames));
+                }
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -225,7 +229,7 @@ public class ImlInfoRequest implements InfoRequestService {
     }
 
     @Override
-    public Optional<InfoArtist> getInfoArtist(@NotNull String idArtist) {
+    public Optional<InfoArtist> getInfoArtist(@NotNull String idArtist, boolean idFast) {
 
         final ObjectMapper mapper = new ObjectMapper();
         if (idArtist.startsWith("A")) {
@@ -256,47 +260,49 @@ public class ImlInfoRequest implements InfoRequestService {
 
                 final InfoArtist infoArtist = mapper
                         .readValue(jsonData.toString(), InfoArtist.class);
-                final JSONArray itemSections = jsonData.getJSONArray("sections");
 
-                itemSections.forEach(itemSection -> {
-                    JSONObject jsonObject = (JSONObject) itemSection;
-                    if (jsonObject.getString("sectionType")
-                            .equals(SearchField.song.name())) {
-                        final JSONArray itemSong = jsonObject.getJSONArray("items");
-                        List<InfoSong> infoSongs = null;
-                        try {
-                            infoSongs = mapper.readValue(itemSong.toString(),
-                                    new TypeReference<>() {
-                                    });
-                        } catch (Exception ignore) {
-
-                        }
-
-                        infoArtist.setSongs(infoSongs);
-                    }
-
-                    List<InfoAlbum> infoAlbums = new ArrayList<>();
-                    if (jsonObject.getString("sectionType")
-                            .equals(SearchField.playlist.name())) {
-                        final String sectionType = jsonObject.getString("sectionType");
-                        final JSONArray itemAlbum = jsonObject.getJSONArray("items");
-                        if (sectionType.equals(SearchField.playlist.name())) {
-                            List<InfoAlbum> infoAlbumsT;
+                if (!idFast) {
+                    final JSONArray itemSections = jsonData.getJSONArray("sections");
+                    itemSections.forEach(itemSection -> {
+                        JSONObject jsonObject = (JSONObject) itemSection;
+                        if (jsonObject.getString("sectionType")
+                                .equals(SearchField.song.name())) {
+                            final JSONArray itemSong = jsonObject.getJSONArray("items");
+                            List<InfoSong> infoSongs = null;
                             try {
-                                infoAlbumsT = mapper.readValue(itemAlbum.toString(),
+                                infoSongs = mapper.readValue(itemSong.toString(),
                                         new TypeReference<>() {
                                         });
-                                infoAlbums.addAll(infoAlbumsT);
                             } catch (Exception ignore) {
+
                             }
 
+                            infoArtist.setSongs(infoSongs);
                         }
-                    }
-                    if (infoArtist.getAlbums() == null) {
-                        infoArtist.setAlbums(infoAlbums);
-                    }
-                    infoArtist.getAlbums().addAll(infoAlbums);
-                });
+
+                        List<InfoAlbum> infoAlbums = new ArrayList<>();
+                        if (jsonObject.getString("sectionType")
+                                .equals(SearchField.playlist.name())) {
+                            final String sectionType = jsonObject.getString("sectionType");
+                            final JSONArray itemAlbum = jsonObject.getJSONArray("items");
+                            if (sectionType.equals(SearchField.playlist.name())) {
+                                List<InfoAlbum> infoAlbumsT;
+                                try {
+                                    infoAlbumsT = mapper.readValue(itemAlbum.toString(),
+                                            new TypeReference<>() {
+                                            });
+                                    infoAlbums.addAll(infoAlbumsT);
+                                } catch (Exception ignore) {
+                                }
+
+                            }
+                        }
+                        if (infoArtist.getAlbums() == null) {
+                            infoArtist.setAlbums(infoAlbums);
+                        }
+                        infoArtist.getAlbums().addAll(infoAlbums);
+                    });
+                }
 
                 log.info(infoArtist.toString());
                 return Optional.of(infoArtist);

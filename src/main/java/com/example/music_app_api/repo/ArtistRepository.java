@@ -7,10 +7,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ArtistRepository extends JpaRepository<Artist, String> {
 
+    @Query(
+            value = """
+                    SELECT a FROM Artist a
+                    WHERE a.name = ?1
+                    AND a.birthday = ?2
+                    """
+    )
+    Optional<Artist> findByNameAndBirthday(String name, String birthday);
+    
     @Query(
             value = """
                     SELECT * FROM artist

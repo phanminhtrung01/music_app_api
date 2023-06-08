@@ -70,7 +70,8 @@ public class LyricServiceImpl implements LyricService {
 
     @Override
     public Lyric getLyricByIdSong(String idSong) {
-        songService.getById(idSong);
+        songService.getSong(idSong);
+
         Optional<Lyric> lyric = lyricRepo.findBySong(idSong);
 
         if (lyric.isPresent()) {

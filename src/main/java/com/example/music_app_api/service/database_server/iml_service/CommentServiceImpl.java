@@ -10,6 +10,7 @@ import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.database_server.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +37,7 @@ public class CommentServiceImpl implements CommentService {
             Comment comment, String idUser, String idSong) {
         try {
             User user = userService.getUserById(idUser);
-            Song song = songService.getById(idSong);
+            Song song = songService.getSong(idSong);
 
             comment.setUser(user);
             comment.setSong(song);
@@ -87,6 +88,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Comment> getCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);
@@ -101,9 +103,10 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Comment> getCommentsBySong(String idSong) {
         try {
-            songService.getById(idSong);
+            songService.getSong(idSong);
             return commentRepository.getCommentsBySong(idSong);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
@@ -115,11 +118,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Comment> getCommentsByUserAndSong(
             String idUser, String idSong) {
         try {
             userService.getUserById(idUser);
-            songService.getById(idSong);
+            songService.getSong(idSong);
             return commentRepository.getCommentsByUserAndSong(idUser, idSong);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
@@ -168,6 +172,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Comment> getLikeCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);

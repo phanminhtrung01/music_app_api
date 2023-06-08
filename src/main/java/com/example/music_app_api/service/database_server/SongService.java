@@ -40,6 +40,8 @@ public interface SongService {
 
     Song addSongToSongs(String idSong, String idUser, TypeSong typeSong);
 
+    Song getSong(String idSong);
+
     Song removeSongFromSongs(String idSong, String idUser, TypeSong typeSong);
 
     Song removeSongFromChart(String idSong, String idChart);

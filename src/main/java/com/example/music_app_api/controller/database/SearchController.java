@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/pmdv/db/search/")
@@ -27,12 +26,10 @@ public class SearchController {
 
     @PostMapping("add")
     public ResponseEntity<ResponseObject> addSearch(
-            @RequestBody Map<String, String> map) {
+            @RequestParam("idUser") String idUser,
+            @RequestBody Search search) {
         try {
-            String key = map.get("key");
-            String idUser = map.get("id_user");
-            Search search = new Search();
-            search.setKey(key);
+
             Search searchPar = searchService.addSearch(search, idUser);
 
             return ResponseEntity
@@ -40,6 +37,36 @@ public class SearchController {
                     .body(new ResponseObject(
                             HttpStatus.CREATED.value(),
                             "Query add search successful!",
+                            searchPar));
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
+    @DeleteMapping("delete")
+    public ResponseEntity<ResponseObject> deleteSearch(
+            @RequestParam("idSearch") String idSearch) {
+        try {
+
+            Search searchPar = searchService.deleteSearch(idSearch);
+
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new ResponseObject(
+                            HttpStatus.CREATED.value(),
+                            "Query remove search successful!",
                             searchPar));
         } catch (NotFoundException notFoundException) {
             return ResponseEntity

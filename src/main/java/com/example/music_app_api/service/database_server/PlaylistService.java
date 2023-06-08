@@ -9,23 +9,23 @@ import java.util.List;
 public interface PlaylistService {
     List<PlaylistDto> getPlayListByUser(String idUser);
 
-    Playlist save(Playlist playlist);
+    PlaylistDto save(Playlist playlist);
 
-    Playlist addUserToPlaylist(String idUser, Playlist playlist);
+    PlaylistDto addUserToPlaylist(String idUser, Playlist playlist);
 
-    Playlist removeUserFromPlaylist(String idUser, String idPlaylist);
+    PlaylistDto removeUserFromPlaylist(String idUser, String idPlaylist);
 
-    Playlist addSongToPlaylist(String idSong, String idPlaylist);
+    PlaylistDto addSongToPlaylist(String idSong, String idPlaylist);
 
-    Playlist removeSongFromPlaylist(String idSong, String idPlaylist);
+    PlaylistDto removeSongFromPlaylist(String idSong, String idPlaylist);
 
     Boolean addSongsToPlaylist(List<String> idSongs, String idPlaylist);
 
-    Playlist removeSongsFromPlaylist(List<String> idSongs, String idPlaylist);
+    PlaylistDto removeSongsFromPlaylist(List<String> idSongs, String idPlaylist);
 
-    Playlist removeAllSongsFromPlaylist(String idPlaylist);
+    PlaylistDto removeAllSongsFromPlaylist(String idPlaylist);
 
-    Playlist delete(String id);
+    PlaylistDto delete(String id);
 
     Playlist getById(String playlistId);
 }

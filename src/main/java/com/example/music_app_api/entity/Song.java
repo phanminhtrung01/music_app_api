@@ -19,6 +19,18 @@ import java.util.Random;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Song {
+
+    public Song(
+            String id, String title,
+            String artistsNames,
+            String thumbnail, int duration) {
+        this.idSong = id;
+        this.title = title;
+        this.artistsNames = artistsNames;
+        this.thumbnail = thumbnail;
+        this.duration = duration;
+    }
+
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int ID_LENGTH = 7;
 
@@ -27,6 +39,7 @@ public class Song {
     private String idSong;
     @Column(
             name = "title",
+            nullable = false,
             columnDefinition =
                     "TEXT, FULLTEXT KEY titleFulltext (title)")
     private String title;

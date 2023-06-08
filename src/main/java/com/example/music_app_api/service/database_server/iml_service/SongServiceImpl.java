@@ -3,9 +3,12 @@ package com.example.music_app_api.service.database_server.iml_service;
 import com.example.music_app_api.component.enums.TypeSong;
 import com.example.music_app_api.entity.*;
 import com.example.music_app_api.exception.NotFoundException;
+import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.repo.SongRepository;
 import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.*;
+import com.example.music_app_api.service.song_request.InfoRequestService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +28,7 @@ public class SongServiceImpl implements SongService {
     private final PlaylistOnService playlistOnService;
     private final ChartsService chartsService;
     private final SourceSongService sourceSongService;
+    private final InfoRequestService infoRequestService;
 
     @Autowired
     public SongServiceImpl(
@@ -35,7 +39,8 @@ public class SongServiceImpl implements SongService {
             PlaylistService playlistService,
             PlaylistOnService playlistOnService,
             ChartsService chartsService,
-            SourceSongService sourceSongService) {
+            SourceSongService sourceSongService,
+            InfoRequestService infoRequestService) {
         this.songRepository = songRepository;
         this.artistService = artistService;
         this.userRepository = userRepository;
@@ -44,9 +49,11 @@ public class SongServiceImpl implements SongService {
         this.playlistOnService = playlistOnService;
         this.chartsService = chartsService;
         this.sourceSongService = sourceSongService;
+        this.infoRequestService = infoRequestService;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Song> getAllSongs() {
         try {
             return songRepository.findAll();
@@ -60,6 +67,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Song> getSongsDB(int count) {
         List<Song> songs = getAllSongs();
         int min = Math.min(count, songs.size());
@@ -67,6 +75,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Song> getSongsByTitle(String title, int count) {
         try {
             Pageable pageable = PageRequest.of(count, 1);
@@ -149,12 +158,57 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public Song getSong(@NotNull String idSong) {
+        Song song;
+        if (idSong.startsWith("S")) {
+            song = getById(idSong);
+        } else {
+
+            Optional<InfoSong> infoSongOptional = infoRequestService.getInfoSong(idSong, true);
+            if (infoSongOptional.isEmpty()) {
+                throw new NotFoundException("Not fount song with ID: " + idSong);
+            }
+            InfoSong infoSong = infoSongOptional.get();
+            Optional<Song> songDB = getByAllParameter(
+                    infoSong.getTitle(),
+                    infoSong.getArtistsNames(),
+                    Integer.parseInt(infoSong.getDuration()));
+            System.out.println();
+            song = songDB.orElseGet(() -> new Song(
+                    infoSong.getId(),
+                    infoSong.getTitle(),
+                    infoSong.getArtistsNames(),
+                    infoSong.getThumbnail(),
+                    Integer.parseInt(infoSong.getDuration())));
+
+        }
+        return song;
+    }
+
+    private Optional<Song> getByAllParameter(
+            String title, String artistsNames, int duration) {
+        try {
+
+            return songRepository
+                    .findByTitleAndArtistsNamesAndDuration(title, artistsNames, duration);
+        } catch (Exception e) {
+            if (e instanceof NotFoundException) {
+                throw new NotFoundException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Song> getSongsByPlayList(String idPlaylist) {
         playlistService.getById(idPlaylist);
         return songRepository.getSongsByPlaylist(idPlaylist);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Song> getSongsByPlayListOn(String idPlaylistOn) {
         playlistOnService.getPlaylistOnById(idPlaylistOn);
 
@@ -162,17 +216,22 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Song> getSongsOfChart(String idChart) {
+        chartsService.getChartById(idChart);
+
         return songRepository.getSongsByChart(idChart);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Song> getSongsByGenre(String idGenre) {
         genreService.getGenreById(idGenre);
         return songRepository.getSongsByGenre(idGenre);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Song> getSongsByArtist(String idArtist, int count) {
         artistService.getArtist(idArtist);
         Pageable pageable = PageRequest.of(1, count);
@@ -180,6 +239,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Song> getSongsByIdUser(
             String idUser, TypeSong typeSong) {
         try {
@@ -210,7 +270,7 @@ public class SongServiceImpl implements SongService {
     public Song addSongToChart(
             String idSong, String idChart) {
         try {
-            Song song = getById(idSong);
+            Song song = getSong(idSong);
             Charts charts = chartsService.getChartById(idChart);
             song.setChart(charts);
             return song;
@@ -228,7 +288,7 @@ public class SongServiceImpl implements SongService {
             String idSong, String idChart) {
 
         try {
-            Song song = getById(idSong);
+            Song song = getSong(idSong);
             chartsService.getChartById(idChart);
             song.setChart(null);
             return song;
@@ -246,18 +306,13 @@ public class SongServiceImpl implements SongService {
     public Song addSongToSongs(
             String idSong, String idUser, TypeSong typeSong) {
         try {
-            Optional<Song> songOptional = songRepository.findById(idSong);
+            Song song = getSong(idSong);
             Optional<User> userOptional = userRepository.findById(idUser);
-
-            if (songOptional.isEmpty()) {
-                throw new NotFoundException("Not fount song with ID: " + idSong);
-            }
 
             if (userOptional.isEmpty()) {
                 throw new NotFoundException("Not fount user with ID: " + idUser);
             }
 
-            Song song = songOptional.get();
             User user = userOptional.get();
 
             switch (typeSong) {
@@ -287,18 +342,13 @@ public class SongServiceImpl implements SongService {
     public Song removeSongFromSongs(
             String idSong, String idUser, TypeSong typeSong) {
         try {
-            Optional<Song> songOptional = songRepository.findById(idSong);
+            Song song = getSong(idSong);
             Optional<User> userOptional = userRepository.findById(idUser);
-
-            if (songOptional.isEmpty()) {
-                throw new NotFoundException("Not fount song with ID: " + idSong);
-            }
 
             if (userOptional.isEmpty()) {
                 throw new NotFoundException("Not fount user with ID: " + idUser);
             }
 
-            Song song = songOptional.get();
             User user = userOptional.get();
 
             switch (typeSong) {

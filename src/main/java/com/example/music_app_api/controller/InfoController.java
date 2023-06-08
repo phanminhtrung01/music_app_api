@@ -39,7 +39,7 @@ public class InfoController {
 
         try {
             final Optional<InfoSong> infoSong = infoRequestService
-                    .getInfoSong(idSong);
+                    .getInfoSong(idSong, false);
 
             return infoSong.map(song -> ResponseEntity
                     .status(HttpStatus.OK)
@@ -106,7 +106,7 @@ public class InfoController {
 
         try {
             final Optional<InfoArtist> infoArtist = infoRequestService
-                    .getInfoArtist(idArtist);
+                    .getInfoArtist(idArtist, false);
             return infoArtist.map(artist -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(

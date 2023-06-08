@@ -16,6 +16,16 @@ import java.util.Random;
 @Setter
 @ToString
 public class Artist {
+
+    public Artist(
+            String name, String birthday,
+            String thumbnail, String sortBiography) {
+        this.name = name;
+        this.birthday = birthday;
+        this.thumbnail = thumbnail;
+        this.sortBiography = sortBiography;
+    }
+
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int ID_LENGTH = 7;
     @Id

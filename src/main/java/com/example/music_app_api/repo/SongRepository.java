@@ -14,6 +14,15 @@ public interface SongRepository extends JpaRepository<Song, String> {
 
     @Query("""
             SELECT s FROM Song s
+            WHERE s.title = ?1
+            AND s.artistsNames = ?2
+            AND s.duration = ?3
+            """
+    )
+    Optional<Song> findByTitleAndArtistsNamesAndDuration(String title, String artistsNames, int duration);
+
+    @Query("""
+            SELECT s FROM Song s
             WHERE LOWER(s.title)
             LIKE LOWER(CONCAT('%', ?1, '%'))
             """

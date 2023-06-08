@@ -6,9 +6,9 @@ import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.repo.PlaylistRepository;
-import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.PlaylistService;
 import com.example.music_app_api.service.database_server.SongService;
+import com.example.music_app_api.service.database_server.UserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
@@ -24,22 +24,23 @@ import java.util.Optional;
 public class PlaylistServiceImpl implements PlaylistService {
 
     private final PlaylistRepository playlistRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final SongService songService;
 
     @Autowired
     @Lazy
     public PlaylistServiceImpl(
             PlaylistRepository playlistRepository,
-            UserRepository userRepository,
+            UserService userService,
             SongService songService) {
         this.playlistRepository = playlistRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.songService = songService;
     }
 
     @Override
-    public Playlist save(Playlist playlist) {
+    public PlaylistDto save(Playlist playlist) {
+        ObjectMapper mapper = new ObjectMapper();
         try {
             playlistRepository.save(playlist);
         } catch (Exception e) {
@@ -49,16 +50,18 @@ public class PlaylistServiceImpl implements PlaylistService {
                 throw new RuntimeException(e.getMessage());
             }
         }
-        return playlist;
+        return mapper.convertValue(playlist, PlaylistDto.class);
     }
 
     @Override
-    public Playlist delete(String id) {
+    public PlaylistDto delete(String id) {
+        ObjectMapper mapper = new ObjectMapper();
+
         try {
             Playlist playlist = getById(id);
             playlistRepository.delete(playlist);
 
-            return playlist;
+            return mapper.convertValue(playlist, PlaylistDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -70,17 +73,16 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     @Transactional
-    public Playlist addUserToPlaylist(
+    public PlaylistDto addUserToPlaylist(
             String idUser, Playlist playlist) {
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            Optional<User> user = userRepository.findById(idUser);
-            if (user.isPresent()) {
-                playlist.setUser(user.get());
-                playlistRepository.save(playlist);
-                return playlist;
-            } else {
-                throw new NotFoundException("Not fount user with ID: " + idUser);
-            }
+            User user = userService.getUserById(idUser);
+
+            playlist.setUser(user);
+            playlistRepository.save(playlist);
+
+            return mapper.convertValue(playlist, PlaylistDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -92,20 +94,19 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     @Transactional
-    public Playlist removeUserFromPlaylist(
+    public PlaylistDto removeUserFromPlaylist(
             String idUser, String idPlaylist) {
-        try {
-            Optional<User> user = userRepository.findById(idUser);
-            if (user.isPresent()) {
-                Playlist playlist = getById(idPlaylist);
-                playlist.setSongs(null);
-                playlist.setUser(null);
-                playlistRepository.deleteById(playlist.getIdPlaylist());
+        ObjectMapper mapper = new ObjectMapper();
 
-                return playlist;
-            } else {
-                throw new RuntimeException("Not fount user with ID: " + idUser);
-            }
+        try {
+            userService.getUserById(idUser);
+
+            Playlist playlist = getById(idPlaylist);
+            playlist.setSongs(null);
+            playlist.setUser(null);
+            playlistRepository.deleteById(playlist.getIdPlaylist());
+
+            return mapper.convertValue(playlist, PlaylistDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -117,17 +118,18 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     @Transactional
-    public Playlist addSongToPlaylist(
+    public PlaylistDto addSongToPlaylist(
             String idSong, String idPlaylist) {
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            Song song = songService.getById(idSong);
+            Song song = songService.getSong(idSong);
             Playlist playlist = getById(idPlaylist);
 
             song.getPlaylistsOfSong().add(playlist);
             playlist.getSongs().add(song);
             playlistRepository.save(playlist);
 
-            return playlist;
+            return mapper.convertValue(playlist, PlaylistDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -139,10 +141,11 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     @Transactional
-    public Playlist removeSongFromPlaylist(
+    public PlaylistDto removeSongFromPlaylist(
             String idSong, String idPlaylist) {
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            Song song = songService.getById(idSong);
+            Song song = songService.getSong(idSong);
             Playlist playlist = getById(idPlaylist);
 
             if (playlist.getSongs().isEmpty()) {
@@ -154,7 +157,7 @@ public class PlaylistServiceImpl implements PlaylistService {
             playlist.getSongs().remove(song);
             playlistRepository.save(playlist);
 
-            return playlist;
+            return mapper.convertValue(playlist, PlaylistDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -172,16 +175,19 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Override
     @Transactional
-    public Playlist removeSongsFromPlaylist(
+    public PlaylistDto removeSongsFromPlaylist(
             @NotNull List<String> idSongs, String idPlaylist) {
+        ObjectMapper mapper = new ObjectMapper();
+
         Playlist playlist = getById(idPlaylist);
         idSongs.forEach(idSong -> removeSongFromPlaylist(idSong, idPlaylist));
 
-        return playlist;
+        return mapper.convertValue(playlist, PlaylistDto.class);
     }
 
     @Override
-    public Playlist removeAllSongsFromPlaylist(String idPlaylist) {
+    public PlaylistDto removeAllSongsFromPlaylist(String idPlaylist) {
+        ObjectMapper mapper = new ObjectMapper();
         Playlist playlist = getById(idPlaylist);
 
         if (playlist.getSongs().isEmpty()) {
@@ -191,7 +197,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         playlist.getSongs().clear();
         playlistRepository.save(playlist);
 
-        return playlist;
+        return mapper.convertValue(playlist, PlaylistDto.class);
     }
 
     @Override
@@ -213,15 +219,13 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PlaylistDto> getPlayListByUser(String idUser) {
-        Optional<User> user = userRepository.findById(idUser);
+        userService.getUserById(idUser);
         ObjectMapper mapper = new ObjectMapper();
-        if (user.isPresent()) {
-            List<Playlist> playlistsDto = playlistRepository.findByUser(idUser);
-            return mapper.convertValue(playlistsDto, new TypeReference<>() {
-            });
-        } else {
-            throw new RuntimeException("Not fount user with ID: " + idUser);
-        }
+
+        List<Playlist> playlists = playlistRepository.findByUser(idUser);
+        return mapper.convertValue(playlists, new TypeReference<>() {
+        });
     }
 }

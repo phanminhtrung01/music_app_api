@@ -5,6 +5,7 @@ import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.repo.PlaylistOnRepository;
 import com.example.music_app_api.service.database_server.PlaylistOnService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,7 @@ public class PlaylistOnServiceIml implements PlaylistOnService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PlaylistOnline> getPlaylistOns(int count) {
         List<PlaylistOnline> playlistsOnline = playlistOnRepository.findAll();
         int min = Math.min(count, playlistsOnline.size());

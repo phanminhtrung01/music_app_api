@@ -8,11 +8,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SearchRepository extends JpaRepository<Search, Long> {
+public interface SearchRepository extends JpaRepository<Search, String> {
     @Query(
             value = """
-                    select * from history_search
-                    where id_user = ?1
-                    """, nativeQuery = true)
+                    SELECT s FROM Search s
+                    JOIN s.user u
+                    WHERE u.idUser = ?1
+                    """)
     List<Search> getSearchesByUser(String idUser);
 }
