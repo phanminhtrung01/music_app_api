@@ -114,8 +114,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     private void isValidPlaylist(@NotNull Playlist playlist) {
         String name = playlist.getName();
         boolean check;
-        String regex = "^[a-zA-Z]\\w*$";
-        check = name == null || name.isEmpty() || !name.matches(regex);
+        check = name == null || name.isBlank();
 
         if (check) {
             throw new RuntimeException("Invalid Name Playlist!");
