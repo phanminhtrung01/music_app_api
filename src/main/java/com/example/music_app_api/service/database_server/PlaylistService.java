@@ -21,6 +21,8 @@ public interface PlaylistService {
 
     Boolean addSongsToPlaylist(List<String> idSongs, String idPlaylist);
 
+    Playlist removeSongsFromPlaylist(List<String> idSongs, String idPlaylist);
+
     Playlist removeAllSongsFromPlaylist(String idPlaylist);
 
     Playlist delete(String id);

@@ -191,6 +191,59 @@ public class PlaylistController {
         }
     }
 
+    @DeleteMapping("delete/songs_from_playlist")
+    public ResponseEntity<ResponseObject> removeSongsFromPlaylist(
+            @RequestBody List<String> idSongs,
+            @RequestParam("idPlaylist") String idPlaylist) {
+        try {
+
+            if (idSongs == null) {
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ResponseObject(
+                                HttpStatus.OK.value(),
+                                "List song not found!",
+                                null)
+                        );
+            }
+
+            if (idSongs.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ResponseObject(
+                                HttpStatus.OK.value(),
+                                "List song empty!",
+                                null)
+                        );
+            }
+
+            Playlist playlist = playlistService
+                    .removeSongsFromPlaylist(idSongs, idPlaylist);
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Query remove songs from playlist successful!",
+                            playlist)
+                    );
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
     @DeleteMapping("delete/all_song_from_playlist")
     public ResponseEntity<ResponseObject> removeAllSongsFromPlaylist(
             @RequestParam("idPlaylist") String idPlaylist) {

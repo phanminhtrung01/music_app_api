@@ -11,6 +11,7 @@ import com.example.music_app_api.service.database_server.PlaylistService;
 import com.example.music_app_api.service.database_server.SongService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -167,6 +168,16 @@ public class PlaylistServiceImpl implements PlaylistService {
     public Boolean addSongsToPlaylist(
             List<String> idSongs, String idPlaylist) {
         return null;
+    }
+
+    @Override
+    @Transactional
+    public Playlist removeSongsFromPlaylist(
+            @NotNull List<String> idSongs, String idPlaylist) {
+        Playlist playlist = getById(idPlaylist);
+        idSongs.forEach(idSong -> removeSongFromPlaylist(idSong, idPlaylist));
+
+        return playlist;
     }
 
     @Override
