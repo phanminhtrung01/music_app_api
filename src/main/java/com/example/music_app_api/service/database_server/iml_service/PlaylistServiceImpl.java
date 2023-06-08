@@ -97,7 +97,9 @@ public class PlaylistServiceImpl implements PlaylistService {
             Optional<User> user = userRepository.findById(idUser);
             if (user.isPresent()) {
                 Playlist playlist = getById(idPlaylist);
-                playlistRepository.delete(playlist);
+                playlist.setSongs(null);
+                playlist.setUser(null);
+                playlistRepository.deleteById(playlist.getIdPlaylist());
 
                 return playlist;
             } else {
@@ -162,15 +164,23 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
-    public Playlist addSongsToPlaylist(
+    public Boolean addSongsToPlaylist(
             List<String> idSongs, String idPlaylist) {
         return null;
     }
 
     @Override
-    public Playlist removeSongsFromPlaylist(
-            List<String> idSongs, String idPlaylist) {
-        return null;
+    public Playlist removeAllSongsFromPlaylist(String idPlaylist) {
+        Playlist playlist = getById(idPlaylist);
+
+        if (playlist.getSongs().isEmpty()) {
+            throw new NotFoundException("List song of playlist empty");
+        }
+
+        playlist.getSongs().clear();
+        playlistRepository.save(playlist);
+
+        return playlist;
     }
 
     @Override

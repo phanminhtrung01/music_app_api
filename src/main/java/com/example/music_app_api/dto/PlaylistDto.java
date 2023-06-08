@@ -13,4 +13,5 @@ public class PlaylistDto implements Serializable {
     private String idPlaylist;
     private String name;
     private String dateCreate;
+    private String thumbnail;
 }

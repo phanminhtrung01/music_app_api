@@ -190,4 +190,35 @@ public class PlaylistController {
                             null));
         }
     }
+
+    @DeleteMapping("delete/all_song_from_playlist")
+    public ResponseEntity<ResponseObject> removeAllSongsFromPlaylist(
+            @RequestParam("idPlaylist") String idPlaylist) {
+        try {
+            Playlist playlist = playlistService
+                    .removeAllSongsFromPlaylist(idPlaylist);
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Query remove songs from playlist successful!",
+                            playlist)
+                    );
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
 }
