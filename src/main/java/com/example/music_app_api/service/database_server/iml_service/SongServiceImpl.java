@@ -11,6 +11,7 @@ import com.example.music_app_api.repo.SongRepository;
 import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.*;
 import com.example.music_app_api.service.song_request.InfoRequestService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -197,8 +198,14 @@ public class SongServiceImpl implements SongService {
     @Override
     public Song getSong(@NotNull Song song) {
         Song songTemp;
+        ObjectMapper objectMapper = new ObjectMapper();
         if (song.getEqualsCode() != null) {
-            song.setIdSong(song.getEqualsCode());
+            Optional<InfoSong> infoSongOptional = infoRequestService
+                    .getInfoSong(song.getIdSong(), false);
+            if (infoSongOptional.isEmpty()) {
+                throw new NotFoundException("Not fount song with ID: " + song.getIdSong());
+            }
+            song = objectMapper.convertValue(infoSongOptional.get(), Song.class);
         }
         songTemp = song;
 
