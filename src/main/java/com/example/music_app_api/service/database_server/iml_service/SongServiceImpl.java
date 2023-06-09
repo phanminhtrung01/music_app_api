@@ -73,8 +73,7 @@ public class SongServiceImpl implements SongService {
     @Override
     @Transactional(readOnly = true)
     public List<Song> getSongsDB(int count) {
-        int n = 2;
-        Pageable pageable = PageRequest.of(0, n);
+        Pageable pageable = PageRequest.of(0, count);
         List<Song> songs = songRepository.findAll(pageable).getContent();
 
         return songs.stream().map(this::getSong).toList();
