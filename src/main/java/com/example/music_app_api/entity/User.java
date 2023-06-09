@@ -30,6 +30,7 @@ public class User {
     private String username;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String gender;
     @Column(nullable = false)
     private String email;

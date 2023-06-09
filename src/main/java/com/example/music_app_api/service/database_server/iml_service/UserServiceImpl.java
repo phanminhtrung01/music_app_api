@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
                     user.getName(), user.getUsername(),
                     user.getGender(),
                     user.getPhoneNumber(),
-                    user.getAvatar(), user.getBirthday());
+                    user.getAvatar(), user.getBirthday(), false);
 
             userRepository.save(user);
         } catch (Exception e) {
@@ -84,9 +84,8 @@ public class UserServiceImpl implements UserService {
             String newPhoneNumber = user.getPhoneNumber();
             String newAvatar = user.getAvatar();
             String newBirthday = user.getBirthday();
-            isValidUser(
-                    newName, newUsername, newGender,
-                    newPhoneNumber, newAvatar, newBirthday);
+            isValidUser(newName, newUsername, newGender,
+                    newPhoneNumber, newAvatar, newBirthday, true);
 
             if (!oldName.equals(newName)) {
                 userDB.setName(newName);
@@ -127,25 +126,31 @@ public class UserServiceImpl implements UserService {
     private void isValidUser(
             @NotNull String newName, String newUsername,
             String newGender, String newPhoneNumber,
-            String newAvatar, String newBirthday) {
-        if (newName.isBlank() || isValidUsername(newName)) {
-            throw new RuntimeException("Invalid Name User!");
+            String newAvatar, String newBirthday, boolean constraint) {
+
+        if (constraint) {
+            if (newName.isBlank() || isValidUsername(newName)) {
+                throw new RuntimeException("Invalid Name User!");
+            }
+            if (newPhoneNumber.isBlank() || !isValidPhoneNumber(newPhoneNumber)) {
+                throw new RuntimeException("Invalid PhoneNumber User!");
+            }
+            if (newBirthday.isBlank() || !isValidDate(newBirthday)) {
+                throw new RuntimeException("Invalid Birthday User!");
+            }
+            if (newAvatar.isBlank()) {
+                throw new RuntimeException("Invalid Avatar User!");
+            }
         }
+
         if (newUsername.isBlank() || isValidUsername(newUsername)) {
             throw new RuntimeException("Invalid Username User!");
         }
         if (newGender.isBlank() || !isValidGenre(newGender)) {
             throw new RuntimeException("Invalid Genre User!");
         }
-        if (newPhoneNumber.isBlank() || !isValidPhoneNumber(newPhoneNumber)) {
-            throw new RuntimeException("Invalid PhoneNumber User!");
-        }
-        if (newAvatar.isBlank()) {
-            throw new RuntimeException("Invalid Avatar User!");
-        }
-        if (newBirthday.isBlank() || !isValidDate(newBirthday)) {
-            throw new RuntimeException("Invalid Birthday User!");
-        }
+
+
     }
 
     private boolean isValidDate(String dateString) {

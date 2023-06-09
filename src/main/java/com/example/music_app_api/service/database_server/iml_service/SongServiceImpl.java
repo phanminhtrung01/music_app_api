@@ -73,11 +73,11 @@ public class SongServiceImpl implements SongService {
     @Override
     @Transactional(readOnly = true)
     public List<Song> getSongsDB(int count) {
-        List<Song> songs = getAllSongs();
-        int min = Math.min(count, songs.size());
-        return songs.subList(0, min)
-                .stream().map(this::getSong)
-                .toList();
+        int n = 2;
+        Pageable pageable = PageRequest.of(0, n);
+        List<Song> songs = songRepository.findAll(pageable).getContent();
+
+        return songs.stream().map(this::getSong).toList();
     }
 
     @Override
@@ -169,6 +169,7 @@ public class SongServiceImpl implements SongService {
     @Override
     public Song getSong(@NotNull String idSong) {
         Song song;
+        ObjectMapper objectMapper = new ObjectMapper();
         if (idSong.startsWith("S")) {
             song = getById(idSong);
         } else {
@@ -183,14 +184,8 @@ public class SongServiceImpl implements SongService {
                     infoSong.getArtistsNames(),
                     Integer.parseInt(infoSong.getDuration()));
 
-            song = songDB.orElseGet(() -> new Song(
-                    infoSong.getId(),
-                    infoSong.getTitle(),
-                    infoSong.getArtistsNames(),
-                    infoSong.getThumbnail(),
-                    Integer.parseInt(infoSong.getDuration()),
-                    infoSong.getId()
-            ));
+            song = songDB.orElseGet(() -> objectMapper.convertValue(infoSong, Song.class));
+            song.setEqualsCode(infoSong.getId());
         }
         return song;
     }
@@ -198,14 +193,8 @@ public class SongServiceImpl implements SongService {
     @Override
     public Song getSong(@NotNull Song song) {
         Song songTemp;
-        ObjectMapper objectMapper = new ObjectMapper();
         if (song.getEqualsCode() != null) {
-            Optional<InfoSong> infoSongOptional = infoRequestService
-                    .getInfoSong(song.getEqualsCode(), false);
-            if (infoSongOptional.isEmpty()) {
-                throw new NotFoundException("Not fount song with ID: " + song.getIdSong());
-            }
-            song = objectMapper.convertValue(infoSongOptional.get(), Song.class);
+            song.setIdSong(song.getEqualsCode());
         }
         songTemp = song;
 
