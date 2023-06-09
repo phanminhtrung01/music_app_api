@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 public interface ImagePlaylistRepository extends JpaRepository<ImagePlaylist, String> {
 
     @Query(
-            value = "SELECT * FROM Playlist ORDER BY RAND() LIMIT 1",
+            value = "SELECT * FROM image_playlist ORDER BY RAND() LIMIT 1",
             nativeQuery = true
     )
     ImagePlaylist findRandomImagePlaylist();
