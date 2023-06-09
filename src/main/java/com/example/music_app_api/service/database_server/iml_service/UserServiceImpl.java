@@ -49,11 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         try {
-            isValidUser(
-                    user.getName(), user.getUsername(),
-                    user.getGender(),
-                    user.getPhoneNumber(),
-                    user.getAvatar(), user.getBirthday(), false);
+            isValidUser(user, false);
 
             userRepository.save(user);
         } catch (Exception e) {
@@ -84,33 +80,32 @@ public class UserServiceImpl implements UserService {
             String newPhoneNumber = user.getPhoneNumber();
             String newAvatar = user.getAvatar();
             String newBirthday = user.getBirthday();
-            isValidUser(newName, newUsername, newGender,
-                    newPhoneNumber, newAvatar, newBirthday, true);
 
-            if (!oldName.equals(newName)) {
+            if (oldName != null && !oldName.equals(newName)) {
                 userDB.setName(newName);
             }
 
-            if (!oldUsername.equals(newUsername)) {
+            if (oldUsername != null && !oldUsername.equals(newUsername)) {
                 userDB.setName(newUsername);
             }
 
-            if (!oldGender.equals(newGender)) {
+            if (oldGender != null && !oldGender.equals(newGender)) {
                 userDB.setName(newGender);
             }
 
-            if (!oldPhoneNumber.equals(newPhoneNumber)) {
+            if (oldPhoneNumber != null && !oldPhoneNumber.equals(newPhoneNumber)) {
                 userDB.setName(newPhoneNumber);
             }
 
-            if (!oldAvatar.equals(newAvatar)) {
+            if (oldAvatar != null && !oldAvatar.equals(newAvatar)) {
                 userDB.setName(newAvatar);
             }
 
-            if (!oldBirthday.equals(newBirthday)) {
+            if (oldBirthday != null && !oldBirthday.equals(newBirthday)) {
                 userDB.setName(newBirthday);
             }
 
+            isValidUser(user, true);
             userRepository.save(userDB);
 
             return userDB;
@@ -123,10 +118,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void isValidUser(
-            @NotNull String newName, String newUsername,
-            String newGender, String newPhoneNumber,
-            String newAvatar, String newBirthday, boolean constraint) {
+    private void isValidUser(@NotNull User user, boolean constraint) {
+
+        String newEmail = user.getEmail();
+        String newPassword = user.getPassword();
+        String newName = user.getName();
+        String newPhoneNumber = user.getPhoneNumber();
+        String newBirthday = user.getBirthday();
+        String newAvatar = user.getAvatar();
+        String newUsername = user.getUsername();
+        String newGender = user.getGender();
+
 
         if (constraint) {
             if (newName.isBlank() || isValidUsername(newName)) {
@@ -141,12 +143,18 @@ public class UserServiceImpl implements UserService {
             if (newAvatar.isBlank()) {
                 throw new RuntimeException("Invalid Avatar User!");
             }
+            if (newUsername.isBlank() || isValidUsername(newUsername)) {
+                throw new RuntimeException("Invalid Username User!");
+            }
         }
 
-        if (newUsername.isBlank() || isValidUsername(newUsername)) {
-            throw new RuntimeException("Invalid Username User!");
+        if (newEmail == null || newEmail.isBlank()) {
+            throw new RuntimeException("Invalid Email User!");
         }
-        if (newGender.isBlank() || !isValidGenre(newGender)) {
+        if (newPassword == null || newPassword.isBlank() || newPassword.length() < 9) {
+            throw new RuntimeException("Invalid Password User!");
+        }
+        if (newGender == null || newGender.isBlank() || !isValidGenre(newGender)) {
             throw new RuntimeException("Invalid Genre User!");
         }
 
