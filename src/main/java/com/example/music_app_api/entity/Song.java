@@ -114,22 +114,30 @@ public class Song {
     @JsonIgnore
     private List<Genre> genres = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "songs")
+    @ManyToMany(
+            mappedBy = "songs",
+            cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonIgnore
     private List<Playlist> playlistsOfSong = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "songs")
+    @ManyToMany(
+            mappedBy = "songs",
+            cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonIgnore
     private List<PlaylistOnline> playlistsOnOfSong = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "favoriteSongs")
+    @ManyToMany(
+            mappedBy = "favoriteSongs",
+            cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonIgnore
     private List<User> usersFavorite = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "historyListen")
+    @ManyToMany(
+            mappedBy = "historyListen",
+            cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonIgnore
     private List<User> usersListen = new ArrayList<>();
@@ -138,7 +146,7 @@ public class Song {
     @JoinColumn(name = "id_chart")
     private Charts chart;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_song")
     @ToString.Exclude
     @JsonIgnore

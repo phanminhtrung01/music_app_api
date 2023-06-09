@@ -123,6 +123,39 @@ public class SongController {
         }
     }
 
+    @PostMapping("add/song_to_singsong")
+    public ResponseEntity<ResponseObject> addSongToSingSong(
+            @RequestParam("idSong") String idSong,
+            @RequestParam("idArtist") String idArtist) {
+        try {
+            Song song = songService.addSongToChart(idSong, idArtist);
+            InfoSong infoSong = mapper
+                    .convertValue(song, InfoSong.class);
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Query add song to chart successful!",
+                            infoSong));
+
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject(
+                            HttpStatus.NOT_FOUND.value(),
+                            notFoundException.getMessage(),
+                            null));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+        }
+    }
+
     @DeleteMapping("delete/song_to_chart")
     public ResponseEntity<ResponseObject> removeSongFromChart(
             @RequestParam("idSong") String idSong,

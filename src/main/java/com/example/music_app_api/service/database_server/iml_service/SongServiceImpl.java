@@ -1,10 +1,7 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
 import com.example.music_app_api.component.enums.TypeSong;
-import com.example.music_app_api.entity.Charts;
-import com.example.music_app_api.entity.Song;
-import com.example.music_app_api.entity.SourceSong;
-import com.example.music_app_api.entity.User;
+import com.example.music_app_api.entity.*;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.repo.SongRepository;
@@ -132,9 +129,25 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional
     public Song delete(String idSong) {
         try {
             Song song = getById(idSong);
+
+            song.setChart(null);
+            song.setSourceSong(null);
+            song.setComments(null);
+            song.setFile(null);
+
+            song.getArtistsSing().clear();
+            song.getGenres().clear();
+            song.getPlaylistsOfSong().clear();
+            song.getPlaylistsOnOfSong().clear();
+            song.getUsersFavorite().clear();
+            song.getUsersListen().clear();
+
+            songRepository.saveAndFlush(song);
+
             songRepository.delete(song);
 
             return getSong(song);
@@ -320,6 +333,28 @@ public class SongServiceImpl implements SongService {
             Song song = getSong(idSong);
             chartsService.getChartById(idChart);
             song.setChart(null);
+
+            return getSong(song);
+        } catch (Exception e) {
+            if (e instanceof NotFoundException) {
+                throw new NotFoundException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+    }
+
+
+    @Override
+    @Transactional
+    public Song addSongToSingSong(String idSong, String idArtist) {
+        try {
+            Song song = getSong(idSong);
+            Artist artist = artistService.getArtist(idArtist);
+
+            song.getArtistsSing().add(artist);
+            artist.getSongs().add(song);
+            songRepository.save(song);
 
             return getSong(song);
         } catch (Exception e) {

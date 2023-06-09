@@ -38,6 +38,8 @@ public interface SongService {
 
     Song addSongToChart(String idSong, String idChart);
 
+    Song addSongToSingSong(String idSong, String idArtist);
+
     Song addSongToSongs(String idSong, String idUser, TypeSong typeSong);
 
     Song getSong(String idSong);

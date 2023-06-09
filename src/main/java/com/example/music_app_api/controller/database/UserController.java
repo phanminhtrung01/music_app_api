@@ -63,6 +63,16 @@ public class UserController {
                             notFoundException.getMessage(),
                             null));
         } catch (RuntimeException e) {
+
+            if (e.getMessage().contains("constraint")) {
+                ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new ResponseObject(
+                                HttpStatus.CONFLICT.value(),
+                                "The email is already!",
+                                null));
+            }
+
             return e.getMessage().contains("Invalid")
                     ? ResponseEntity
                     .status(HttpStatus.CONFLICT)

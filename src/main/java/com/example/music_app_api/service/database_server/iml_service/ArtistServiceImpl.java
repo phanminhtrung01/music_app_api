@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -140,6 +142,7 @@ public class ArtistServiceImpl implements ArtistService {
     @Override
     public Artist save(Artist artist) {
         try {
+            isValidArtist(artist, true);
             artistRepository.save(artist);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
@@ -150,6 +153,54 @@ public class ArtistServiceImpl implements ArtistService {
         }
 
         return getArtist(artist);
+    }
+
+    private void isValidArtist(@NotNull Artist artist, boolean constraint) {
+
+        String newName = artist.getName();
+        String newBirthday = artist.getBirthday();
+        String newThumbnail = artist.getThumbnail();
+        String newSortBiography = artist.getSortBiography();
+
+        if (newName == null || newName.isBlank()) {
+            throw new RuntimeException("Invalid Name User!");
+        }
+        if (newBirthday == null || newBirthday.isBlank()) {
+            throw new RuntimeException("Invalid Birthday User!");
+        }
+        if (newThumbnail == null || newThumbnail.isBlank()) {
+            throw new RuntimeException("Invalid Thumbnail User!");
+        }
+        if (newSortBiography == null || newSortBiography.isBlank()) {
+            throw new RuntimeException("Invalid Thumbnail User!");
+        }
+
+        if (constraint) {
+            if (isValidUsername(newName)) {
+                throw new RuntimeException("Invalid Name User!");
+            }
+
+            if (!isValidDate(newBirthday)) {
+                throw new RuntimeException("Invalid Birthday User!");
+            }
+        }
+
+    }
+
+    private boolean isValidDate(String dateString) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        dateFormat.setLenient(false);
+        try {
+            dateFormat.parse(dateString);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    private boolean isValidUsername(String username) {
+        String regex = "^[a-zA-Z]\\w*$";
+        return username == null || !username.matches(regex);
     }
 
     @Override

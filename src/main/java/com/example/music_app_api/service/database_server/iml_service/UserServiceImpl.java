@@ -50,6 +50,10 @@ public class UserServiceImpl implements UserService {
     public User save(User user) {
         try {
             isValidUser(user, false);
+            Optional<User> userOptional = userRepository.findUserByEmail(user.getEmail());
+            if (userOptional.isPresent()) {
+                throw new RuntimeException("constraint");
+            }
 
             userRepository.save(user);
         } catch (Exception e) {
@@ -151,7 +155,7 @@ public class UserServiceImpl implements UserService {
         if (newEmail == null || newEmail.isBlank()) {
             throw new RuntimeException("Invalid Email User!");
         }
-        if (newPassword == null || newPassword.isBlank() || newPassword.length() < 9) {
+        if (newPassword == null || newPassword.isBlank() || newPassword.length() < 8) {
             throw new RuntimeException("Invalid Password User!");
         }
         if (newGender == null || newGender.isBlank() || !isValidGenre(newGender)) {
