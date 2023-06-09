@@ -302,7 +302,11 @@ public class SongController {
 
         try {
             if (count == null) {
-                count = 10;
+                count = 5;
+            }
+
+            if (count > 5) {
+                count = 5;
             }
             List<InfoSong> songs = songRequestSer
                     .getSongsOfArtist(idArtist, count);
