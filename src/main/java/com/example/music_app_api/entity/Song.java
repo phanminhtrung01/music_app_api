@@ -1,6 +1,7 @@
 package com.example.music_app_api.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -38,6 +39,7 @@ public class Song {
 
     @Id
     @Column(name = "id_song")
+    @JsonAlias({"id"})
     private String idSong;
     @Column(
             name = "title",

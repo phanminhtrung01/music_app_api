@@ -201,7 +201,7 @@ public class SongServiceImpl implements SongService {
         ObjectMapper objectMapper = new ObjectMapper();
         if (song.getEqualsCode() != null) {
             Optional<InfoSong> infoSongOptional = infoRequestService
-                    .getInfoSong(song.getIdSong(), false);
+                    .getInfoSong(song.getEqualsCode(), false);
             if (infoSongOptional.isEmpty()) {
                 throw new NotFoundException("Not fount song with ID: " + song.getIdSong());
             }
