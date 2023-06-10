@@ -9,6 +9,7 @@ public class SongRequest {
     private String title;
     private String artistsNames;
     private String thumbnail;
+    private int duration;
     private String sourceM4a;
     private String source128;
     private int source320;

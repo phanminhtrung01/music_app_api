@@ -12,10 +12,10 @@ import java.util.List;
 public interface GenreRepository extends JpaRepository<Genre, String> {
     @Query(
             value = """
-                    SELECT * FROM genre
-                    WHERE EXISTS(SELECT * FROM genre_song
-                    WHERE id_song = ?1 AND genre.id_genre=genre_song.id_genre)
-                    """, nativeQuery = true
+                    SELECT g FROM Genre g
+                    JOIN g.songs s
+                    WHERE s.idSong = ?1
+                    """
     )
     List<Genre> getGenresBySong(String idSong);
 }

@@ -20,13 +20,13 @@ public interface ArtistRepository extends JpaRepository<Artist, String> {
                     """
     )
     Optional<Artist> findByNameAndBirthday(String name, String birthday);
-    
+
     @Query(
             value = """
-                    SELECT * FROM artist
-                    where EXISTS(SELECT * FROM sing_song WHERE id_song=?1
-                    AND artist.id_artist = sing_song.id_artist)
-                    """, nativeQuery = true
+                    SELECT a FROM Artist a
+                    JOIN a.songs s
+                    WHERE s.idSong = ?1
+                    """
     )
     List<Artist> getArtistsBySong(String idSong);
 
