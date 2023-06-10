@@ -19,13 +19,9 @@ public class File {
     @Id
     @Column(name = "id_file")
     private String idFile;
-    @Column(nullable = false)
     private String data;
-    @Column(name = "name_file", nullable = false)
     private String nameFile;
-    @Column(name = "size_file", nullable = false)
     private String sizeFile;
-    @Column(name = "type_file", nullable = false)
     private String typeFile;
     @Column(name = "status_file")
     private String statusFile;

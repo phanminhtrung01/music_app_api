@@ -90,23 +90,23 @@ public class UserServiceImpl implements UserService {
             }
 
             if (oldUsername != null && !oldUsername.equals(newUsername)) {
-                userDB.setName(newUsername);
+                userDB.setUsername(newUsername);
             }
 
             if (oldGender != null && !oldGender.equals(newGender)) {
-                userDB.setName(newGender);
+                userDB.setGender(newGender);
             }
 
             if (oldPhoneNumber != null && !oldPhoneNumber.equals(newPhoneNumber)) {
-                userDB.setName(newPhoneNumber);
+                userDB.setPhoneNumber(newPhoneNumber);
             }
 
             if (oldAvatar != null && !oldAvatar.equals(newAvatar)) {
-                userDB.setName(newAvatar);
+                userDB.setAvatar(newAvatar);
             }
 
             if (oldBirthday != null && !oldBirthday.equals(newBirthday)) {
-                userDB.setName(newBirthday);
+                userDB.setBirthday(newBirthday);
             }
 
             isValidUser(user, true);
