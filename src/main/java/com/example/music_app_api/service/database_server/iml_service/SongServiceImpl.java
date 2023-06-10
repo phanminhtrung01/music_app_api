@@ -152,6 +152,10 @@ public class SongServiceImpl implements SongService {
                     source = sourceLossless;
                 }
 
+                if (song.getThumbnailM() == null) {
+                    song.setThumbnailM(song.getThumbnail());
+                }
+
                 sourceSong.setSource128(source);
                 song.setReleaseDate(Long.valueOf(firstTenDigits));
                 song.setSourceSong(sourceSong);
