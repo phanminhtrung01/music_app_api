@@ -188,7 +188,6 @@ public class SongServiceImpl implements SongService {
         String title = song.getTitle();
         String artistsNames = song.getArtistsNames();
         String thumbnail = song.getThumbnail();
-        int duration = song.getDuration();
 
         if (title == null || title.isBlank()) {
             throw new RuntimeException("Invalid Title Song!");
@@ -200,10 +199,6 @@ public class SongServiceImpl implements SongService {
 
         if (thumbnail == null || thumbnail.isBlank()) {
             throw new RuntimeException("Invalid Thumbnail Song!");
-        }
-
-        if (duration <= 0) {
-            throw new RuntimeException("Invalid Duration Song!");
         }
 
         return true;
