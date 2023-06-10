@@ -9,8 +9,6 @@ import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.*;
 import com.example.music_app_api.service.song_request.InfoRequestService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -154,9 +151,8 @@ public class SongServiceImpl implements SongService {
                 if (source == null) {
                     source = sourceLossless;
                 }
-                int duration = getDurationInSecondsWithMp3Spi(new File(source));
 
-                song.setDuration(duration);
+                sourceSong.setSource128(source);
                 song.setReleaseDate(Long.valueOf(firstTenDigits));
                 song.setSourceSong(sourceSong);
 
@@ -172,22 +168,11 @@ public class SongServiceImpl implements SongService {
         return getSong(song);
     }
 
-    private int getDurationInSecondsWithMp3Spi(File file) {
-        int duration;
-        try {
-            AudioFile audioFile = AudioFileIO.read(file);
-            duration = audioFile.getAudioHeader().getTrackLength();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return duration;
-    }
-
     private boolean isValidSong(@NotNull Song song) {
         String title = song.getTitle();
         String artistsNames = song.getArtistsNames();
         String thumbnail = song.getThumbnail();
+        int duration = song.getDuration();
 
         if (title == null || title.isBlank()) {
             throw new RuntimeException("Invalid Title Song!");
@@ -199,6 +184,10 @@ public class SongServiceImpl implements SongService {
 
         if (thumbnail == null || thumbnail.isBlank()) {
             throw new RuntimeException("Invalid Thumbnail Song!");
+        }
+
+        if (duration <= 0) {
+            throw new RuntimeException("Invalid Duration Song!");
         }
 
         return true;
