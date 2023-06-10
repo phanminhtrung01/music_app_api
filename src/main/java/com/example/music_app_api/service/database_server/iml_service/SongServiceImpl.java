@@ -285,11 +285,11 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Song getSong(@NotNull Song song) {
-        Song songTemp;
+        ObjectMapper objectMapper = new ObjectMapper();
+        Song songTemp = objectMapper.convertValue(song, Song.class);
         if (song.getEqualsCode() != null) {
-            song.setIdSong(song.getEqualsCode());
+            songTemp.setIdSong(song.getEqualsCode());
         }
-        songTemp = song;
 
         return songTemp;
     }

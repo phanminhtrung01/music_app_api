@@ -21,6 +21,7 @@ public class Lyric {
     @Id
     @Column(name = "id_lyric", nullable = false)
     private String id;
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @PrePersist
