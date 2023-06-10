@@ -2,10 +2,13 @@ package com.example.music_app_api.controller.database;
 
 import com.example.music_app_api.component.enums.TypeSong;
 import com.example.music_app_api.entity.Song;
+import com.example.music_app_api.entity.SourceSong;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.ResponseObject;
+import com.example.music_app_api.model.SongRequest;
 import com.example.music_app_api.model.source_song.InfoSong;
 import com.example.music_app_api.service.database_server.SongService;
+import com.example.music_app_api.service.database_server.SourceSongService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +23,16 @@ import java.util.List;
 @CrossOrigin(value = "*", maxAge = 3600)
 public class SongController {
     private final SongService songService;
+    private final SourceSongService sourceSongService;
     final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
-    public SongController(SongService songService) {
+    public SongController(
+            SongService songService,
+            SourceSongService sourceSongService) {
 
         this.songService = songService;
+        this.sourceSongService = sourceSongService;
     }
 
     @PostMapping("add")
@@ -33,6 +40,17 @@ public class SongController {
             @RequestBody Song song) {
         try {
             Song songPar = songService.save(song);
+
+            if (song.getIdSong() == null
+                    || song.getIdSong().isBlank()) {
+                return ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(new ResponseObject(
+                                HttpStatus.CREATED.value(),
+                                "Query add song failure!",
+                                null));
+            }
+
             InfoSong infoSong = mapper
                     .convertValue(songPar, InfoSong.class);
 
@@ -56,6 +74,81 @@ public class SongController {
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             e.getMessage(),
                             null));
+        }
+    }
+
+    @PostMapping("add/song")
+    public ResponseEntity<ResponseObject> addSong(
+            @RequestBody SongRequest songRequest) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        SourceSong sourceSong = objectMapper
+                .convertValue(songRequest, SourceSong.class);
+        Song song = objectMapper
+                .convertValue(songRequest, Song.class);
+
+        try {
+            sourceSongService.add(sourceSong);
+        } catch (Exception e) {
+            if (e.getMessage().contains("Invalid")) {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new ResponseObject(
+                                HttpStatus.CONFLICT.value(),
+                                e.getMessage(),
+                                null));
+            }
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            e.getMessage(),
+                            null));
+
+        }
+
+        try {
+            songService.save(song, sourceSong);
+
+            Song songResult = songService.getSong(song.getIdSong());
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseObject(
+                            HttpStatus.OK.value(),
+                            "Success!",
+                            songResult));
+
+        } catch (Exception e) {
+            if (e.getMessage().contains("already")) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(new ResponseObject(
+                                HttpStatus.FORBIDDEN.value(),
+                                e.getMessage(),
+                                null));
+            } else if (e.getMessage().contains("Invalid")) {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new ResponseObject(
+                                HttpStatus.CONFLICT.value(),
+                                e.getMessage(),
+                                null));
+            } else if (e.getMessage().contains("Not fount")) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(new ResponseObject(
+                                HttpStatus.NOT_FOUND.value(),
+                                e.getMessage(),
+                                null));
+            } else {
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(new ResponseObject(
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                e.getMessage(),
+                                null));
+            }
         }
     }
 
@@ -123,36 +216,37 @@ public class SongController {
         }
     }
 
-    @PostMapping("add/song_to_singsong")
-    public ResponseEntity<ResponseObject> addSongToSingSong(
-            @RequestParam("idSong") String idSong,
-            @RequestParam("idArtist") String idArtist) {
+    @PostMapping("add/artists/song")
+    public ResponseEntity<ResponseObject> addArtistsToSong(
+            @RequestBody List<String> idArtists,
+            @RequestParam("idSong") String idSong) {
+
         try {
-            Song song = songService.addSongToChart(idSong, idArtist);
-            InfoSong infoSong = mapper
-                    .convertValue(song, InfoSong.class);
+            Song song = songService.addArtistsToSong(idArtists, idSong);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
-                            "Query add song to chart successful!",
-                            infoSong));
+                            "Success!",
+                            song));
 
-        } catch (NotFoundException notFoundException) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseObject(
-                            HttpStatus.NOT_FOUND.value(),
-                            notFoundException.getMessage(),
-                            null));
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseObject(
-                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
-                            null));
+        } catch (Exception e) {
+            if (e.getMessage().contains("Not fount")) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(new ResponseObject(
+                                HttpStatus.NOT_FOUND.value(),
+                                e.getMessage(),
+                                null));
+            } else {
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(new ResponseObject(
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                e.getMessage(),
+                                null));
+            }
         }
     }
 

@@ -7,7 +7,6 @@ import com.example.music_app_api.entity.SourceSong;
 import java.util.List;
 
 public interface SongService {
-    List<Song> getAllSongs();
 
     List<Song> getSongsByTitle(String title, int count);
 
@@ -15,7 +14,9 @@ public interface SongService {
 
     List<Song> getSongsDB(int count);
 
-    Song save(Song Song);
+    Song save(Song song);
+
+    Song save(Song song, SourceSong sourceSong);
 
     Song delete(String idSong);
 
@@ -37,6 +38,8 @@ public interface SongService {
     List<Song> getSongsByIdUser(String idUser, TypeSong typeSong);
 
     Song addSongToChart(String idSong, String idChart);
+
+    Song addArtistsToSong(List<String> idArtists, String idSong);
 
     Song addSongToSingSong(String idSong, String idArtist);
 

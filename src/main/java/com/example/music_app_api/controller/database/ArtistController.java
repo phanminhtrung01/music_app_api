@@ -154,8 +154,7 @@ public class ArtistController {
         }
 
     }
-
-
+    
     @PostMapping("add/artist_to_favorite_artist")
     public ResponseEntity<ResponseObject> addArtistToFavoriteArtist(
             @RequestParam("idArtist") String idArtist,

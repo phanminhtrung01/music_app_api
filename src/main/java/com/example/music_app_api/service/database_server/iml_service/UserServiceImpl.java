@@ -126,7 +126,6 @@ public class UserServiceImpl implements UserService {
 
         String newEmail = user.getEmail();
         String newPassword = user.getPassword();
-        String newName = user.getName();
         String newPhoneNumber = user.getPhoneNumber();
         String newBirthday = user.getBirthday();
         String newAvatar = user.getAvatar();
@@ -135,20 +134,17 @@ public class UserServiceImpl implements UserService {
 
 
         if (constraint) {
-            if (newName.isBlank() || isValidUsername(newName)) {
-                throw new RuntimeException("Invalid Name User!");
-            }
             if (newPhoneNumber.isBlank() || !isValidPhoneNumber(newPhoneNumber)) {
-                throw new RuntimeException("Invalid PhoneNumber User!");
+                throw new RuntimeException("Invalid PhoneNumber User! Not blank, Correct format.");
             }
             if (newBirthday.isBlank() || !isValidDate(newBirthday)) {
-                throw new RuntimeException("Invalid Birthday User!");
+                throw new RuntimeException("Invalid Birthday User! Not blank, Correct format.");
             }
             if (newAvatar.isBlank()) {
-                throw new RuntimeException("Invalid Avatar User!");
+                throw new RuntimeException("Invalid Avatar User! Not blank.");
             }
             if (newUsername.isBlank() || isValidUsername(newUsername)) {
-                throw new RuntimeException("Invalid Username User!");
+                throw new RuntimeException("Invalid Username User! Not blank, Not special characters.");
             }
         }
 

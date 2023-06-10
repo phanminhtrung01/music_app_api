@@ -21,6 +21,8 @@ public interface ArtistService {
 
     Artist addArtistToFavoriteArtist(String idArtist, String idUser);
 
+    Artist addArtistsToSingSong(String idArtist, String idUser);
+
     Artist removeArtistFromFavoriteArtist(String idArtist, String idUser);
 
     Artist delete(String idArtist);

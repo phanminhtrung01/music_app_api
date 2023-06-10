@@ -261,4 +261,9 @@ public class ArtistServiceImpl implements ArtistService {
             }
         }
     }
+
+    @Override
+    public Artist addArtistsToSingSong(String idArtist, String idUser) {
+        return null;
+    }
 }
