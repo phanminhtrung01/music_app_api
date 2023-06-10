@@ -205,10 +205,10 @@ public class InfoController {
                     )));
         } catch (Exception e) {
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
+                    .status(HttpStatus.CONFLICT)
                     .body(new ResponseObject(
-                            HttpStatus.BAD_REQUEST.value(),
-                            "Not found lyric of song with ID: " + idSong,
+                            HttpStatus.CONFLICT.value(),
+                            e.getMessage(),
                             null
                     ));
         }

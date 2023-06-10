@@ -1,6 +1,7 @@
 package com.example.music_app_api.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,10 +48,12 @@ public class Lyric {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_file", referencedColumnName = "id_file")
+    @JsonIgnore
     private File file;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_song")
+    @JsonIgnore
     private Song song;
 
 }

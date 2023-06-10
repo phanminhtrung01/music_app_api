@@ -12,9 +12,8 @@ import java.util.Optional;
 public interface LyricRepo extends JpaRepository<Lyric, String> {
     @Query(
             value = """
-                    SELECT * FROM lyric
-                    WHERE id_song = ?1
-                    """, nativeQuery = true
+                    SELECT l FROM Lyric l JOIN l.song s WHERE s.idSong = ?1
+                    """
     )
     Optional<Lyric> findBySong(String idSong);
 }
