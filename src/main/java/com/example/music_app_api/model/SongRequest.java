@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 public class SongRequest {
     private String title;
-    private String artistsNames;
     private String thumbnail;
     private int duration;
     private String sourceM4a;

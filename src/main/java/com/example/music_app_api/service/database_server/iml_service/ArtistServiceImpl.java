@@ -142,7 +142,26 @@ public class ArtistServiceImpl implements ArtistService {
     @Override
     public Artist save(Artist artist) {
         try {
+            Optional<Artist> optionalArtist = artistRepository.findByNameAndRealNameAndBirthday(
+                    artist.getName(), artist.getRealName(), artist.getBirthday()
+            );
+            if (optionalArtist.isPresent()) {
+                throw new Exception("There are already similar artist in the database");
+            }
+
             isValidArtist(artist, true);
+            if (artist.getThumbnailM() == null) {
+                artist.setThumbnailM(artist.getThumbnail());
+            }
+
+            if (artist.getBiography() == null) {
+                artist.setBiography(artist.getSortBiography());
+            }
+
+            if (artist.getTotalFollow() == null) {
+                artist.setTotalFollow(0);
+            }
+
             artistRepository.save(artist);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
@@ -158,26 +177,30 @@ public class ArtistServiceImpl implements ArtistService {
     private void isValidArtist(@NotNull Artist artist, boolean constraint) {
 
         String newName = artist.getName();
+        String newRealName = artist.getRealName();
         String newBirthday = artist.getBirthday();
         String newThumbnail = artist.getThumbnail();
         String newSortBiography = artist.getSortBiography();
 
         if (newName == null || newName.isBlank()) {
-            throw new RuntimeException("Invalid Name User!");
+            throw new RuntimeException("Invalid Name Artist!");
+        }
+        if (newRealName == null || newRealName.isBlank()) {
+            throw new RuntimeException("Invalid Name Artist!");
         }
         if (newBirthday == null || newBirthday.isBlank()) {
-            throw new RuntimeException("Invalid Birthday User!");
+            throw new RuntimeException("Invalid Birthday Artist!");
         }
         if (newThumbnail == null || newThumbnail.isBlank()) {
-            throw new RuntimeException("Invalid Thumbnail User!");
+            throw new RuntimeException("Invalid Thumbnail Artist!");
         }
         if (newSortBiography == null || newSortBiography.isBlank()) {
-            throw new RuntimeException("Invalid Thumbnail User!");
+            throw new RuntimeException("Invalid Thumbnail Artist!");
         }
 
         if (constraint) {
             if (isValidUsername(newName)) {
-                throw new RuntimeException("Invalid Name User!");
+                throw new RuntimeException("Invalid Name Artist!");
             }
 
             if (!isValidDate(newBirthday)) {

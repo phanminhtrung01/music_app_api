@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -156,6 +157,10 @@ public class SongServiceImpl implements SongService {
                     song.setThumbnailM(song.getThumbnail());
                 }
 
+                if (song.getArtistsNames() == null) {
+                    song.setArtistsNames("");
+                }
+
                 sourceSong.setSource128(source);
                 song.setReleaseDate(Long.valueOf(firstTenDigits));
                 song.setSourceSong(sourceSong);
@@ -180,10 +185,6 @@ public class SongServiceImpl implements SongService {
 
         if (title == null || title.isBlank()) {
             throw new RuntimeException("Invalid Title Song!");
-        }
-
-        if (artistsNames == null || artistsNames.isBlank()) {
-            throw new RuntimeException("Invalid Name Song!");
         }
 
         if (thumbnail == null || thumbnail.isBlank()) {
@@ -413,39 +414,28 @@ public class SongServiceImpl implements SongService {
         }
     }
 
-
     @Override
     @Transactional
     public Song addArtistsToSong(List<String> idArtists, String idSong) {
         try {
             Song song = getSong(idSong);
+            List<String> artistNamesStr = new ArrayList<>();
             idArtists.forEach(idArtist -> {
                 Artist artist = artistService.getArtist(idArtist);
                 artist.getSongs().add(song);
                 song.getArtistsSing().add(artist);
+                artistNamesStr.add(artist.getName());
             });
-
-            songRepository.save(song);
-
-            return song;
-        } catch (Exception e) {
-            if (e instanceof NotFoundException) {
-                throw new NotFoundException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
+            String artistNames;
+            artistNames = song.getArtistsNames();
+            if (artistNames == null) {
+                artistNames = "";
             }
-        }
-    }
+            artistNamesStr.add(0, artistNames);
+            String genresNamesStr = String.join(", ", artistNamesStr);
 
-    @Override
-    @Transactional
-    public Song addSongToSingSong(String idSong, String idArtist) {
-        try {
-            Song song = getSong(idSong);
-            Artist artist = artistService.getArtist(idArtist);
+            song.setArtistsNames(genresNamesStr);
 
-            song.getArtistsSing().add(artist);
-            artist.getSongs().add(song);
             songRepository.save(song);
 
             return getSong(song);

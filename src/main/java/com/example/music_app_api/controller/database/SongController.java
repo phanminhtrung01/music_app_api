@@ -1,6 +1,7 @@
 package com.example.music_app_api.controller.database;
 
 import com.example.music_app_api.component.enums.TypeSong;
+import com.example.music_app_api.dto.SongDto;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.SourceSong;
 import com.example.music_app_api.exception.NotFoundException;
@@ -222,14 +223,16 @@ public class SongController {
             @RequestParam("idSong") String idSong) {
 
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
             Song song = songService.addArtistsToSong(idArtists, idSong);
+            SongDto songDto = objectMapper.convertValue(song, SongDto.class);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(new ResponseObject(
                             HttpStatus.OK.value(),
                             "Success!",
-                            song));
+                            songDto));
 
         } catch (Exception e) {
             if (e.getMessage().contains("Not fount")) {
@@ -238,6 +241,13 @@ public class SongController {
                         .body(new ResponseObject(
                                 HttpStatus.NOT_FOUND.value(),
                                 e.getMessage(),
+                                null));
+            } else if (e.getMessage().contains("constraint")) {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new ResponseObject(
+                                HttpStatus.CONFLICT.value(),
+                                "Artist was added to the song!",
                                 null));
             } else {
                 return ResponseEntity

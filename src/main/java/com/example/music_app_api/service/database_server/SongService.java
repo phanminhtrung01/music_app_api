@@ -41,8 +41,6 @@ public interface SongService {
 
     Song addArtistsToSong(List<String> idArtists, String idSong);
 
-    Song addSongToSingSong(String idSong, String idArtist);
-
     Song addSongToSongs(String idSong, String idUser, TypeSong typeSong);
 
     Song getSong(String idSong);

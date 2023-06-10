@@ -36,7 +36,7 @@ public class Artist {
     private String idArtist;
     @Column(nullable = false)
     private String name;
-    @Column(name = "real_name")
+    @Column(name = "real_name", nullable = false)
     private String realName;
     @Column(nullable = false)
     private String birthday;
@@ -47,9 +47,10 @@ public class Artist {
     @Column(name = "sort_biography", nullable = false)
     private String sortBiography;
     private String biography;
+    @Column(nullable = false)
     private String national;
     @Column(name = "total_follow")
-    private String totalFollow;
+    private Integer totalFollow;
     @JsonIgnore
     @Column(name = "equals_code")
     private String equalsCode;
@@ -79,11 +80,13 @@ public class Artist {
             mappedBy = "artistsSing",
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Song> songs = new ArrayList<>();
 
     @ManyToMany(
             mappedBy = "favoriteArtists",
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<User> users = new ArrayList<>();
 }

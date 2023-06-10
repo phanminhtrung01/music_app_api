@@ -24,6 +24,14 @@ public interface ArtistRepository extends JpaRepository<Artist, String> {
     @Query(
             value = """
                     SELECT a FROM Artist a
+                    WHERE a.name = ?1 AND a.realName = ?2 AND a.birthday = ?3
+                    """
+    )
+    Optional<Artist> findByNameAndRealNameAndBirthday(String name, String realName, String birthday);
+
+    @Query(
+            value = """
+                    SELECT a FROM Artist a
                     JOIN a.songs s
                     WHERE s.idSong = ?1
                     """

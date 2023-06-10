@@ -1,9 +1,12 @@
 package com.example.music_app_api.controller.database;
 
+import com.example.music_app_api.dto.ArtistDto;
 import com.example.music_app_api.entity.Artist;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.ResponseObject;
 import com.example.music_app_api.service.database_server.ArtistService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,22 +29,24 @@ public class ArtistController {
     public ResponseEntity<ResponseObject> getAllArtists() {
 
         try {
+            ObjectMapper mapper = new ObjectMapper();
             List<Artist> artists = artistService.getAllArtist();
-
+            List<ArtistDto> artistsDto = mapper.convertValue(artists, new TypeReference<>() {
+            });
             return artists.size() > 0 ?
                     ResponseEntity
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "Query artist successful!",
-                                    artists)
+                                    artistsDto)
                             ) :
                     ResponseEntity
                             .status(HttpStatus.OK)
                             .body(new ResponseObject(
                                     HttpStatus.OK.value(),
                                     "List empty",
-                                    artists)
+                                    artistsDto)
                             );
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
@@ -113,7 +118,12 @@ public class ArtistController {
                             notFoundException.getMessage(),
                             null));
         } catch (RuntimeException runtimeException) {
-            return ResponseEntity
+            return runtimeException.getMessage().contains("already") ? ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ResponseObject(
+                            HttpStatus.CONFLICT.value(),
+                            runtimeException.getMessage(),
+                            null)) : ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseObject(
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -154,7 +164,7 @@ public class ArtistController {
         }
 
     }
-    
+
     @PostMapping("add/artist_to_favorite_artist")
     public ResponseEntity<ResponseObject> addArtistToFavoriteArtist(
             @RequestParam("idArtist") String idArtist,
