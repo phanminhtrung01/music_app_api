@@ -224,9 +224,9 @@ public class CommentController {
                     .addLikeComment(idComment, idUser);
 
             return ResponseEntity
-                    .status(HttpStatus.OK)
+                    .status(HttpStatus.CREATED)
                     .body(new ResponseObject(
-                            HttpStatus.OK.value(),
+                            HttpStatus.CREATED.value(),
                             "Query like comment successful!",
                             comment)
                     );
