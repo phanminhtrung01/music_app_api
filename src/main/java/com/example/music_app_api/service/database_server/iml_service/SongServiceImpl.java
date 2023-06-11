@@ -4,13 +4,16 @@ import com.example.music_app_api.component.enums.TypeSong;
 import com.example.music_app_api.entity.*;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.source_song.InfoSong;
+import com.example.music_app_api.model.source_song.StreamSourceSong;
 import com.example.music_app_api.repo.SongRepository;
 import com.example.music_app_api.repo.UserRepository;
 import com.example.music_app_api.service.database_server.*;
 import com.example.music_app_api.service.song_request.InfoRequestService;
+import com.example.music_app_api.service.song_request.SongRequestService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,8 +35,10 @@ public class SongServiceImpl implements SongService {
     private final ChartsService chartsService;
     private final SourceSongService sourceSongService;
     private final InfoRequestService infoRequestService;
+    private final SongRequestService songRequestService;
 
     @Autowired
+    @Lazy
     public SongServiceImpl(
             SongRepository songRepository,
             ArtistService artistService,
@@ -43,7 +48,7 @@ public class SongServiceImpl implements SongService {
             PlaylistOnService playlistOnService,
             ChartsService chartsService,
             SourceSongService sourceSongService,
-            InfoRequestService infoRequestService) {
+            InfoRequestService infoRequestService, SongRequestService songRequestService) {
         this.songRepository = songRepository;
         this.artistService = artistService;
         this.userRepository = userRepository;
@@ -53,6 +58,7 @@ public class SongServiceImpl implements SongService {
         this.chartsService = chartsService;
         this.sourceSongService = sourceSongService;
         this.infoRequestService = infoRequestService;
+        this.songRequestService = songRequestService;
     }
 
     @Override
@@ -83,10 +89,17 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public SourceSong getSourceSong(String idSong) {
+    public StreamSourceSong getSourceSong(String idSong) {
         try {
-            getById(idSong);
-            return sourceSongService.getSourceSongByIdSong(idSong);
+            ObjectMapper mapper = new ObjectMapper();
+            Song song = getById(idSong);
+            if (song.getIdSong().startsWith("Z")) {
+
+                return songRequestService
+                        .getStreamSong(song.getIdSong());
+            }
+            SourceSong sourceSong = sourceSongService.getSourceSongByIdSong(idSong);
+            return mapper.convertValue(sourceSong, StreamSourceSong.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -179,7 +192,6 @@ public class SongServiceImpl implements SongService {
 
     private boolean isValidSong(@NotNull Song song) {
         String title = song.getTitle();
-        String artistsNames = song.getArtistsNames();
         String thumbnail = song.getThumbnail();
         int duration = song.getDuration();
 
@@ -233,12 +245,19 @@ public class SongServiceImpl implements SongService {
     @Override
     public Song getById(String idSong) {
         try {
+            ObjectMapper mapper = new ObjectMapper();
             Optional<Song> songOptional = songRepository.findById(idSong);
             if (songOptional.isEmpty()) {
                 throw new NotFoundException("Not fount song with ID: " + idSong);
             }
 
-            return songOptional.get();
+            Song song = songOptional.get();
+            Song songTemp = mapper.convertValue(song, Song.class);
+            if (song.getEqualsCode() != null) {
+                songTemp.setIdSong(song.getEqualsCode());
+            }
+
+            return songTemp;
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -416,7 +435,8 @@ public class SongServiceImpl implements SongService {
 
     @Override
     @Transactional
-    public Song addArtistsToSong(List<String> idArtists, String idSong) {
+    public Song addArtistsToSong(
+            List<String> idArtists, String idSong) {
         try {
             Song song = getSong(idSong);
             List<String> artistNamesStr = new ArrayList<>();
@@ -428,10 +448,10 @@ public class SongServiceImpl implements SongService {
             });
             String artistNames;
             artistNames = song.getArtistsNames();
-            if (artistNames == null) {
-                artistNames = "";
+            if (!artistNames.isBlank()) {
+                artistNamesStr.add(0, artistNames);
             }
-            artistNamesStr.add(0, artistNames);
+
             String genresNamesStr = String.join(", ", artistNamesStr);
 
             song.setArtistsNames(genresNamesStr);

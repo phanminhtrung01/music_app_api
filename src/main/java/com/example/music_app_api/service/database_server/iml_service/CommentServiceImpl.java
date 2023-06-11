@@ -1,5 +1,6 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
+import com.example.music_app_api.dto.CommentDto;
 import com.example.music_app_api.entity.Comment;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
@@ -8,6 +9,8 @@ import com.example.music_app_api.repo.CommentRepository;
 import com.example.music_app_api.service.database_server.CommentService;
 import com.example.music_app_api.service.database_server.SongService;
 import com.example.music_app_api.service.database_server.UserService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final SongService songService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     public CommentServiceImpl(
@@ -34,7 +38,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment saveComment(
+    public CommentDto saveComment(
             Comment comment, String idUser, String idSong) {
         try {
             User user = userService.getUserById(idUser);
@@ -44,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
             comment.setSong(song);
             commentRepository.save(comment);
 
-            return comment;
+            return objectMapper.convertValue(comment, CommentDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -55,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment deleteComment(String idComment) {
+    public CommentDto deleteComment(String idComment) {
         try {
             Comment comment = getCommentById(idComment);
             comment.setUser(null);
@@ -63,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
 
             commentRepository.delete(comment);
 
-            return comment;
+            return objectMapper.convertValue(comment, CommentDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -78,6 +82,7 @@ public class CommentServiceImpl implements CommentService {
         try {
             Optional<Comment> commentOptional = commentRepository.findById(idComment);
             if (commentOptional.isPresent()) {
+
                 return commentOptional.get();
             } else {
                 throw new NotFoundException("Not fount comment with ID: " + idComment);
@@ -93,10 +98,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
-    public List<Comment> getCommentsByUser(String idUser) {
+    public List<CommentDto> getCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);
-            return commentRepository.getCommentsByUser(idUser);
+            List<Comment> comments = commentRepository.getCommentsByUser(idUser);
+            return objectMapper.convertValue(comments, new TypeReference<>() {
+            });
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -108,10 +115,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
-    public List<Comment> getCommentsBySong(String idSong) {
+    public List<CommentDto> getCommentsBySong(String idSong) {
         try {
             songService.getSong(idSong);
-            return commentRepository.getCommentsBySong(idSong);
+            List<Comment> comments = commentRepository.getCommentsBySong(idSong);
+            return objectMapper.convertValue(comments, new TypeReference<>() {
+            });
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -123,12 +132,15 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
-    public List<Comment> getCommentsByUserAndSong(
+    public List<CommentDto> getCommentsByUserAndSong(
             String idUser, String idSong) {
         try {
             userService.getUserById(idUser);
             songService.getSong(idSong);
-            return commentRepository.getCommentsByUserAndSong(idUser, idSong);
+            List<Comment> comments = commentRepository
+                    .getCommentsByUserAndSong(idUser, idSong);
+            return objectMapper.convertValue(comments, new TypeReference<>() {
+            });
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -139,7 +151,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment addLikeComment(String idComment, String idUser) {
+    public CommentDto addLikeComment(String idComment, String idUser) {
         try {
             User user = userService.getUserById(idUser);
             Comment comment = getCommentById(idComment);
@@ -147,7 +159,7 @@ public class CommentServiceImpl implements CommentService {
             comment.getUsersLike().add(user);
             commentRepository.save(comment);
 
-            return comment;
+            return objectMapper.convertValue(comment, CommentDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -158,14 +170,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment removeLikeComment(String idComment, String idUser) {
+    public CommentDto removeLikeComment(String idComment, String idUser) {
         try {
             User user = userService.getUserById(idUser);
             Comment comment = getCommentById(idComment);
             comment.getUsersLike().remove(user);
             commentRepository.save(comment);
 
-            return comment;
+            return objectMapper.convertValue(comment, CommentDto.class);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -177,11 +189,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
-    public List<Comment> getLikeCommentsByUser(String idUser) {
+    public List<CommentDto> getLikeCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);
-
-            return commentRepository.getLikeCommentsByUser(idUser);
+            List<Comment> comments = commentRepository.getLikeCommentsByUser(idUser);
+            return objectMapper.convertValue(comments, new TypeReference<>() {
+            });
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());

@@ -6,7 +6,6 @@ import com.example.music_app_api.component.enums.TypeParameter;
 import com.example.music_app_api.entity.Artist;
 import com.example.music_app_api.entity.Genre;
 import com.example.music_app_api.entity.Song;
-import com.example.music_app_api.entity.SourceSong;
 import com.example.music_app_api.main_api.GetInfo;
 import com.example.music_app_api.main_api.HostApi;
 import com.example.music_app_api.main_api.SearchSong;
@@ -364,11 +363,8 @@ public class ImlSongRequest implements SongRequestService {
     }
 
     private StreamSourceSong getSourceSongOff(String idSong) {
-        StreamSourceSong streamSourceSong;
         final ObjectMapper mapper = new ObjectMapper();
-        SourceSong sourceSong = songService.getSourceSong(idSong);
-        streamSourceSong = mapper.convertValue(sourceSong, StreamSourceSong.class);
-        return streamSourceSong;
+        return songService.getSourceSong(idSong);
     }
 
     private StreamSourceSong getSourceSongOn(String idSong) {

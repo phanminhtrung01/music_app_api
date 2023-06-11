@@ -3,6 +3,7 @@ package com.example.music_app_api.service.database_server;
 import com.example.music_app_api.component.enums.TypeSong;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.SourceSong;
+import com.example.music_app_api.model.source_song.StreamSourceSong;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface SongService {
 
     List<Song> getSongsByTitle(String title, int count);
 
-    SourceSong getSourceSong(String idSong);
+    StreamSourceSong getSourceSong(String idSong);
 
     List<Song> getSongsDB(int count);
 

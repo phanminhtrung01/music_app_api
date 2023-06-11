@@ -1,5 +1,6 @@
 package com.example.music_app_api.controller.database;
 
+import com.example.music_app_api.dto.CommentDto;
 import com.example.music_app_api.entity.Comment;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.ResponseObject;
@@ -33,7 +34,8 @@ public class CommentController {
         try {
             Comment comment = new Comment();
             comment.setValue(value);
-            Comment commentPar = commentService.saveComment(comment, idUser, idSong);
+            CommentDto commentPar = commentService
+                    .saveComment(comment, idUser, idSong);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -62,7 +64,8 @@ public class CommentController {
     public ResponseEntity<ResponseObject> deleteComment(
             @RequestParam("idComment") String idComment) {
         try {
-            Comment comment = commentService.deleteComment(idComment);
+            CommentDto comment = commentService
+                    .deleteComment(idComment);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -92,7 +95,7 @@ public class CommentController {
             @RequestParam("idUser") String idUser) {
 
         try {
-            List<Comment> comments = commentService.getCommentsByUser(idUser);
+            List<CommentDto> comments = commentService.getCommentsByUser(idUser);
 
             if (!comments.isEmpty()) {
                 return ResponseEntity
@@ -133,7 +136,7 @@ public class CommentController {
             @RequestParam("idSong") String idSong) {
 
         try {
-            List<Comment> comments = commentService.getCommentsBySong(idSong);
+            List<CommentDto> comments = commentService.getCommentsBySong(idSong);
 
             if (!comments.isEmpty()) {
                 return ResponseEntity
@@ -175,7 +178,7 @@ public class CommentController {
             @RequestParam("idUser") String idUser) {
 
         try {
-            List<Comment> comments = commentService
+            List<CommentDto> comments = commentService
                     .getCommentsByUserAndSong(idUser, idSong);
 
             if (!comments.isEmpty()) {
@@ -217,7 +220,7 @@ public class CommentController {
             @RequestParam("idUser") String idUser,
             @RequestParam("idComment") String idComment) {
         try {
-            Comment comment = commentService
+            CommentDto comment = commentService
                     .addLikeComment(idComment, idUser);
 
             return ResponseEntity
@@ -256,7 +259,7 @@ public class CommentController {
             @RequestParam("idUser") String idUser,
             @RequestParam("idComment") String idComment) {
         try {
-            Comment comment = commentService
+            CommentDto comment = commentService
                     .removeLikeComment(idComment, idUser);
 
             return ResponseEntity
@@ -288,7 +291,7 @@ public class CommentController {
     public ResponseEntity<ResponseObject> getLikeCommentByUser(
             @RequestParam("idUser") String idUser) {
         try {
-            List<Comment> comments = commentService
+            List<CommentDto> comments = commentService
                     .getLikeCommentsByUser(idUser);
 
             return !comments.isEmpty() ?
