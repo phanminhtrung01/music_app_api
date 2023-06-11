@@ -65,7 +65,7 @@ public class UserController {
         } catch (RuntimeException e) {
 
             if (e.getMessage().contains("constraint")) {
-                ResponseEntity
+                return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(new ResponseObject(
                                 HttpStatus.CONFLICT.value(),
@@ -73,18 +73,19 @@ public class UserController {
                                 null));
             }
 
-            return e.getMessage().contains("Invalid")
-                    ? ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(new ResponseObject(
-                            HttpStatus.CONFLICT.value(),
-                            e.getMessage(),
-                            null)) : ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseObject(
-                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            e.getMessage(),
-                            null));
+            return e.getMessage().contains("Invalid") ?
+                    ResponseEntity
+                            .status(HttpStatus.CONFLICT)
+                            .body(new ResponseObject(
+                                    HttpStatus.CONFLICT.value(),
+                                    e.getMessage(),
+                                    null)) :
+                    ResponseEntity
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(new ResponseObject(
+                                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                    e.getMessage(),
+                                    null));
         }
     }
 

@@ -50,10 +50,14 @@ public class UserServiceImpl implements UserService {
     public User save(User user) {
         try {
             isValidUser(user, false);
-            Optional<User> userOptional = userRepository.findUserByEmail(user.getEmail());
+            Optional<User> userOptional = userRepository
+                    .findUserByEmail(user.getEmail());
             if (userOptional.isPresent()) {
                 throw new RuntimeException("constraint");
             }
+            UserCredential userCredential = new UserCredential();
+            userCredential.setCheckLogin(false);
+            user.setUserCredential(userCredential);
 
             userRepository.save(user);
         } catch (Exception e) {
