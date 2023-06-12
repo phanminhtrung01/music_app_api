@@ -186,7 +186,7 @@ public class ArtistServiceImpl implements ArtistService {
             throw new RuntimeException("Invalid Name Artist!");
         }
         if (newRealName == null || newRealName.isBlank()) {
-            throw new RuntimeException("Invalid Name Artist!");
+            throw new RuntimeException("Invalid RealName Artist!");
         }
         if (newBirthday == null || newBirthday.isBlank()) {
             throw new RuntimeException("Invalid Birthday Artist!");
@@ -199,9 +199,6 @@ public class ArtistServiceImpl implements ArtistService {
         }
 
         if (constraint) {
-            if (isValidUsername(newName)) {
-                throw new RuntimeException("Invalid Name Artist!");
-            }
 
             if (!isValidDate(newBirthday)) {
                 throw new RuntimeException("Invalid Birthday User!");
@@ -219,11 +216,6 @@ public class ArtistServiceImpl implements ArtistService {
         } catch (ParseException e) {
             return false;
         }
-    }
-
-    private boolean isValidUsername(String username) {
-        String regex = "^[a-zA-Z]\\w*$";
-        return username == null || !username.matches(regex);
     }
 
     @Override
