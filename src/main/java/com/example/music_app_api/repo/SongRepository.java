@@ -12,20 +12,20 @@ import java.util.Optional;
 @Repository
 public interface SongRepository extends JpaRepository<Song, String> {
 
-    @Query("""
-            SELECT s FROM Song s
-            WHERE s.title = ?1
-            AND s.artistsNames = ?2
-            AND s.duration = ?3
-            """
+    @Query(
+            value = """
+                    SELECT s FROM Song s
+                    WHERE s.equalsCode = ?1
+                    """
     )
-    Optional<Song> findByTitleAndArtistsNamesAndDuration(String title, String artistsNames, int duration);
+    Optional<Song> findSongsByEqualsCode(String equalsCode);
 
-    @Query("""
-            SELECT s FROM Song s
-            WHERE LOWER(s.title)
-            LIKE LOWER(CONCAT('%', ?1, '%'))
-            """
+    @Query(
+            value = """
+                    SELECT s FROM Song s
+                    WHERE LOWER(s.title)
+                    LIKE LOWER(CONCAT('%', ?1, '%'))
+                    """
     )
     List<Song> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 

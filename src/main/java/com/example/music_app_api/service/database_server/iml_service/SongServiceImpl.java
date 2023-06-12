@@ -92,7 +92,7 @@ public class SongServiceImpl implements SongService {
     public StreamSourceSong getSourceSong(String idSong) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Song song = getById(idSong);
+            Song song = getById(idSong, false);
             if (song.getIdSong().startsWith("Z")) {
 
                 return songRequestService
@@ -214,7 +214,7 @@ public class SongServiceImpl implements SongService {
     @Transactional
     public Song delete(String idSong) {
         try {
-            Song song = getById(idSong);
+            Song song = getById(idSong, true);
 
             song.setChart(null);
             song.setSourceSong(null);
@@ -243,7 +243,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public Song getById(String idSong) {
+    public Song getById(String idSong, boolean isIn) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Optional<Song> songOptional = songRepository.findById(idSong);
@@ -251,6 +251,9 @@ public class SongServiceImpl implements SongService {
                 throw new NotFoundException("Not fount song with ID: " + idSong);
             }
 
+            if (isIn) {
+                return songOptional.get();
+            }
             Song song = songOptional.get();
             Song songTemp = mapper.convertValue(song, Song.class);
             if (song.getEqualsCode() != null) {
@@ -272,21 +275,20 @@ public class SongServiceImpl implements SongService {
         Song song;
         ObjectMapper objectMapper = new ObjectMapper();
         if (idSong.startsWith("S")) {
-            song = getById(idSong);
+            song = getById(idSong, true);
         } else {
 
-            Optional<InfoSong> infoSongOptional = infoRequestService.getInfoSong(idSong, true);
+            Optional<InfoSong> infoSongOptional = infoRequestService
+                    .getInfoSong(idSong, true);
             if (infoSongOptional.isEmpty()) {
                 throw new NotFoundException("Not fount song with ID: " + idSong);
             }
             InfoSong infoSong = infoSongOptional.get();
-            Optional<Song> songDB = getByAllParameter(
-                    infoSong.getTitle(),
-                    infoSong.getArtistsNames(),
-                    Integer.parseInt(infoSong.getDuration()));
+            String idSongInfo = infoSong.getId();
+            Optional<Song> songDB = getSongByEqualsCode(idSongInfo);
 
             song = songDB.orElseGet(() -> objectMapper.convertValue(infoSong, Song.class));
-            song.setEqualsCode(infoSong.getId());
+            song.setEqualsCode(idSongInfo);
         }
         return song;
     }
@@ -302,12 +304,10 @@ public class SongServiceImpl implements SongService {
         return songTemp;
     }
 
-    private Optional<Song> getByAllParameter(
-            String title, String artistsNames, int duration) {
+    private Optional<Song> getSongByEqualsCode(String equalsCode) {
         try {
 
-            return songRepository
-                    .findByTitleAndArtistsNamesAndDuration(title, artistsNames, duration);
+            return songRepository.findSongsByEqualsCode(equalsCode);
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());

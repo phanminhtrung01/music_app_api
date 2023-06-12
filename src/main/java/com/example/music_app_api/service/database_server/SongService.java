@@ -21,7 +21,7 @@ public interface SongService {
 
     Song delete(String idSong);
 
-    Song getById(String idSong);
+    Song getById(String idSong, boolean isIn);
 
     Song getSong(Song song);
 

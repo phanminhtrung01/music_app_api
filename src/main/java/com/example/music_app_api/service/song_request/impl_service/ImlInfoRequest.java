@@ -69,7 +69,7 @@ public class ImlInfoRequest implements InfoRequestService {
         InfoSong infoSong;
         ObjectMapper mapper = new ObjectMapper();
         if (idSong.startsWith("S")) {
-            Song song = songService.getById(idSong);
+            Song song = songService.getSong(idSong);
             List<Artist> artists = artistService.getArtistByIdSong(idSong);
             List<Genre> genres = genreService.getGenresByIdSong(idSong);
             List<String> genresNames = genres
