@@ -48,7 +48,8 @@ public class SongServiceImpl implements SongService {
             PlaylistOnService playlistOnService,
             ChartsService chartsService,
             SourceSongService sourceSongService,
-            InfoRequestService infoRequestService, SongRequestService songRequestService) {
+            InfoRequestService infoRequestService,
+            SongRequestService songRequestService) {
         this.songRepository = songRepository;
         this.artistService = artistService;
         this.userRepository = userRepository;
