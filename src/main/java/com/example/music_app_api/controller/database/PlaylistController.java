@@ -198,7 +198,7 @@ public class PlaylistController {
         }
     }
 
-    @DeleteMapping("delete/songs_from_playlist")
+    @PostMapping("delete/songs_from_playlist")
     public ResponseEntity<ResponseObject> removeSongsFromPlaylist(
             @RequestBody List<String> idSongs,
             @RequestParam("idPlaylist") String idPlaylist) {

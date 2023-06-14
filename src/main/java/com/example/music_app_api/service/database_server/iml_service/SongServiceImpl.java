@@ -72,6 +72,11 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public List<Song> getSongsByIds(List<String> idSongs) {
+        return songRepository.findAllById(idSongs);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<Song> getSongsByTitle(String title, int count) {
         try {

@@ -34,7 +34,7 @@ public interface CommentRepository extends JpaRepository<Comment, String> {
                     SELECT c FROM Comment c
                     JOIN FETCH c.song s
                     WHERE s.idSong = ?1
-                    ORDER BY c.date DESC
+                    ORDER BY c.date ASC
                     """)
     @Transactional(readOnly = true)
     List<Comment> getCommentsBySong(String idSong);

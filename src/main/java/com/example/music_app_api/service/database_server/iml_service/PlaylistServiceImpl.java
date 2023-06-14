@@ -210,7 +210,9 @@ public class PlaylistServiceImpl implements PlaylistService {
         ObjectMapper mapper = new ObjectMapper();
 
         Playlist playlist = getById(idPlaylist);
-        idSongs.forEach(idSong -> removeSongFromPlaylist(idSong, idPlaylist));
+        List<Song> songs = songService.getSongsByIds(idSongs);
+        playlist.getSongs().removeAll(songs);
+        songs.forEach(song -> song.getPlaylistsOfSong().remove(playlist));
 
         return mapper.convertValue(playlist, PlaylistDto.class);
     }
@@ -223,9 +225,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         if (playlist.getSongs().isEmpty()) {
             throw new NotFoundException("List song of playlist empty");
         }
-
-        playlist.getSongs().clear();
-        playlistRepository.save(playlist);
+        playlistRepository.deleteAllSongsFromPlaylist(idPlaylist);
 
         return mapper.convertValue(playlist, PlaylistDto.class);
     }

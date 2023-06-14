@@ -94,5 +94,4 @@ public interface SongRepository extends JpaRepository<Song, String> {
             nativeQuery = true
     )
     Optional<Song> findSongByTitleAndArtistsNames(String title, String artistNames);
-
 }
