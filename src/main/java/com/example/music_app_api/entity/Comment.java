@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -27,6 +28,8 @@ public class Comment {
     private String idComment;
     @Column(nullable = false)
     private String value;
+    @Column(nullable = false)
+    private Long date;
 
     @PrePersist
     public void generateId() {
@@ -46,6 +49,13 @@ public class Comment {
             int digitIndex = random.nextInt(10) + 26;
             sb.setCharAt(index, CHARACTERS.charAt(digitIndex));
         }
+
+        Date today = new Date();
+        long timeInMilliseconds = today.getTime();
+        String numberStr = String.valueOf(timeInMilliseconds);
+        String firstTenDigits = numberStr.substring(0, 10);
+
+        this.setDate(Long.valueOf(firstTenDigits));
         this.idComment = "CM" + sb;
     }
 

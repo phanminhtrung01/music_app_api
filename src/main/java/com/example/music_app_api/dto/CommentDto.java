@@ -14,4 +14,5 @@ public class CommentDto implements Serializable {
     private String value;
     private UserDto user;
     private SongDto song;
+    private Long date;
 }

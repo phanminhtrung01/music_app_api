@@ -5,6 +5,8 @@ import com.example.music_app_api.entity.Comment;
 import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
 import com.example.music_app_api.exception.NotFoundException;
+import com.example.music_app_api.mix_in.IgnoreSongMixIn;
+import com.example.music_app_api.mix_in.IgnoreUserMixIn;
 import com.example.music_app_api.repo.CommentRepository;
 import com.example.music_app_api.service.database_server.CommentService;
 import com.example.music_app_api.service.database_server.SongService;
@@ -101,9 +103,12 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getCommentsByUser(String idUser) {
         try {
             userService.getUserById(idUser);
+            objectMapper.addMixIn(CommentDto.class, IgnoreUserMixIn.class);
             List<Comment> comments = commentRepository.getCommentsByUser(idUser);
-            return objectMapper.convertValue(comments, new TypeReference<>() {
+            List<CommentDto> commentsDto = objectMapper.convertValue(comments, new TypeReference<>() {
             });
+            objectMapper.addMixIn(CommentDto.class, null);
+            return commentsDto;
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
@@ -118,9 +123,12 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getCommentsBySong(String idSong) {
         try {
             songService.getSong(idSong);
+            objectMapper.addMixIn(CommentDto.class, IgnoreSongMixIn.class);
             List<Comment> comments = commentRepository.getCommentsBySong(idSong);
-            return objectMapper.convertValue(comments, new TypeReference<>() {
+            List<CommentDto> commentsDto = objectMapper.convertValue(comments, new TypeReference<>() {
             });
+            objectMapper.addMixIn(CommentDto.class, null);
+            return commentsDto;
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());
