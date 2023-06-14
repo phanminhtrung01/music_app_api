@@ -9,8 +9,13 @@ import java.io.Serializable;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CommentDto implements Serializable {
-    private String idComment;
-    private String value;
-    private UserDto user;
+public class UserDto implements Serializable {
+    private String idUser;
+    private String name;
+    private String username;
+    private String gender;
+    private String email;
+    private String phoneNumber;
+    private String avatar;
+    private String birthday;
 }
