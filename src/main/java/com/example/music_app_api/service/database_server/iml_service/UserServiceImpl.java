@@ -8,6 +8,7 @@ import com.example.music_app_api.service.database_server.UserService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -208,6 +209,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Map<String, Object> verifyUser(
             String email, String password) {
         Map<String, Object> map = new HashMap<>();
@@ -217,14 +219,19 @@ public class UserServiceImpl implements UserService {
                 throw new NotFoundException("Not found user with email: " + email);
             }
             User user = userOptional.get();
-
+            UserCredential userCredential = user.getUserCredential();
             if (user.getPassword().equals(password)) {
+                userCredential.setCheckLogin(true);
+                user.setUserCredential(userCredential);
                 map.put("user", user);
                 map.put("check", true);
             } else {
-                map.put("user", new User());
+                userCredential.setCheckLogin(false);
+                user.setUserCredential(userCredential);
+                map.put("user", user);
                 map.put("check", false);
             }
+            userRepository.saveAndFlush(user);
 
             return map;
         } catch (Exception e) {
