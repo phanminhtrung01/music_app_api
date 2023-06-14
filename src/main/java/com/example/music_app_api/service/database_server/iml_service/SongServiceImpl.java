@@ -489,6 +489,7 @@ public class SongServiceImpl implements SongService {
                     user.getFavoriteSongs().add(song);
                 }
                 case LISTEN -> {
+                    
                     song.getUsersListen().add(user);
                     user.getHistoryListen().add(song);
                 }
