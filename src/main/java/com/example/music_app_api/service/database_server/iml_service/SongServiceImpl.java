@@ -287,9 +287,13 @@ public class SongServiceImpl implements SongService {
             InfoSong infoSong = infoSongOptional.get();
             String idSongInfo = infoSong.getId();
             Optional<Song> songDB = getSongByEqualsCode(idSongInfo);
+            if (songDB.isEmpty()) {
+                song = objectMapper.convertValue(infoSong, Song.class);
+                song.setEqualsCode(idSongInfo);
+            } else {
+                song = songDB.get();
+            }
 
-            song = songDB.orElseGet(() -> objectMapper.convertValue(infoSong, Song.class));
-            song.setEqualsCode(idSongInfo);
         }
         return song;
     }
@@ -489,7 +493,7 @@ public class SongServiceImpl implements SongService {
                     user.getFavoriteSongs().add(song);
                 }
                 case LISTEN -> {
-                    
+
                     song.getUsersListen().add(user);
                     user.getHistoryListen().add(song);
                 }
