@@ -13,4 +13,5 @@ public class CommentDto implements Serializable {
     private String idComment;
     private String value;
     private UserDto user;
+    private SongDto song;
 }
