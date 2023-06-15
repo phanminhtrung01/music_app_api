@@ -1,6 +1,7 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
 import com.example.music_app_api.entity.Artist;
+import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.entity.User;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.model.InfoArtist;
@@ -125,8 +126,8 @@ public class ArtistServiceImpl implements ArtistService {
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Artist> getArtistByIdSong(String idSong) {
         try {
-            songService.getSong(idSong);
-            List<Artist> artists = artistRepository.getArtistsBySong(idSong);
+            Song song = songService.getSong(idSong);
+            List<Artist> artists = artistRepository.getArtistsBySong(song.getIdSong());
             artists = artists.stream().map(this::getArtist).toList();
 
             return artists;

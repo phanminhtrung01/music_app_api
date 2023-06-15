@@ -1,6 +1,7 @@
 package com.example.music_app_api.service.database_server.iml_service;
 
 import com.example.music_app_api.entity.Genre;
+import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.repo.GenreRepository;
 import com.example.music_app_api.service.database_server.GenreService;
@@ -43,9 +44,9 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public List<Genre> getGenresByIdSong(String idSong) {
         try {
-            songService.getSong(idSong);
+            Song song = songService.getSong(idSong);
 
-            return genreRepository.getGenresBySong(idSong);
+            return genreRepository.getGenresBySong(song.getIdSong());
         } catch (Exception e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException(e.getMessage());

@@ -2,6 +2,7 @@ package com.example.music_app_api.service.database_server.iml_service;
 
 
 import com.example.music_app_api.entity.Lyric;
+import com.example.music_app_api.entity.Song;
 import com.example.music_app_api.exception.NotFoundException;
 import com.example.music_app_api.repo.LyricRepo;
 import com.example.music_app_api.service.database_server.LyricService;
@@ -70,9 +71,9 @@ public class LyricServiceImpl implements LyricService {
 
     @Override
     public Lyric getLyricByIdSong(String idSong) {
-        songService.getSong(idSong);
+        Song song = songService.getSong(idSong);
 
-        Optional<Lyric> lyric = lyricRepo.findBySong(idSong);
+        Optional<Lyric> lyric = lyricRepo.findBySong(song.getIdSong());
 
         if (lyric.isPresent()) {
             return lyric.get();

@@ -122,9 +122,9 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<CommentDto> getCommentsBySong(String idSong) {
         try {
-            songService.getSong(idSong);
+            Song song = songService.getSong(idSong);
             objectMapper.addMixIn(CommentDto.class, IgnoreSongMixIn.class);
-            List<Comment> comments = commentRepository.getCommentsBySong(idSong);
+            List<Comment> comments = commentRepository.getCommentsBySong(song.getIdSong());
             List<CommentDto> commentsDto = objectMapper.convertValue(comments, new TypeReference<>() {
             });
             objectMapper.addMixIn(CommentDto.class, null);
@@ -144,9 +144,9 @@ public class CommentServiceImpl implements CommentService {
             String idUser, String idSong) {
         try {
             userService.getUserById(idUser);
-            songService.getSong(idSong);
+            Song song = songService.getSong(idSong);
             List<Comment> comments = commentRepository
-                    .getCommentsByUserAndSong(idUser, idSong);
+                    .getCommentsByUserAndSong(idUser, song.getIdSong());
             return objectMapper.convertValue(comments, new TypeReference<>() {
             });
         } catch (Exception e) {
