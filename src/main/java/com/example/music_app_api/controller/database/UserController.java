@@ -223,11 +223,11 @@ public class UserController {
                                     "User authentication successful!",
                                     user)) :
                     ResponseEntity
-                            .status(HttpStatus.OK)
+                            .status(HttpStatus.CONFLICT)
                             .body(new ResponseObject(
-                                    HttpStatus.OK.value(),
+                                    HttpStatus.CONFLICT.value(),
                                     "User authentication failed!",
-                                    user));
+                                    null));
         } catch (NotFoundException notFoundException) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
