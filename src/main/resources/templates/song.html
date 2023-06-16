@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Info Song</title>
+    <style>
+        .note {
+            padding-left: 10px;
+        }
+
+        .titlePage {
+            text-align: center;
+            font-size: 30px;
+            padding-bottom: 30px;
+        }
+
+        .song {
+            text-align: center;
+        }
+
+        .song img {
+            width: 200px;
+            height: 200px;
+        }
+
+        .song h2 {
+            color: #333;
+        }
+
+        .song p {
+            color: #777;
+        }
+
+        .player {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .player input[type="range"] {
+            flex: 1;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="note">Preview</div>
+<div class="titlePage">Song Info</div>
+<div class="song">
+    <img alt="Thumbnail" src="${song.thumbnailM}" th:src="${song.thumbnailM}">
+    <h2 th:text="${song.title}">Tên bài hát</h2>
+    <p th:text="${song.artistsNames}">Tên nghệ sĩ</p>
+    <p th:text="${song.duration}">Thời lượng</p>
+</div>
+
+<audio id="audio" th:src="${song.sourceSong.source128}"></audio>
+
+<div class="player">
+    <button id="play">Phát nhạc</button>
+    <span>0:00</span>
+    <label>
+        <input type="range" min="0" max="100" value="0">
+    </label>
+    <span>0:00</span>
+</div>
+
+<script>
+    const audio = document.querySelector('#audio');
+    const playButton = document.querySelector('#play');
+    const range = document.querySelector('input[type="range"]');
+    const currentTime = document.querySelector('.player span:first-of-type');
+    const duration = document.querySelector('.player span:last-of-type');
+
+    playButton.addEventListener('click', () => {
+        if (audio.paused) {
+            audio.play();
+            playButton.textContent = 'Ngừng';
+        } else {
+            audio.pause();
+            playButton.textContent = 'Phát nhạc';
+        }
+    });
+
+    range.addEventListener('input', () => {
+        audio.currentTime = audio.duration * (range.value / 100);
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+        const minutes = Math.floor(audio.duration / 60);
+        const seconds = Math.floor(audio.duration % 60);
+        duration.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        range.value = (audio.currentTime / audio.duration) * 100;
+
+        const minutes = Math.floor(audio.currentTime / 60);
+        const seconds = Math.floor(audio.currentTime % 60);
+        currentTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    });
+</script>
+</body>
+</html>
